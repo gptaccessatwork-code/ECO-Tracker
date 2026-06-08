@@ -1,0 +1,32 @@
+These files are updated Outlook VBA modules based on your current `v3` logic.
+
+What they add:
+- Keep the current CRF and Spec Award detection flow
+- Parse the latest Spec Award email table from the HTML body
+- Extract only `Slot Number` and `Part Number`
+- Build `System Number` by replacing the `SEMSYS` prefix with `Z<Slot Number>`
+- Overwrite the local staging workbook with the latest extracted rows
+- Store only `System Number` and the received `Spec Award Date`
+- Run `excel_to_sharepoint.py` to sync those rows into the synced SharePoint workbook
+
+Files:
+- `ThisOutlookSession.bas`
+- `Module1.bas`
+
+Config values to check in `Module1.bas`:
+- `SPEC_AWARD_STAGING_FILE`
+- `SPEC_AWARD_STAGING_SHEET`
+- `SYNC_PYTHON_COMMAND`
+- `SYNC_SCRIPT_PATH`
+- `SYNC_TARGET_WORKBOOK_FILE`
+- `SYNC_TARGET_TABLE_NAME`
+
+Recommended flow:
+1. Close the synced target workbook before Outlook triggers the sync.
+2. Import these two `.bas` files into your Outlook VBA project.
+3. Restart Outlook or run `StartCRFMonitoring`.
+4. Send yourself a Spec Award test email that contains the target table.
+5. Check `Documents\OutlookMacroLog.txt` if the extraction or sync fails.
+
+Important note:
+The staging workbook is intentionally overwritten on each Spec Award email so that `excel_to_sharepoint.py` only pushes the latest detected rows and does not keep re-appending old staging data.

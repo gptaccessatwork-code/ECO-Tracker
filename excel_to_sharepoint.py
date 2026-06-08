@@ -27,6 +27,7 @@ GRAPH_BASE_URL = "https://graph.microsoft.com/v1.0"
 GRAPH_SCOPES = ["Files.ReadWrite"]
 DEFAULT_CACHE_FILE = ".msal_token_cache.bin"
 DEFAULT_BATCH_SIZE = 50
+SYSTEM_NUMBER_COLUMN = "System Number"
 
 
 @dataclass
@@ -323,10 +324,41 @@ def get_local_table_columns(worksheet, table) -> List[str]:
     return headers
 
 
+def get_local_table_rows(worksheet, table) -> List[List[Any]]:
+    min_col, min_row, max_col, max_row = range_boundaries(table.ref)
+    rows: List[List[Any]] = []
+    for row_idx in range(min_row + 1, max_row + 1):
+        row_values: List[Any] = []
+        for col_idx in range(min_col, max_col + 1):
+            row_values.append(worksheet.cell(row=row_idx, column=col_idx).value)
+        rows.append(row_values)
+    return rows
+
+
 def read_local_table_columns(target_workbook_file: str, table_name: str) -> List[str]:
     workbook, worksheet, table = get_local_table(target_workbook_file, table_name)
     try:
         return get_local_table_columns(worksheet, table)
+    finally:
+        workbook.close()
+
+
+def read_local_existing_keys(
+    target_workbook_file: str,
+    table_name: str,
+    key_column: str,
+) -> set[str]:
+    workbook, worksheet, table = get_local_table(target_workbook_file, table_name)
+    try:
+        columns = get_local_table_columns(worksheet, table)
+        if key_column not in columns:
+            return set()
+        key_index = columns.index(key_column)
+        existing_keys: set[str] = set()
+        for row in get_local_table_rows(worksheet, table):
+            if key_index < len(row) and row[key_index] is not None:
+                existing_keys.add(str(row[key_index]).strip())
+        return existing_keys
     finally:
         workbook.close()
 
@@ -385,8 +417,10 @@ def load_rows_from_excel(path: str, sheet_name: Optional[str]) -> List[Dict[str,
 
 
 def normalize_value(value: Any) -> Any:
-    if isinstance(value, (datetime, date)):
-        return value.isoformat()
+    if isinstance(value, datetime):
+        return value.strftime("%d %b %Y")
+    if isinstance(value, date):
+        return value.strftime("%d %b %Y")
     if isinstance(value, bool):
         return value
     if isinstance(value, (int, float, str)):
@@ -404,6 +438,35 @@ def apply_field_map(row: Dict[str, Any], field_map: Dict[str, str]) -> Dict[str,
 
 def align_row_to_table(row: Dict[str, Any], table_columns: List[str]) -> List[Any]:
     return [row.get(column) for column in table_columns]
+
+
+def filter_duplicate_rows(
+    prepared_rows: List[List[Any]],
+    table_columns: List[str],
+    existing_keys: set[str],
+    key_column: str,
+) -> List[List[Any]]:
+    if key_column not in table_columns:
+        return prepared_rows
+
+    key_index = table_columns.index(key_column)
+    filtered_rows: List[List[Any]] = []
+    seen_keys = set(existing_keys)
+
+    for row in prepared_rows:
+        key_value = ""
+        if key_index < len(row) and row[key_index] is not None:
+            key_value = str(row[key_index]).strip()
+
+        if key_value and key_value in seen_keys:
+            print(f"Skipping duplicate {key_column}: {key_value}")
+            continue
+
+        if key_value:
+            seen_keys.add(key_value)
+        filtered_rows.append(row)
+
+    return filtered_rows
 
 
 def batch_rows(items: List[List[Any]], batch_size: int) -> Iterable[List[List[Any]]]:
@@ -457,8 +520,24 @@ def main() -> int:
         if config.dry_run:
             print(f"[DRY RUN] Row {index}: {aligned}")
 
+    if config.target_workbook_file:
+        existing_keys = read_local_existing_keys(
+            config.target_workbook_file, config.table_name, SYSTEM_NUMBER_COLUMN
+        )
+        before_count = len(prepared_rows)
+        prepared_rows = filter_duplicate_rows(
+            prepared_rows, table_columns, existing_keys, SYSTEM_NUMBER_COLUMN
+        )
+        skipped_count = before_count - len(prepared_rows)
+        if skipped_count:
+            print(f"Skipped {skipped_count} duplicate row(s).")
+
     if config.dry_run:
         print("Dry run complete. No SharePoint data was changed.")
+        return 0
+
+    if not prepared_rows:
+        print("No new rows to append after duplicate check.")
         return 0
 
     if config.target_workbook_file:
