@@ -48,6 +48,13 @@ class Config:
     dry_run: bool
 
 
+@dataclass(frozen=True)
+class LocalTableContext:
+    workbook: Any
+    worksheet: Any
+    table: Any
+
+
 def parse_args() -> Config:
     parser = argparse.ArgumentParser(
         description="Append local Excel rows to a SharePoint workbook table."
@@ -119,41 +126,8 @@ def parse_args() -> Config:
 
     args = parser.parse_args()
 
-    missing = [
-        name
-        for name, value in [
-            ("table_name", args.table_name),
-            ("excel_file", args.excel_file),
-        ]
-        if not value
-    ]
-    use_local_target = bool(args.target_workbook_file)
-    if not use_local_target and not args.tenant_id:
-        missing.append("tenant_id")
-    if not use_local_target and not args.client_id:
-        missing.append("client_id")
-    if not use_local_target and not args.workbook_url:
-        missing.extend(
-            name
-            for name, value in [
-                ("sharepoint_hostname", args.sharepoint_hostname),
-                ("sharepoint_site_path", args.sharepoint_site_path),
-                ("workbook_path", args.workbook_path),
-            ]
-            if not value
-        )
-    if missing:
-        parser.error("Missing required values: " + ", ".join(missing))
-
-    if args.batch_size < 1:
-        parser.error("--batch-size must be at least 1")
-
-    field_map: Dict[str, str] = {}
-    for mapping in args.map:
-        if "=" not in mapping:
-            parser.error(f"Invalid --map value '{mapping}'. Use EXCEL_HEADER=TABLE_COLUMN.")
-        excel_header, table_column = mapping.split("=", 1)
-        field_map[excel_header.strip()] = table_column.strip()
+    validate_args(parser, args)
+    field_map = parse_field_map(parser, args.map)
 
     return Config(
         tenant_id=args.tenant_id,
@@ -171,6 +145,56 @@ def parse_args() -> Config:
         cache_file=args.cache_file,
         dry_run=args.dry_run,
     )
+
+
+def validate_args(parser: argparse.ArgumentParser, args: argparse.Namespace) -> None:
+    missing = [
+        name
+        for name, value in [
+            ("table_name", args.table_name),
+            ("excel_file", args.excel_file),
+        ]
+        if not value
+    ]
+
+    use_local_target = bool(args.target_workbook_file)
+    if not use_local_target:
+        for name, value in [
+            ("tenant_id", args.tenant_id),
+            ("client_id", args.client_id),
+        ]:
+            if not value:
+                missing.append(name)
+
+        if not args.workbook_url:
+            missing.extend(
+                name
+                for name, value in [
+                    ("sharepoint_hostname", args.sharepoint_hostname),
+                    ("sharepoint_site_path", args.sharepoint_site_path),
+                    ("workbook_path", args.workbook_path),
+                ]
+                if not value
+            )
+
+    if missing:
+        parser.error("Missing required values: " + ", ".join(missing))
+
+    if args.batch_size < 1:
+        parser.error("--batch-size must be at least 1")
+
+
+def parse_field_map(
+    parser: argparse.ArgumentParser,
+    mappings: List[str],
+) -> Dict[str, str]:
+    field_map: Dict[str, str] = {}
+    for mapping in mappings:
+        if "=" not in mapping:
+            parser.error(f"Invalid --map value '{mapping}'. Use EXCEL_HEADER=TABLE_COLUMN.")
+        excel_header, table_column = mapping.split("=", 1)
+        field_map[excel_header.strip()] = table_column.strip()
+    return field_map
 
 
 def load_cache(path: str) -> msal.SerializableTokenCache:
@@ -301,14 +325,14 @@ def get_table_columns(workbook_base_url: str, table_name: str, token: str) -> Li
     return columns
 
 
-def get_local_table(target_workbook_file: str, table_name: str):
+def get_local_table(target_workbook_file: str, table_name: str) -> LocalTableContext:
     workbook = load_workbook(target_workbook_file)
     for worksheet in workbook.worksheets:
         if table_name in worksheet.tables:
-            return workbook, worksheet, worksheet.tables[table_name]
+            return LocalTableContext(workbook, worksheet, worksheet.tables[table_name])
         for table in worksheet.tables.values():
             if getattr(table, "displayName", None) == table_name:
-                return workbook, worksheet, table
+                return LocalTableContext(workbook, worksheet, table)
     workbook.close()
     raise RuntimeError(
         f"Could not find table '{table_name}' in local workbook '{target_workbook_file}'."
@@ -336,11 +360,11 @@ def get_local_table_rows(worksheet, table) -> List[List[Any]]:
 
 
 def read_local_table_columns(target_workbook_file: str, table_name: str) -> List[str]:
-    workbook, worksheet, table = get_local_table(target_workbook_file, table_name)
+    context = get_local_table(target_workbook_file, table_name)
     try:
-        return get_local_table_columns(worksheet, table)
+        return get_local_table_columns(context.worksheet, context.table)
     finally:
-        workbook.close()
+        context.workbook.close()
 
 
 def read_local_existing_keys(
@@ -348,19 +372,19 @@ def read_local_existing_keys(
     table_name: str,
     key_column: str,
 ) -> set[str]:
-    workbook, worksheet, table = get_local_table(target_workbook_file, table_name)
+    context = get_local_table(target_workbook_file, table_name)
     try:
-        columns = get_local_table_columns(worksheet, table)
+        columns = get_local_table_columns(context.worksheet, context.table)
         if key_column not in columns:
             return set()
         key_index = columns.index(key_column)
         existing_keys: set[str] = set()
-        for row in get_local_table_rows(worksheet, table):
+        for row in get_local_table_rows(context.worksheet, context.table):
             if key_index < len(row) and row[key_index] is not None:
                 existing_keys.add(str(row[key_index]).strip())
         return existing_keys
     finally:
-        workbook.close()
+        context.workbook.close()
 
 
 def append_rows_to_local_table(
@@ -369,51 +393,56 @@ def append_rows_to_local_table(
     rows: List[List[Any]],
 ) -> None:
     print(f"Opening target workbook: {target_workbook_file}")
-    workbook, worksheet, table = get_local_table(target_workbook_file, table_name)
-    if getattr(table, "totalsRowShown", False):
-        workbook.close()
-        raise RuntimeError(
-            f"Table '{table_name}' uses a totals row. This script currently expects a normal table without totals."
+    context = get_local_table(target_workbook_file, table_name)
+    try:
+        if getattr(context.table, "totalsRowShown", False):
+            raise RuntimeError(
+                f"Table '{table_name}' uses a totals row. This script currently expects a normal table without totals."
+            )
+
+        min_col, min_row, max_col, max_row = range_boundaries(context.table.ref)
+        next_row = max_row + 1
+
+        print(f"Writing {len(rows)} row(s) into table '{table_name}'...")
+        for row_values in rows:
+            for offset, value in enumerate(row_values):
+                context.worksheet.cell(row=next_row, column=min_col + offset, value=value)
+            next_row += 1
+
+        new_max_row = max_row + len(rows)
+        context.table.ref = (
+            f"{get_column_letter(min_col)}{min_row}:{get_column_letter(max_col)}{new_max_row}"
         )
-
-    min_col, min_row, max_col, max_row = range_boundaries(table.ref)
-    next_row = max_row + 1
-
-    print(f"Writing {len(rows)} row(s) into table '{table_name}'...")
-    for row_values in rows:
-        for offset, value in enumerate(row_values):
-            worksheet.cell(row=next_row, column=min_col + offset, value=value)
-        next_row += 1
-
-    new_max_row = max_row + len(rows)
-    table.ref = f"{get_column_letter(min_col)}{min_row}:{get_column_letter(max_col)}{new_max_row}"
-    print("Saving workbook to local synced file...")
-    workbook.save(target_workbook_file)
-    workbook.close()
-    print("Local workbook save complete.")
+        print("Saving workbook to local synced file...")
+        context.workbook.save(target_workbook_file)
+        print("Local workbook save complete.")
+    finally:
+        context.workbook.close()
 
 
 def load_rows_from_excel(path: str, sheet_name: Optional[str]) -> List[Dict[str, Any]]:
     workbook = load_workbook(path, data_only=True)
-    sheet = workbook[sheet_name] if sheet_name else workbook.active
+    try:
+        sheet = workbook[sheet_name] if sheet_name else workbook.active
+        rows = list(sheet.iter_rows(values_only=True))
+        if not rows:
+            return []
 
-    rows = list(sheet.iter_rows(values_only=True))
-    if not rows:
-        return []
+        headers = [str(cell).strip() if cell is not None else "" for cell in rows[0]]
+        data_rows: List[Dict[str, Any]] = []
 
-    headers = [str(cell).strip() if cell is not None else "" for cell in rows[0]]
-    data_rows: List[Dict[str, Any]] = []
+        for row in rows[1:]:
+            item: Dict[str, Any] = {}
+            for header, value in zip(headers, row):
+                if not header or value is None:
+                    continue
+                item[header] = value
+            if item:
+                data_rows.append(item)
 
-    for row in rows[1:]:
-        item: Dict[str, Any] = {}
-        for header, value in zip(headers, row):
-            if not header or value is None:
-                continue
-            item[header] = value
-        if item:
-            data_rows.append(item)
-
-    return data_rows
+        return data_rows
+    finally:
+        workbook.close()
 
 
 def normalize_value(value: Any) -> Any:
@@ -438,6 +467,36 @@ def apply_field_map(row: Dict[str, Any], field_map: Dict[str, str]) -> Dict[str,
 
 def align_row_to_table(row: Dict[str, Any], table_columns: List[str]) -> List[Any]:
     return [row.get(column) for column in table_columns]
+
+
+def prepare_rows_for_table(
+    source_rows: List[Dict[str, Any]],
+    field_map: Dict[str, str],
+    table_columns: List[str],
+    dry_run: bool,
+) -> List[List[Any]]:
+    prepared_rows: List[List[Any]] = []
+    for index, row in enumerate(source_rows, start=2):
+        mapped = apply_field_map(row, field_map)
+        aligned = align_row_to_table(mapped, table_columns)
+        prepared_rows.append(aligned)
+        if dry_run:
+            print(f"[DRY RUN] Row {index}: {aligned}")
+    return prepared_rows
+
+
+def resolve_table_columns(config: Config) -> tuple[Optional[str], Optional[str], List[str]]:
+    if config.target_workbook_file:
+        return (
+            None,
+            None,
+            read_local_table_columns(config.target_workbook_file, config.table_name),
+        )
+
+    token = get_access_token(config)
+    workbook_base_url = resolve_workbook_base_url(config, token)
+    table_columns = get_table_columns(workbook_base_url, config.table_name, token)
+    return workbook_base_url, token, table_columns
 
 
 def filter_duplicate_rows(
@@ -493,16 +552,7 @@ def main() -> int:
         print("No data rows found in the Excel file.")
         return 0
 
-    workbook_base_url = None
-    token = None
-    if config.target_workbook_file:
-        table_columns = read_local_table_columns(
-            config.target_workbook_file, config.table_name
-        )
-    else:
-        token = get_access_token(config)
-        workbook_base_url = resolve_workbook_base_url(config, token)
-        table_columns = get_table_columns(workbook_base_url, config.table_name, token)
+    workbook_base_url, token, table_columns = resolve_table_columns(config)
 
     print(f"Found {len(source_rows)} source row(s).")
     print(
@@ -512,13 +562,12 @@ def main() -> int:
     print(f"Target table: {config.table_name}")
     print(f"Table columns: {', '.join(table_columns)}")
 
-    prepared_rows: List[List[Any]] = []
-    for index, row in enumerate(source_rows, start=2):
-        mapped = apply_field_map(row, config.field_map)
-        aligned = align_row_to_table(mapped, table_columns)
-        prepared_rows.append(aligned)
-        if config.dry_run:
-            print(f"[DRY RUN] Row {index}: {aligned}")
+    prepared_rows = prepare_rows_for_table(
+        source_rows=source_rows,
+        field_map=config.field_map,
+        table_columns=table_columns,
+        dry_run=config.dry_run,
+    )
 
     if config.target_workbook_file:
         existing_keys = read_local_existing_keys(

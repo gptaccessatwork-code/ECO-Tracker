@@ -13,14 +13,17 @@ Credentials are read from environment variables:
 from __future__ import annotations
 
 import argparse
+import json
 import os
 import sys
 from dataclasses import dataclass
 from datetime import date, datetime, timedelta
+from html import escape
 from pathlib import Path
 from typing import Any, Dict, Iterable, List, Optional
 from zoneinfo import ZoneInfo
 
+import win32com.client
 from lxml import etree
 from openpyxl import load_workbook
 from openpyxl.formatting.rule import FormulaRule
@@ -78,11 +81,49 @@ DEFAULT_SUBMITTED_DELTA_EXCL_WEEKEND_COLUMN = "F"
 DEFAULT_RELEASED_COLUMN = "G"
 DEFAULT_RELEASED_DELTA_COLUMN = "H"
 DEFAULT_RELEASED_DELTA_EXCL_WEEKEND_COLUMN = "I"
+DEFAULT_REMINDER_TO = os.getenv("ECO_REMINDER_TO", "")
+DEFAULT_REMINDER_CC = os.getenv("ECO_REMINDER_CC", "")
+DEFAULT_REMINDER_BCC = os.getenv("ECO_REMINDER_BCC", "")
+REMINDER_STATE_FILE = Path(__file__).with_name(".eco_reminder_state.json")
 ALERT_FILL = PatternFill(fill_type="solid", start_color="FF5B5B", end_color="FF5B5B")
 ALERT_FONT = Font(color="000000", bold=True)
 CLEAR_FILL = PatternFill(fill_type=None)
 CLEAR_FONT = Font(color="000000", bold=False)
 CENTER_ALIGNMENT = Alignment(horizontal="center", vertical="center")
+DISPLAY_DATE_FORMAT = "DD MMM YYYY"
+DATE_PARSE_FORMATS = (
+    "%Y-%m-%dT%H:%M:%S.%fZ",
+    "%d %b %Y %I:%M:%S %p",
+    "%d %b %Y %H:%M:%S",
+    "%d %b %Y %I:%M %p",
+    "%d %b %Y %H:%M",
+    "%m/%d/%Y %I:%M:%S %p",
+    "%m/%d/%Y %H:%M:%S",
+    "%m/%d/%Y %I:%M %p",
+    "%m/%d/%Y %H:%M",
+    "%Y-%m-%dT%H:%M:%S",
+    "%Y-%m-%d %H:%M:%S",
+)
+SHEET_DATE_FORMATS = ("%d %b %Y", "%d %B %Y", "%m/%d/%Y", "%Y-%m-%d", "%d/%m/%Y")
+EMAIL_CELL_STYLE = (
+    "border:1px solid #808080;padding:6px 10px;"
+    "text-align:center;vertical-align:middle;"
+)
+EMAIL_HEADER_STYLE = (
+    f"{EMAIL_CELL_STYLE}background-color:#d9e2f3;font-weight:bold;"
+)
+
+
+@dataclass(frozen=True)
+class WorkbookColumns:
+    spec_award: str
+    eco: str
+    submitted: str
+    submitted_delta: str
+    submitted_delta_excl_weekend: str
+    released: str
+    released_delta: str
+    released_delta_excl_weekend: str
 
 
 @dataclass
@@ -91,6 +132,24 @@ class EcoDates:
     released_date: Optional[str]
     class_identifier: str
     table_identifier: str
+
+
+@dataclass
+class ReminderItem:
+    row_number: int
+    system_number: str
+    spec_award_date: str
+    eco_number: str
+    submitted_date: str
+    released_date: str
+    reason: str
+
+
+@dataclass
+class SelfTestResult:
+    label: str
+    ok: bool
+    detail: str
 
 
 class AgileEcoClient:
@@ -207,6 +266,19 @@ def parse_args() -> argparse.Namespace:
         action="store_true",
         help="Print discovered row fields to help tune class/table identifiers.",
     )
+    parser.add_argument(
+        "--self-test",
+        action="store_true",
+        help="Run setup checks without updating the workbook or sending email.",
+    )
+    parser.add_argument(
+        "--preview-reminder",
+        action="store_true",
+        help="Open the reminder email as an Outlook draft instead of sending it.",
+    )
+    parser.add_argument("--reminder-to", default=DEFAULT_REMINDER_TO, help="Semicolon-separated reminder recipients.")
+    parser.add_argument("--reminder-cc", default=DEFAULT_REMINDER_CC, help="Semicolon-separated reminder CC recipients.")
+    parser.add_argument("--reminder-bcc", default=DEFAULT_REMINDER_BCC, help="Semicolon-separated reminder BCC recipients.")
     return parser.parse_args()
 
 
@@ -237,20 +309,7 @@ def find_first_value(fields: Dict[str, str], candidates: Iterable[str]) -> Optio
 
 
 def parse_datetime(value: str) -> Optional[datetime]:
-    formats = [
-        "%Y-%m-%dT%H:%M:%S.%fZ",
-        "%d %b %Y %I:%M:%S %p",
-        "%d %b %Y %H:%M:%S",
-        "%d %b %Y %I:%M %p",
-        "%d %b %Y %H:%M",
-        "%m/%d/%Y %I:%M:%S %p",
-        "%m/%d/%Y %H:%M:%S",
-        "%m/%d/%Y %I:%M %p",
-        "%m/%d/%Y %H:%M",
-        "%Y-%m-%dT%H:%M:%S",
-        "%Y-%m-%d %H:%M:%S",
-    ]
-    for fmt in formats:
+    for fmt in DATE_PARSE_FORMATS:
         try:
             return datetime.strptime(value, fmt)
         except ValueError:
@@ -295,7 +354,7 @@ def parse_sheet_date(value: Any) -> Optional[date]:
     text_value = str(value).strip()
     if not text_value:
         return None
-    for fmt in ("%d %b %Y", "%d %B %Y", "%m/%d/%Y", "%Y-%m-%d", "%d/%m/%Y"):
+    for fmt in SHEET_DATE_FORMATS:
         try:
             return datetime.strptime(text_value, fmt).date()
         except ValueError:
@@ -344,18 +403,21 @@ def clear_cell_style(cell) -> None:
     cell.alignment = CENTER_ALIGNMENT
 
 
+def write_date_cell(cell, value: Optional[str]) -> None:
+    parsed = parse_sheet_date(value)
+    if parsed is None:
+        cell.value = ""
+    else:
+        cell.value = parsed
+        cell.number_format = DISPLAY_DATE_FORMAT
+    cell.alignment = CENTER_ALIGNMENT
+
+
 def apply_conditional_formatting(
     worksheet,
-    start_row: int,
-    end_row: int,
-    column_letter: str,
-    threshold: int,
+    range_ref: str,
+    formula: str,
 ) -> None:
-    if end_row < start_row:
-        return
-
-    range_ref = f"{column_letter}{start_row}:{column_letter}{end_row}"
-    formula = f"AND(ISNUMBER({column_letter}{start_row}),{column_letter}{start_row}>{threshold})"
     worksheet.conditional_formatting.add(
         range_ref,
         FormulaRule(formula=[formula], fill=ALERT_FILL, font=ALERT_FONT),
@@ -381,6 +443,269 @@ def clear_existing_conditional_formatting_for_columns(
 
     for key in to_remove:
         del cf_rules[key]
+
+
+def load_reminder_state() -> Dict[str, bool]:
+    if not REMINDER_STATE_FILE.exists():
+        return {}
+    try:
+        return json.loads(REMINDER_STATE_FILE.read_text(encoding="utf-8"))
+    except Exception:
+        return {}
+
+
+def save_reminder_state(state: Dict[str, bool]) -> None:
+    REMINDER_STATE_FILE.write_text(
+        json.dumps(state, indent=2, sort_keys=True),
+        encoding="utf-8",
+    )
+
+
+def reminder_key(reminder: ReminderItem) -> str:
+    return "|".join(
+        [
+            singapore_today().isoformat(),
+            str(reminder.row_number),
+            reminder.system_number,
+            reminder.eco_number,
+            reminder.reason,
+        ]
+    )
+
+
+def create_agile_client_from_env() -> AgileEcoClient:
+    agile_user = os.getenv("AGILE_USER")
+    agile_pass = os.getenv("AGILE_PASS")
+    if not agile_user or not agile_pass:
+        raise RuntimeError("AGILE_USER and AGILE_PASS must be set in the environment.")
+    return AgileEcoClient(agile_user, agile_pass)
+
+
+def dispatch_outlook_application():
+    return win32com.client.Dispatch("Outlook.Application")
+
+
+def build_email_cell(value: str, style: str = EMAIL_CELL_STYLE) -> str:
+    return f'<td style="{style}">{escape(value)}</td>'
+
+
+def build_reminder_rows_html(reminders: List[ReminderItem]) -> str:
+    rows_html: List[str] = []
+    for item in reminders:
+        eco_text = item.eco_number if item.eco_number else "Missing"
+        submitted_text = item.submitted_date if item.submitted_date else "Pending"
+        released_text = item.released_date if item.released_date else "Pending"
+        cells = [
+            item.system_number,
+            item.spec_award_date,
+            eco_text,
+            submitted_text,
+            released_text,
+            item.reason,
+        ]
+        rows_html.append("<tr>" + "".join(build_email_cell(cell) for cell in cells) + "</tr>")
+    return "".join(rows_html)
+
+
+def send_reminder_email(
+    reminders: List[ReminderItem],
+    to_recipients: str,
+    cc_recipients: str,
+    bcc_recipients: str,
+    preview_only: bool = False,
+) -> bool:
+    if not reminders:
+        print("No reminder email created: no overdue rows matched the follow-up rules.")
+        return False
+
+    if not to_recipients.strip():
+        print("No reminder email created: reminder recipients are empty. Use --reminder-to or set ECO_REMINDER_TO.")
+        return False
+
+    outlook = dispatch_outlook_application()
+    mail = outlook.CreateItem(0)
+    mail.To = to_recipients
+    mail.CC = cc_recipients
+    mail.BCC = bcc_recipients
+    mail.Subject = f"ECO Tracker Follow-Up - {singapore_today().strftime('%d %b %Y')}"
+    mail.HTMLBody = f"""
+<html>
+  <body style="font-family:Calibri,Arial,sans-serif;font-size:11pt;color:#1f1f1f;">
+    <p>Hi team,</p>
+    <p>The following items need follow-up:</p>
+    <table style="border-collapse:collapse;border:1px solid #808080;">
+      <tr style="background-color:#d9e2f3;font-weight:bold;">
+        {build_email_cell("System Number", EMAIL_HEADER_STYLE)}
+        {build_email_cell("Spec Award Date", EMAIL_HEADER_STYLE)}
+        {build_email_cell("ECO Number", EMAIL_HEADER_STYLE)}
+        {build_email_cell("Submitted Date", EMAIL_HEADER_STYLE)}
+        {build_email_cell("Released Date", EMAIL_HEADER_STYLE)}
+        {build_email_cell("Action Needed", EMAIL_HEADER_STYLE)}
+      </tr>
+      {build_reminder_rows_html(reminders)}
+    </table>
+    <p>Please follow up accordingly.</p>
+  </body>
+</html>
+"""
+    if preview_only:
+        mail.Display()
+        print(f"Reminder preview opened for: {to_recipients}")
+    else:
+        mail.Send()
+        print(f"Reminder email sent to: {to_recipients}")
+    return True
+
+
+def collect_self_test_results(
+    workbook_file: Optional[str],
+    worksheet_name: Optional[str],
+    reminder_to: str,
+    reminder_cc: str,
+    reminder_bcc: str,
+) -> List[SelfTestResult]:
+    results: List[SelfTestResult] = []
+
+    agile_user = os.getenv("AGILE_USER")
+    agile_pass = os.getenv("AGILE_PASS")
+    results.append(
+        SelfTestResult(
+            label="AGILE_USER",
+            ok=bool(agile_user),
+            detail="Found in environment." if agile_user else "Missing from environment.",
+        )
+    )
+    results.append(
+        SelfTestResult(
+            label="AGILE_PASS",
+            ok=bool(agile_pass),
+            detail="Found in environment." if agile_pass else "Missing from environment.",
+        )
+    )
+
+    try:
+        dispatch_outlook_application()
+        results.append(
+            SelfTestResult(
+                label="Outlook",
+                ok=True,
+                detail="Outlook COM is available.",
+            )
+        )
+    except Exception as exc:
+        results.append(
+            SelfTestResult(
+                label="Outlook",
+                ok=False,
+                detail=f"Outlook COM unavailable: {exc}",
+            )
+        )
+
+    recipient_summary = []
+    if reminder_to.strip():
+        recipient_summary.append(f"To={reminder_to}")
+    if reminder_cc.strip():
+        recipient_summary.append(f"Cc={reminder_cc}")
+    if reminder_bcc.strip():
+        recipient_summary.append(f"Bcc={reminder_bcc}")
+    results.append(
+        SelfTestResult(
+            label="Reminder Recipients",
+            ok=bool(reminder_to.strip()),
+            detail="; ".join(recipient_summary)
+            if recipient_summary
+            else "No reminder recipients configured.",
+        )
+    )
+
+    if workbook_file:
+        workbook_path = Path(workbook_file)
+        results.append(
+            SelfTestResult(
+                label="Workbook File",
+                ok=workbook_path.exists(),
+                detail=str(workbook_path) if workbook_path.exists() else f"File not found: {workbook_file}",
+            )
+        )
+        if workbook_path.exists():
+            workbook = load_workbook(workbook_path)
+            try:
+                if worksheet_name:
+                    ok = worksheet_name in workbook.sheetnames
+                    detail = (
+                        f"Worksheet '{worksheet_name}' found."
+                        if ok
+                        else f"Worksheet '{worksheet_name}' not found. Available: {', '.join(workbook.sheetnames)}"
+                    )
+                    results.append(SelfTestResult(label="Worksheet", ok=ok, detail=detail))
+                else:
+                    results.append(
+                        SelfTestResult(
+                            label="Worksheet",
+                            ok=True,
+                            detail=f"Using active worksheet '{workbook.active.title}'.",
+                        )
+                    )
+            finally:
+                workbook.close()
+    else:
+        results.append(
+            SelfTestResult(
+                label="Workbook File",
+                ok=False,
+                detail="Not provided. Use --workbook-file or TARGET_WORKBOOK_FILE.",
+            )
+        )
+
+    return results
+
+
+def run_self_test(
+    workbook_file: Optional[str],
+    worksheet_name: Optional[str],
+    reminder_to: str,
+    reminder_cc: str,
+    reminder_bcc: str,
+) -> int:
+    results = collect_self_test_results(
+        workbook_file=workbook_file,
+        worksheet_name=worksheet_name,
+        reminder_to=reminder_to,
+        reminder_cc=reminder_cc,
+        reminder_bcc=reminder_bcc,
+    )
+    has_failure = False
+    for result in results:
+        status = "PASS" if result.ok else "FAIL"
+        print(f"{status}: {result.label} - {result.detail}")
+        if not result.ok:
+            has_failure = True
+    return 1 if has_failure else 0
+
+
+def build_follow_up_reason(
+    spec_award_date: Optional[date],
+    eco_number: str,
+    submitted_date: Optional[date],
+    released_date: Optional[date],
+    today_sg: date,
+) -> str:
+    if not spec_award_date:
+        return ""
+
+    days_since_spec = (today_sg - spec_award_date).days
+    if not eco_number and days_since_spec >= 2:
+        return "No ECO number after 2 days from Spec Award date"
+
+    if not submitted_date and days_since_spec >= 2:
+        return "ECO not submitted within 2 days from Spec Award date"
+
+    if submitted_date and not released_date:
+        days_since_submitted = (today_sg - submitted_date).days
+        if days_since_submitted >= 3:
+            return "ECO not released after 3 days from Submitted date"
+
+    return ""
 
 
 def extract_status_dates(
@@ -436,17 +761,12 @@ def pick_best_date(values: List[tuple[int, str]]) -> Optional[str]:
 
 
 def fetch_eco_dates(
+    client: AgileEcoClient,
     eco_number: str,
     class_identifiers: List[str],
     table_identifiers: List[str],
     inspect: bool,
 ) -> EcoDates:
-    agile_user = os.getenv("AGILE_USER")
-    agile_pass = os.getenv("AGILE_PASS")
-    if not agile_user or not agile_pass:
-        raise RuntimeError("AGILE_USER and AGILE_PASS must be set in the environment.")
-
-    client = AgileEcoClient(agile_user, agile_pass)
     errors: List[str] = []
 
     for class_identifier in class_identifiers:
@@ -498,100 +818,160 @@ def update_workbook_dates(
     start_row: int,
     class_identifiers: List[str],
     table_identifiers: List[str],
+    reminder_to: str,
+    reminder_cc: str,
+    reminder_bcc: str,
+    preview_reminder: bool,
 ) -> int:
     workbook_path = Path(workbook_file)
     if not workbook_path.exists():
         raise FileNotFoundError(f"Workbook file not found: {workbook_file}")
 
     workbook = load_workbook(workbook_path)
-    worksheet = workbook[worksheet_name] if worksheet_name else workbook.active
+    try:
+        worksheet = workbook[worksheet_name] if worksheet_name else workbook.active
+        columns = WorkbookColumns(
+            spec_award=spec_award_column.upper(),
+            eco=eco_column.upper(),
+            submitted=submitted_column.upper(),
+            submitted_delta=submitted_delta_column.upper(),
+            submitted_delta_excl_weekend=submitted_delta_excl_weekend_column.upper(),
+            released=released_column.upper(),
+            released_delta=released_delta_column.upper(),
+            released_delta_excl_weekend=released_delta_excl_weekend_column.upper(),
+        )
 
-    spec_award_col = spec_award_column.upper()
-    eco_col = eco_column.upper()
-    submitted_col = submitted_column.upper()
-    submitted_delta_col = submitted_delta_column.upper()
-    submitted_delta_excl_col = submitted_delta_excl_weekend_column.upper()
-    released_col = released_column.upper()
-    released_delta_col = released_delta_column.upper()
-    released_delta_excl_col = released_delta_excl_weekend_column.upper()
+        updated_rows = 0
+        eco_cache: Dict[str, EcoDates] = {}
+        today_sg = singapore_today()
+        reminders: List[ReminderItem] = []
+        reminder_state = load_reminder_state()
+        sent_reminder_keys: List[str] = []
+        agile_client = create_agile_client_from_env()
 
-    updated_rows = 0
-    eco_cache: Dict[str, EcoDates] = {}
-    today_sg = singapore_today()
-    for row_idx in range(start_row, worksheet.max_row + 1):
-        eco_value = worksheet[f"{eco_col}{row_idx}"].value
-        spec_award_date = parse_sheet_date(worksheet[f"{spec_award_col}{row_idx}"].value)
-        eco_number = "" if eco_value is None else str(eco_value).strip()
+        for row_idx in range(start_row, worksheet.max_row + 1):
+            eco_value = worksheet[f"{columns.eco}{row_idx}"].value
+            spec_award_date = parse_sheet_date(worksheet[f"{columns.spec_award}{row_idx}"].value)
+            system_number_value = worksheet[f"A{row_idx}"].value
+            system_number = "" if system_number_value is None else str(system_number_value).strip()
+            eco_number = "" if eco_value is None else str(eco_value).strip()
 
-        result: Optional[EcoDates] = None
-        if eco_number:
-            if eco_number not in eco_cache:
-                eco_cache[eco_number] = fetch_eco_dates(
+            result: Optional[EcoDates] = None
+            if eco_number:
+                if eco_number not in eco_cache:
+                    eco_cache[eco_number] = fetch_eco_dates(
+                        client=agile_client,
+                        eco_number=eco_number,
+                        class_identifiers=class_identifiers,
+                        table_identifiers=table_identifiers,
+                        inspect=False,
+                    )
+                result = eco_cache[eco_number]
+
+            submitted_date_text = result.submitted_date if result else ""
+            released_date_text = result.released_date if result else ""
+            write_date_cell(worksheet[f"{columns.submitted}{row_idx}"], submitted_date_text)
+            write_date_cell(worksheet[f"{columns.released}{row_idx}"], released_date_text)
+
+            submitted_date = parse_sheet_date(submitted_date_text)
+            released_date = parse_sheet_date(released_date_text)
+            submitted_delta_end = submitted_date or today_sg
+            released_delta_end = released_date or today_sg
+
+            cell_updates = [
+                (
+                    worksheet[f"{columns.submitted_delta}{row_idx}"],
+                    calculate_delta_days(spec_award_date, submitted_delta_end),
+                ),
+                (
+                    worksheet[f"{columns.submitted_delta_excl_weekend}{row_idx}"],
+                    calculate_delta_excluding_weekends(spec_award_date, submitted_delta_end),
+                ),
+                (
+                    worksheet[f"{columns.released_delta}{row_idx}"],
+                    calculate_delta_days(spec_award_date, released_delta_end),
+                ),
+                (
+                    worksheet[f"{columns.released_delta_excl_weekend}{row_idx}"],
+                    calculate_delta_excluding_weekends(spec_award_date, released_delta_end),
+                ),
+            ]
+            for cell, value in cell_updates:
+                cell.value = value
+                clear_cell_style(cell)
+
+            follow_up_reason = build_follow_up_reason(
+                spec_award_date=spec_award_date,
+                eco_number=eco_number,
+                submitted_date=submitted_date,
+                released_date=released_date,
+                today_sg=today_sg,
+            )
+            if follow_up_reason and spec_award_date:
+                reminder = ReminderItem(
+                    row_number=row_idx,
+                    system_number=system_number,
+                    spec_award_date=spec_award_date.strftime("%d %b %Y"),
                     eco_number=eco_number,
-                    class_identifiers=class_identifiers,
-                    table_identifiers=table_identifiers,
-                    inspect=False,
+                    submitted_date=submitted_date.strftime("%d %b %Y") if submitted_date else "",
+                    released_date=released_date.strftime("%d %b %Y") if released_date else "",
+                    reason=follow_up_reason,
                 )
-            result = eco_cache[eco_number]
+                key = reminder_key(reminder)
+                if not reminder_state.get(key):
+                    reminders.append(reminder)
+                    sent_reminder_keys.append(key)
+                else:
+                    print(
+                        f"Reminder already sent today for row {row_idx}: "
+                        f"{system_number or '(blank system number)'} - {follow_up_reason}"
+                    )
 
-        submitted_date_text = result.submitted_date if result else ""
-        released_date_text = result.released_date if result else ""
-        worksheet[f"{submitted_col}{row_idx}"] = submitted_date_text
-        worksheet[f"{released_col}{row_idx}"] = released_date_text
+            updated_rows += 1
+            print(
+                f"Updated row {row_idx}: ECO={eco_number} "
+                f"Submitted={submitted_date_text} Released={released_date_text}"
+            )
 
-        submitted_date = parse_sheet_date(submitted_date_text)
-        released_date = parse_sheet_date(released_date_text)
-        submitted_delta_end = submitted_date or today_sg
-        released_delta_end = released_date or today_sg
-
-        submitted_delta_value = calculate_delta_days(spec_award_date, submitted_delta_end)
-        submitted_delta_excl_value = calculate_delta_excluding_weekends(
-            spec_award_date, submitted_delta_end
+        clear_existing_conditional_formatting_for_columns(
+            worksheet,
+            start_row,
+            worksheet.max_row,
+            [
+                columns.submitted_delta,
+                columns.released_delta,
+                columns.submitted_delta_excl_weekend,
+                columns.released_delta_excl_weekend,
+            ],
         )
-        released_delta_value = calculate_delta_days(spec_award_date, released_delta_end)
-        released_delta_excl_value = calculate_delta_excluding_weekends(
-            spec_award_date, released_delta_end
+        apply_conditional_formatting(
+            worksheet,
+            f"{columns.submitted_delta}{start_row}:{columns.submitted_delta}{worksheet.max_row}",
+            f'AND(ISNUMBER(${columns.submitted_delta}{start_row}),${columns.submitted_delta}{start_row}>=2,${columns.submitted}{start_row}="")',
         )
-
-        submitted_delta_cell = worksheet[f"{submitted_delta_col}{row_idx}"]
-        submitted_delta_excl_cell = worksheet[f"{submitted_delta_excl_col}{row_idx}"]
-        released_delta_cell = worksheet[f"{released_delta_col}{row_idx}"]
-        released_delta_excl_cell = worksheet[f"{released_delta_excl_col}{row_idx}"]
-
-        submitted_delta_cell.value = submitted_delta_value
-        submitted_delta_excl_cell.value = submitted_delta_excl_value
-        released_delta_cell.value = released_delta_value
-        released_delta_excl_cell.value = released_delta_excl_value
-
-        worksheet[f"{submitted_col}{row_idx}"].alignment = CENTER_ALIGNMENT
-        worksheet[f"{released_col}{row_idx}"].alignment = CENTER_ALIGNMENT
-
-        clear_cell_style(submitted_delta_cell)
-        clear_cell_style(submitted_delta_excl_cell)
-        clear_cell_style(released_delta_cell)
-        clear_cell_style(released_delta_excl_cell)
-        updated_rows += 1
-        print(
-            f"Updated row {row_idx}: ECO={eco_number} "
-            f"Submitted={submitted_date_text} Released={released_date_text}"
+        apply_conditional_formatting(
+            worksheet,
+            f"{columns.released_delta}{start_row}:{columns.released_delta}{worksheet.max_row}",
+            f'AND(${columns.submitted}{start_row}<>"",${columns.released}{start_row}="",TODAY()-${columns.submitted}{start_row}>=3)',
         )
 
-    clear_existing_conditional_formatting_for_columns(
-        worksheet,
-        start_row,
-        worksheet.max_row,
-        [
-            submitted_delta_col,
-            released_delta_col,
-            submitted_delta_excl_col,
-            released_delta_excl_col,
-        ],
-    )
-    apply_conditional_formatting(worksheet, start_row, worksheet.max_row, submitted_delta_col, 2)
-    apply_conditional_formatting(worksheet, start_row, worksheet.max_row, released_delta_col, 4)
+        workbook.save(workbook_path)
+    finally:
+        workbook.close()
 
-    workbook.save(workbook_path)
-    workbook.close()
+    reminder_sent = False
+    if reminders:
+        reminder_sent = send_reminder_email(
+            reminders,
+            reminder_to,
+            reminder_cc,
+            reminder_bcc,
+            preview_only=preview_reminder,
+        )
+    if reminder_sent and not preview_reminder:
+        for key in sent_reminder_keys:
+            reminder_state[key] = True
+        save_reminder_state(reminder_state)
     print(f"Workbook updated: {workbook_file}")
     return updated_rows
 
@@ -601,8 +981,19 @@ def main() -> int:
     class_identifiers = args.class_identifiers or DEFAULT_CLASS_CANDIDATES
     table_identifiers = args.table_identifiers or DEFAULT_TABLE_CANDIDATES
 
+    if args.self_test:
+        return run_self_test(
+            workbook_file=args.workbook_file,
+            worksheet_name=args.worksheet,
+            reminder_to=args.reminder_to,
+            reminder_cc=args.reminder_cc,
+            reminder_bcc=args.reminder_bcc,
+        )
+
     if args.eco_number:
+        agile_client = create_agile_client_from_env()
         result = fetch_eco_dates(
+            client=agile_client,
             eco_number=args.eco_number,
             class_identifiers=class_identifiers,
             table_identifiers=table_identifiers,
@@ -633,6 +1024,10 @@ def main() -> int:
         start_row=args.start_row,
         class_identifiers=class_identifiers,
         table_identifiers=table_identifiers,
+        reminder_to=args.reminder_to,
+        reminder_cc=args.reminder_cc,
+        reminder_bcc=args.reminder_bcc,
+        preview_reminder=args.preview_reminder,
     )
     return 0
 
