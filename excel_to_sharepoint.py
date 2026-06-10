@@ -359,6 +359,31 @@ def get_local_table_rows(worksheet, table) -> List[List[Any]]:
     return rows
 
 
+def is_table_row_empty(row_values: List[Any]) -> bool:
+    for value in row_values:
+        if value is None:
+            continue
+        if isinstance(value, str) and not value.strip():
+            continue
+        return False
+    return True
+
+
+def find_last_populated_table_row(worksheet, table) -> int:
+    min_col, min_row, max_col, max_row = range_boundaries(table.ref)
+    last_populated_row = min_row
+
+    for row_idx in range(min_row + 1, max_row + 1):
+        row_values = [
+            worksheet.cell(row=row_idx, column=col_idx).value
+            for col_idx in range(min_col, max_col + 1)
+        ]
+        if not is_table_row_empty(row_values):
+            last_populated_row = row_idx
+
+    return last_populated_row
+
+
 def read_local_table_columns(target_workbook_file: str, table_name: str) -> List[str]:
     context = get_local_table(target_workbook_file, table_name)
     try:
@@ -401,7 +426,8 @@ def append_rows_to_local_table(
             )
 
         min_col, min_row, max_col, max_row = range_boundaries(context.table.ref)
-        next_row = max_row + 1
+        last_populated_row = find_last_populated_table_row(context.worksheet, context.table)
+        next_row = last_populated_row + 1
 
         print(f"Writing {len(rows)} row(s) into table '{table_name}'...")
         for row_values in rows:
@@ -409,7 +435,7 @@ def append_rows_to_local_table(
                 context.worksheet.cell(row=next_row, column=min_col + offset, value=value)
             next_row += 1
 
-        new_max_row = max_row + len(rows)
+        new_max_row = max(max_row, last_populated_row + len(rows))
         context.table.ref = (
             f"{get_column_letter(min_col)}{min_row}:{get_column_letter(max_col)}{new_max_row}"
         )

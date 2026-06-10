@@ -318,8 +318,10 @@ Private Function BuildSystemNumber(ByVal slotNumber As String, ByVal partNumber 
     cleanedPart = CleanCellText(partNumber)
     If cleanedPart = "" Then Exit Function
 
-    If InStr(1, UCase$(cleanedPart), "SEMSYS", vbTextCompare) > 0 Then
+    If InStr(1, cleanedPart, "SEMSYS", vbTextCompare) > 0 Then
         BuildSystemNumber = Replace(cleanedPart, "SEMSYS", cleanedSlot, 1, 1, vbTextCompare)
+    ElseIf InStr(1, cleanedPart, "SEMNSO", vbTextCompare) > 0 Then
+        BuildSystemNumber = Replace(cleanedPart, "SEMNSO", cleanedSlot, 1, 1, vbTextCompare)
     Else
         BuildSystemNumber = cleanedPart
     End If

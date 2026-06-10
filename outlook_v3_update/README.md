@@ -4,7 +4,7 @@ What they add:
 - Keep the current CRF and Spec Award detection flow
 - Parse the latest Spec Award email table from the HTML body
 - Extract only `Slot Number` and `Part Number`
-- Build `System Number` by replacing the `SEMSYS` prefix with `Z<Slot Number>`
+- Build `System Number` by replacing the `SEMSYS` or `SEMNSO` placeholder with the slot number
 - Overwrite the local staging workbook with the latest extracted rows
 - Store only `System Number` and the received `Spec Award Date`
 - Run `excel_to_sharepoint.py` to sync those rows into the synced SharePoint workbook
