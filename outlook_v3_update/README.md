@@ -5,9 +5,10 @@ What they add:
 - Parse the latest Spec Award email table from the HTML body
 - Extract only `Slot Number` and `Part Number`
 - Build `System Number` by replacing the `SEMSYS` or `SEMNSO` placeholder with the slot number
-- Overwrite the local staging workbook with the latest extracted rows
+- Append new extracted rows into the local staging workbook queue
 - Store only `System Number` and the received `Spec Award Date`
 - Run `excel_to_sharepoint.py` to sync those rows into the synced SharePoint workbook
+- If the synced workbook is busy, keep the queued rows and retry every 15 minutes until the sync succeeds
 
 Files:
 - `ThisOutlookSession.bas`
@@ -22,11 +23,11 @@ Config values to check in `Module1.bas`:
 - `SYNC_TARGET_TABLE_NAME`
 
 Recommended flow:
-1. Close the synced target workbook before Outlook triggers the sync.
+1. Close the synced target workbook when possible so the first sync attempt can finish immediately.
 2. Import these two `.bas` files into your Outlook VBA project.
 3. Restart Outlook or run `StartCRFMonitoring`.
 4. Send yourself a Spec Award test email that contains the target table.
 5. Check `Documents\OutlookMacroLog.txt` if the extraction or sync fails.
 
 Important note:
-The staging workbook is intentionally overwritten on each Spec Award email so that `excel_to_sharepoint.py` only pushes the latest detected rows and does not keep re-appending old staging data.
+The staging workbook now acts as a pending queue. New Spec Award rows are appended there, and only the rows that have been successfully pushed are removed from the staging workbook.

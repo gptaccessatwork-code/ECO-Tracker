@@ -9,8 +9,11 @@ from __future__ import annotations
 
 import argparse
 import base64
+import json
 import os
+import subprocess
 import sys
+import time
 from dataclasses import dataclass
 from datetime import date, datetime
 from pathlib import Path
@@ -28,6 +31,8 @@ GRAPH_SCOPES = ["Files.ReadWrite"]
 DEFAULT_CACHE_FILE = ".msal_token_cache.bin"
 DEFAULT_BATCH_SIZE = 50
 SYSTEM_NUMBER_COLUMN = "System Number"
+DEFAULT_RETRY_DELAY_MINUTES = 15
+DEFAULT_RETRY_STATE_FILE = ".excel_to_sharepoint_retry.json"
 
 
 @dataclass
@@ -46,6 +51,11 @@ class Config:
     batch_size: int
     cache_file: str
     dry_run: bool
+    retry_on_conflict: bool
+    retry_delay_minutes: int
+    retry_state_file: str
+    retry_worker: bool
+    clear_source_on_success: bool
 
 
 @dataclass(frozen=True)
@@ -123,6 +133,32 @@ def parse_args() -> Config:
         default=os.getenv("DRY_RUN", "false").lower() in {"1", "true", "yes"},
         help="Print rows that would be uploaded without writing to SharePoint.",
     )
+    parser.add_argument(
+        "--retry-on-conflict",
+        action="store_true",
+        help="If the local target workbook is busy, keep retrying in the background until it succeeds.",
+    )
+    parser.add_argument(
+        "--retry-delay-minutes",
+        type=int,
+        default=int(os.getenv("RETRY_DELAY_MINUTES", str(DEFAULT_RETRY_DELAY_MINUTES))),
+        help="Minutes to wait between retry attempts after a local workbook conflict. Default: 15",
+    )
+    parser.add_argument(
+        "--retry-state-file",
+        default=os.getenv("RETRY_STATE_FILE", DEFAULT_RETRY_STATE_FILE),
+        help="Path to the retry state file used to avoid launching duplicate retry workers.",
+    )
+    parser.add_argument(
+        "--clear-source-on-success",
+        action="store_true",
+        help="Clear the source workbook rows after a successful sync.",
+    )
+    parser.add_argument(
+        "--retry-worker",
+        action="store_true",
+        help=argparse.SUPPRESS,
+    )
 
     args = parser.parse_args()
 
@@ -144,6 +180,11 @@ def parse_args() -> Config:
         batch_size=args.batch_size,
         cache_file=args.cache_file,
         dry_run=args.dry_run,
+        retry_on_conflict=args.retry_on_conflict,
+        retry_delay_minutes=args.retry_delay_minutes,
+        retry_state_file=args.retry_state_file,
+        retry_worker=args.retry_worker,
+        clear_source_on_success=args.clear_source_on_success,
     )
 
 
@@ -182,6 +223,8 @@ def validate_args(parser: argparse.ArgumentParser, args: argparse.Namespace) -> 
 
     if args.batch_size < 1:
         parser.error("--batch-size must be at least 1")
+    if args.retry_delay_minutes < 1:
+        parser.error("--retry-delay-minutes must be at least 1")
 
 
 def parse_field_map(
@@ -471,6 +514,29 @@ def load_rows_from_excel(path: str, sheet_name: Optional[str]) -> List[Dict[str,
         workbook.close()
 
 
+def remove_excel_rows_by_keys(
+    path: str,
+    sheet_name: Optional[str],
+    keys_to_remove: set[str],
+    key_column_index: int = 1,
+) -> None:
+    if not keys_to_remove:
+        return
+
+    workbook = load_workbook(path)
+    try:
+        sheet = workbook[sheet_name] if sheet_name else workbook.active
+        for row_idx in range(sheet.max_row, 1, -1):
+            key_value = sheet.cell(row=row_idx, column=key_column_index).value
+            if key_value is None:
+                continue
+            if str(key_value).strip() in keys_to_remove:
+                sheet.delete_rows(row_idx, 1)
+        workbook.save(path)
+    finally:
+        workbook.close()
+
+
 def normalize_value(value: Any) -> Any:
     if isinstance(value, datetime):
         return value.strftime("%d %b %Y")
@@ -525,6 +591,102 @@ def resolve_table_columns(config: Config) -> tuple[Optional[str], Optional[str],
     return workbook_base_url, token, table_columns
 
 
+def is_local_conflict_error(exc: Exception) -> bool:
+    if isinstance(exc, PermissionError):
+        return True
+
+    winerror = getattr(exc, "winerror", None)
+    if winerror in {5, 32, 33}:
+        return True
+
+    text = str(exc).lower()
+    return "being used by another process" in text or "permission denied" in text
+
+
+def retry_state_path(config: Config) -> Path:
+    state_path = Path(config.retry_state_file)
+    if not state_path.is_absolute():
+        base_path = Path(sys.executable).resolve() if getattr(sys, "frozen", False) else Path(__file__).resolve()
+        state_path = base_path.with_name(config.retry_state_file)
+    return state_path
+
+
+def clear_retry_state(config: Config) -> None:
+    state_path = retry_state_path(config)
+    if state_path.exists():
+        state_path.unlink()
+
+
+def current_retry_worker_command() -> List[str]:
+    args = [arg for arg in sys.argv[1:] if arg != "--retry-worker"]
+    args.append("--retry-worker")
+    if getattr(sys, "frozen", False):
+        return [sys.executable, *args]
+    return [sys.executable, str(Path(__file__).resolve()), *args]
+
+
+def start_retry_worker(config: Config) -> None:
+    state_path = retry_state_path(config)
+    worker_already_scheduled = False
+    if state_path.exists():
+        age_seconds = time.time() - state_path.stat().st_mtime
+        if age_seconds < (config.retry_delay_minutes * 60 * 2):
+            worker_already_scheduled = True
+
+    if worker_already_scheduled:
+        print(
+            f"Retry worker already scheduled. Pending rows will be retried from {config.excel_file}."
+        )
+        return
+
+    payload = {
+        "scheduled_at": datetime.now().isoformat(timespec="seconds"),
+        "excel_file": config.excel_file,
+        "target_workbook_file": config.target_workbook_file,
+        "table_name": config.table_name,
+        "retry_delay_minutes": config.retry_delay_minutes,
+    }
+    state_path.write_text(json.dumps(payload, indent=2), encoding="utf-8")
+
+    creationflags = 0
+    creationflags |= getattr(subprocess, "CREATE_NO_WINDOW", 0)
+    creationflags |= getattr(subprocess, "DETACHED_PROCESS", 0)
+    creationflags |= getattr(subprocess, "CREATE_NEW_PROCESS_GROUP", 0)
+    subprocess.Popen(
+        current_retry_worker_command(),
+        cwd=str((Path(sys.executable).resolve().parent if getattr(sys, "frozen", False) else Path(__file__).resolve().parent)),
+        stdout=subprocess.DEVNULL,
+        stderr=subprocess.DEVNULL,
+        stdin=subprocess.DEVNULL,
+        close_fds=True,
+        creationflags=creationflags,
+    )
+    print(
+        f"Target workbook is busy. Scheduled background retry every {config.retry_delay_minutes} minutes."
+    )
+
+
+def run_retry_worker(config: Config) -> int:
+    print(
+        f"Retry worker started. It will retry every {config.retry_delay_minutes} minutes until the sync succeeds."
+    )
+    while True:
+        try:
+            result = run_once(config)
+            clear_retry_state(config)
+            print("Retry worker completed successfully.")
+            return result
+        except Exception as exc:
+            if not is_local_conflict_error(exc):
+                clear_retry_state(config)
+                raise
+            retry_state_path(config).touch()
+            print(
+                f"Target workbook is still busy. Retrying in {config.retry_delay_minutes} minutes."
+            )
+            time.sleep(config.retry_delay_minutes * 60)
+
+
 def filter_duplicate_rows(
     prepared_rows: List[List[Any]],
     table_columns: List[str],
@@ -570,9 +732,13 @@ def append_rows_to_table(
     graph_request("POST", url, token, json=payload)
 
 
-def main() -> int:
-    config = parse_args()
+def run_once(config: Config) -> int:
     source_rows = load_rows_from_excel(config.excel_file, config.excel_sheet)
+    source_keys = {
+        str(row.get(SYSTEM_NUMBER_COLUMN)).strip()
+        for row in source_rows
+        if row.get(SYSTEM_NUMBER_COLUMN) is not None and str(row.get(SYSTEM_NUMBER_COLUMN)).strip()
+    }
 
     if not source_rows:
         print("No data rows found in the Excel file.")
@@ -613,6 +779,9 @@ def main() -> int:
 
     if not prepared_rows:
         print("No new rows to append after duplicate check.")
+        if config.clear_source_on_success:
+            remove_excel_rows_by_keys(config.excel_file, config.excel_sheet, source_keys)
+            print("Processed rows removed from source workbook queue.")
         return 0
 
     if config.target_workbook_file:
@@ -626,8 +795,29 @@ def main() -> int:
             written += len(chunk)
             print(f"Appended {written}/{len(prepared_rows)} row(s).")
 
+    if config.clear_source_on_success:
+        remove_excel_rows_by_keys(config.excel_file, config.excel_sheet, source_keys)
+        print("Processed rows removed from source workbook queue.")
+
     print(f"Upload complete. {written} row(s) appended.")
     return 0
+
+
+def main() -> int:
+    config = parse_args()
+    try:
+        if config.retry_worker:
+            return run_retry_worker(config)
+        return run_once(config)
+    except Exception as exc:
+        if (
+            config.retry_on_conflict
+            and config.target_workbook_file
+            and is_local_conflict_error(exc)
+        ):
+            start_retry_worker(config)
+            return 0
+        raise
 
 
 if __name__ == "__main__":

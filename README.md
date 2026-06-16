@@ -85,6 +85,16 @@ If you use `TARGET_WORKBOOK_FILE`, the script edits the local synced file direct
 
 If you use `WORKBOOK_URL` or `WORKBOOK_PATH`, the script uses Microsoft Graph Excel APIs and the first run will prompt you to sign in with device code flow.
 
+### Conflict retry queue
+
+For the Spec Award intake flow, `excel_to_sharepoint.py` can now be used in queue mode:
+
+- the source staging workbook acts as the pending queue
+- if the target workbook is busy, a background retry worker is launched
+- the worker retries every 15 minutes until the write succeeds
+- only the processed rows are removed from the staging workbook after a successful sync
+- rows that arrive while a retry is waiting remain in the staging workbook and are included in a later successful sync
+
 ## agile_eco_dates.py
 
 ### Purpose

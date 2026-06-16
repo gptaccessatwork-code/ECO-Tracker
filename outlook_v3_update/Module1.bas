@@ -426,13 +426,36 @@ Public Sub SaveSpecAwardRowsToWorkbook(ByVal rows As Collection, ByVal workbookP
         ws.Cells(1, i + 1).Value = headers(i)
     Next i
 
-    ws.Range("A2:B1048576").ClearContents
+    Dim existingSystemNumbers As Object
+    Set existingSystemNumbers = CreateObject("Scripting.Dictionary")
+
+    Dim lastUsedRow As Long
+    lastUsedRow = GetLastUsedRow(ws, 1, 2)
+
+    For rowIndex = 2 To lastUsedRow
+        Dim existingSystemNumber As String
+        existingSystemNumber = Trim$(CStr(ws.Cells(rowIndex, 1).Value))
+        If existingSystemNumber <> "" Then
+            existingSystemNumbers(existingSystemNumber) = True
+        End If
+    Next rowIndex
+
+    Dim nextRow As Long
+    nextRow = IIf(lastUsedRow < 2, 2, lastUsedRow + 1)
 
     For rowIndex = 1 To rows.Count
         Dim rowData As Object
         Set rowData = rows(rowIndex)
-        ws.Cells(rowIndex + 1, 1).Value = rowData("System Number")
-        ws.Cells(rowIndex + 1, 2).Value = rowData("Spec Award Date")
+        Dim systemNumber As String
+        systemNumber = Trim$(CStr(rowData("System Number")))
+        If systemNumber <> "" Then
+            If Not existingSystemNumbers.Exists(systemNumber) Then
+                ws.Cells(nextRow, 1).Value = systemNumber
+                ws.Cells(nextRow, 2).Value = rowData("Spec Award Date")
+                existingSystemNumbers(systemNumber) = True
+                nextRow = nextRow + 1
+            End If
+        End If
     Next rowIndex
 
     If workbookExists Then
@@ -451,6 +474,22 @@ ErrorHandler:
     On Error GoTo 0
     Err.Raise Err.Number, , "SaveSpecAwardRowsToWorkbook failed: " & Err.Description
 End Sub
+
+Private Function GetLastUsedRow(ByVal ws As Object, ByVal firstColumn As Long, ByVal lastColumn As Long) As Long
+    Dim lastRow As Long
+    lastRow = 1
+
+    Dim colIndex As Long
+    For colIndex = firstColumn To lastColumn
+        Dim currentLastRow As Long
+        currentLastRow = ws.Cells(ws.Rows.Count, colIndex).End(-4162).Row
+        If currentLastRow > lastRow Then
+            lastRow = currentLastRow
+        End If
+    Next colIndex
+
+    GetLastUsedRow = lastRow
+End Function
 
 Private Function GetOrCreateWorksheet(ByVal wb As Object, ByVal sheetName As String) As Object
     On Error Resume Next
@@ -475,7 +514,10 @@ Public Sub RunSpecAwardSync()
                   "--target-workbook-file " & QuoteArg(SYNC_TARGET_WORKBOOK_FILE) & " " & _
                   "--table-name " & QuoteArg(SYNC_TARGET_TABLE_NAME) & " " & _
                   "--excel-file " & QuoteArg(SPEC_AWARD_STAGING_FILE) & " " & _
-                  "--excel-sheet " & QuoteArg(SPEC_AWARD_STAGING_SHEET)
+                  "--excel-sheet " & QuoteArg(SPEC_AWARD_STAGING_SHEET) & " " & _
+                  "--retry-on-conflict " & _
+                  "--retry-delay-minutes 15 " & _
+                  "--clear-source-on-success"
 
     LogEvent "Starting SharePoint sync."
     Set shellObj = CreateObject("WScript.Shell")
