@@ -13,9 +13,11 @@ Credentials are read from environment variables:
 from __future__ import annotations
 
 import argparse
+import ctypes
 import json
 import os
 import sys
+import time
 from dataclasses import dataclass
 from datetime import date, datetime, timedelta
 from html import escape
@@ -85,6 +87,9 @@ DEFAULT_REMINDER_TO = os.getenv("ECO_REMINDER_TO", "")
 DEFAULT_REMINDER_CC = os.getenv("ECO_REMINDER_CC", "")
 DEFAULT_REMINDER_BCC = os.getenv("ECO_REMINDER_BCC", "")
 REMINDER_STATE_FILE = Path(__file__).with_name(".eco_reminder_state.json")
+LOCAL_WORKBOOK_RETRY_DELAY_MINUTES = 15
+LOCAL_WORKBOOK_SETTLE_SECONDS = 30
+WINDOWS_LOCK_ERRORS = {5, 32, 33}
 ALERT_FILL = PatternFill(fill_type="solid", start_color="FF5B5B", end_color="FF5B5B")
 ALERT_FONT = Font(color="000000", bold=True)
 CLEAR_FILL = PatternFill(fill_type=None)
@@ -411,6 +416,71 @@ def write_date_cell(cell, value: Optional[str]) -> None:
         cell.value = parsed
         cell.number_format = DISPLAY_DATE_FORMAT
     cell.alignment = CENTER_ALIGNMENT
+
+
+def is_local_conflict_error(exc: Exception) -> bool:
+    if isinstance(exc, PermissionError):
+        return True
+
+    winerror = getattr(exc, "winerror", None)
+    if winerror in WINDOWS_LOCK_ERRORS:
+        return True
+
+    text = str(exc).lower()
+    return "being used by another process" in text or "permission denied" in text
+
+
+def is_workbook_open(workbook_path: Path) -> bool:
+    kernel32 = ctypes.windll.kernel32
+    kernel32.CreateFileW.argtypes = [
+        ctypes.c_wchar_p,
+        ctypes.c_uint32,
+        ctypes.c_uint32,
+        ctypes.c_void_p,
+        ctypes.c_uint32,
+        ctypes.c_uint32,
+        ctypes.c_void_p,
+    ]
+    kernel32.CreateFileW.restype = ctypes.c_void_p
+    kernel32.CloseHandle.argtypes = [ctypes.c_void_p]
+    kernel32.CloseHandle.restype = ctypes.c_int
+
+    handle = kernel32.CreateFileW(
+        str(workbook_path),
+        0x80000000 | 0x40000000,
+        0,
+        None,
+        3,
+        0x80,
+        None,
+    )
+
+    if handle in (None, ctypes.c_void_p(-1).value):
+        return True
+
+    kernel32.CloseHandle(handle)
+    return False
+
+
+def wait_for_workbook_ready(workbook_path: Path, retry_delay_minutes: int) -> None:
+    while True:
+        if is_workbook_open(workbook_path):
+            print(
+                f"Workbook is still open or locked. Retrying in {retry_delay_minutes} minutes."
+            )
+            time.sleep(retry_delay_minutes * 60)
+            continue
+
+        print(
+            f"Workbook looks free. Waiting {LOCAL_WORKBOOK_SETTLE_SECONDS} seconds for OneDrive to settle..."
+        )
+        time.sleep(LOCAL_WORKBOOK_SETTLE_SECONDS)
+
+        if not is_workbook_open(workbook_path):
+            return
+
+        print(f"Workbook became busy again. Retrying in {retry_delay_minutes} minutes.")
+        time.sleep(retry_delay_minutes * 60)
 
 
 def apply_conditional_formatting(
@@ -827,137 +897,163 @@ def update_workbook_dates(
     if not workbook_path.exists():
         raise FileNotFoundError(f"Workbook file not found: {workbook_file}")
 
-    workbook = load_workbook(workbook_path)
-    try:
-        worksheet = workbook[worksheet_name] if worksheet_name else workbook.active
-        columns = WorkbookColumns(
-            spec_award=spec_award_column.upper(),
-            eco=eco_column.upper(),
-            submitted=submitted_column.upper(),
-            submitted_delta=submitted_delta_column.upper(),
-            submitted_delta_excl_weekend=submitted_delta_excl_weekend_column.upper(),
-            released=released_column.upper(),
-            released_delta=released_delta_column.upper(),
-            released_delta_excl_weekend=released_delta_excl_weekend_column.upper(),
-        )
+    columns = WorkbookColumns(
+        spec_award=spec_award_column.upper(),
+        eco=eco_column.upper(),
+        submitted=submitted_column.upper(),
+        submitted_delta=submitted_delta_column.upper(),
+        submitted_delta_excl_weekend=submitted_delta_excl_weekend_column.upper(),
+        released=released_column.upper(),
+        released_delta=released_delta_column.upper(),
+        released_delta_excl_weekend=released_delta_excl_weekend_column.upper(),
+    )
 
-        updated_rows = 0
-        eco_cache: Dict[str, EcoDates] = {}
-        today_sg = singapore_today()
-        reminders: List[ReminderItem] = []
-        reminder_state = load_reminder_state()
-        sent_reminder_keys: List[str] = []
-        agile_client = create_agile_client_from_env()
+    while True:
+        wait_for_workbook_ready(workbook_path, LOCAL_WORKBOOK_RETRY_DELAY_MINUTES)
 
-        for row_idx in range(start_row, worksheet.max_row + 1):
-            eco_value = worksheet[f"{columns.eco}{row_idx}"].value
-            spec_award_date = parse_sheet_date(worksheet[f"{columns.spec_award}{row_idx}"].value)
-            system_number_value = worksheet[f"A{row_idx}"].value
-            system_number = "" if system_number_value is None else str(system_number_value).strip()
-            eco_number = "" if eco_value is None else str(eco_value).strip()
+        workbook = None
+        try:
+            workbook = load_workbook(workbook_path)
+            worksheet = workbook[worksheet_name] if worksheet_name else workbook.active
 
-            result: Optional[EcoDates] = None
-            if eco_number:
-                if eco_number not in eco_cache:
-                    eco_cache[eco_number] = fetch_eco_dates(
-                        client=agile_client,
-                        eco_number=eco_number,
-                        class_identifiers=class_identifiers,
-                        table_identifiers=table_identifiers,
-                        inspect=False,
-                    )
-                result = eco_cache[eco_number]
+            updated_rows = 0
+            eco_cache: Dict[str, EcoDates] = {}
+            today_sg = singapore_today()
+            reminders: List[ReminderItem] = []
+            reminder_state = load_reminder_state()
+            sent_reminder_keys: List[str] = []
+            agile_client = create_agile_client_from_env()
 
-            submitted_date_text = result.submitted_date if result else ""
-            released_date_text = result.released_date if result else ""
-            write_date_cell(worksheet[f"{columns.submitted}{row_idx}"], submitted_date_text)
-            write_date_cell(worksheet[f"{columns.released}{row_idx}"], released_date_text)
+            for row_idx in range(start_row, worksheet.max_row + 1):
+                eco_value = worksheet[f"{columns.eco}{row_idx}"].value
+                spec_award_date = parse_sheet_date(worksheet[f"{columns.spec_award}{row_idx}"].value)
+                system_number_value = worksheet[f"A{row_idx}"].value
+                system_number = "" if system_number_value is None else str(system_number_value).strip()
+                eco_number = "" if eco_value is None else str(eco_value).strip()
 
-            submitted_date = parse_sheet_date(submitted_date_text)
-            released_date = parse_sheet_date(released_date_text)
-            submitted_delta_end = submitted_date or today_sg
-            released_delta_end = released_date or today_sg
-
-            cell_updates = [
-                (
-                    worksheet[f"{columns.submitted_delta}{row_idx}"],
-                    calculate_delta_days(spec_award_date, submitted_delta_end),
-                ),
-                (
-                    worksheet[f"{columns.submitted_delta_excl_weekend}{row_idx}"],
-                    calculate_delta_excluding_weekends(spec_award_date, submitted_delta_end),
-                ),
-                (
-                    worksheet[f"{columns.released_delta}{row_idx}"],
-                    calculate_delta_days(spec_award_date, released_delta_end),
-                ),
-                (
-                    worksheet[f"{columns.released_delta_excl_weekend}{row_idx}"],
-                    calculate_delta_excluding_weekends(spec_award_date, released_delta_end),
-                ),
-            ]
-            for cell, value in cell_updates:
-                cell.value = value
-                clear_cell_style(cell)
-
-            follow_up_reason = build_follow_up_reason(
-                spec_award_date=spec_award_date,
-                eco_number=eco_number,
-                submitted_date=submitted_date,
-                released_date=released_date,
-                today_sg=today_sg,
-            )
-            if follow_up_reason and spec_award_date:
-                reminder = ReminderItem(
-                    row_number=row_idx,
-                    system_number=system_number,
-                    spec_award_date=spec_award_date.strftime("%d %b %Y"),
-                    eco_number=eco_number,
-                    submitted_date=submitted_date.strftime("%d %b %Y") if submitted_date else "",
-                    released_date=released_date.strftime("%d %b %Y") if released_date else "",
-                    reason=follow_up_reason,
-                )
-                key = reminder_key(reminder)
-                if not reminder_state.get(key):
-                    reminders.append(reminder)
-                    sent_reminder_keys.append(key)
-                else:
+                if not eco_number or eco_number.upper() in {"NA", "N/A", "NONE"}:
                     print(
-                        f"Reminder already sent today for row {row_idx}: "
-                        f"{system_number or '(blank system number)'} - {follow_up_reason}"
+                        f"Skipping row {row_idx}: ECO value is empty or not usable "
+                        f"({eco_number or 'blank'})."
                     )
+                    continue
 
-            updated_rows += 1
-            print(
-                f"Updated row {row_idx}: ECO={eco_number} "
-                f"Submitted={submitted_date_text} Released={released_date_text}"
+                result: Optional[EcoDates] = None
+                if eco_number:
+                    if eco_number not in eco_cache:
+                        try:
+                            eco_cache[eco_number] = fetch_eco_dates(
+                                client=agile_client,
+                                eco_number=eco_number,
+                                class_identifiers=class_identifiers,
+                                table_identifiers=table_identifiers,
+                                inspect=False,
+                            )
+                        except RuntimeError as exc:
+                            print(f"Skipping row {row_idx}: could not find ECO {eco_number} - {exc}")
+                            continue
+                    result = eco_cache[eco_number]
+
+                submitted_date_text = result.submitted_date if result else ""
+                released_date_text = result.released_date if result else ""
+                write_date_cell(worksheet[f"{columns.submitted}{row_idx}"], submitted_date_text)
+                write_date_cell(worksheet[f"{columns.released}{row_idx}"], released_date_text)
+
+                submitted_date = parse_sheet_date(submitted_date_text)
+                released_date = parse_sheet_date(released_date_text)
+                submitted_delta_end = submitted_date or today_sg
+                released_delta_end = released_date or today_sg
+
+                cell_updates = [
+                    (
+                        worksheet[f"{columns.submitted_delta}{row_idx}"],
+                        calculate_delta_days(spec_award_date, submitted_delta_end),
+                    ),
+                    (
+                        worksheet[f"{columns.submitted_delta_excl_weekend}{row_idx}"],
+                        calculate_delta_excluding_weekends(spec_award_date, submitted_delta_end),
+                    ),
+                    (
+                        worksheet[f"{columns.released_delta}{row_idx}"],
+                        calculate_delta_days(spec_award_date, released_delta_end),
+                    ),
+                    (
+                        worksheet[f"{columns.released_delta_excl_weekend}{row_idx}"],
+                        calculate_delta_excluding_weekends(spec_award_date, released_delta_end),
+                    ),
+                ]
+                for cell, value in cell_updates:
+                    cell.value = value
+                    clear_cell_style(cell)
+
+                follow_up_reason = build_follow_up_reason(
+                    spec_award_date=spec_award_date,
+                    eco_number=eco_number,
+                    submitted_date=submitted_date,
+                    released_date=released_date,
+                    today_sg=today_sg,
+                )
+                if follow_up_reason and spec_award_date:
+                    reminder = ReminderItem(
+                        row_number=row_idx,
+                        system_number=system_number,
+                        spec_award_date=spec_award_date.strftime("%d %b %Y"),
+                        eco_number=eco_number,
+                        submitted_date=submitted_date.strftime("%d %b %Y") if submitted_date else "",
+                        released_date=released_date.strftime("%d %b %Y") if released_date else "",
+                        reason=follow_up_reason,
+                    )
+                    key = reminder_key(reminder)
+                    if not reminder_state.get(key):
+                        reminders.append(reminder)
+                        sent_reminder_keys.append(key)
+                    else:
+                        print(
+                            f"Reminder already sent today for row {row_idx}: "
+                            f"{system_number or '(blank system number)'} - {follow_up_reason}"
+                        )
+
+                updated_rows += 1
+                print(
+                    f"Updated row {row_idx}: ECO={eco_number} "
+                    f"Submitted={submitted_date_text} Released={released_date_text}"
+                )
+
+            clear_existing_conditional_formatting_for_columns(
+                worksheet,
+                start_row,
+                worksheet.max_row,
+                [
+                    columns.submitted_delta,
+                    columns.released_delta,
+                    columns.submitted_delta_excl_weekend,
+                    columns.released_delta_excl_weekend,
+                ],
+            )
+            apply_conditional_formatting(
+                worksheet,
+                f"{columns.submitted_delta}{start_row}:{columns.submitted_delta}{worksheet.max_row}",
+                f'AND(ISNUMBER(${columns.submitted_delta}{start_row}),${columns.submitted_delta}{start_row}>=2,${columns.submitted}{start_row}="")',
+            )
+            apply_conditional_formatting(
+                worksheet,
+                f"{columns.released_delta}{start_row}:{columns.released_delta}{worksheet.max_row}",
+                f'AND(${columns.submitted}{start_row}<>"",${columns.released}{start_row}="",TODAY()-${columns.submitted}{start_row}>=3)',
             )
 
-        clear_existing_conditional_formatting_for_columns(
-            worksheet,
-            start_row,
-            worksheet.max_row,
-            [
-                columns.submitted_delta,
-                columns.released_delta,
-                columns.submitted_delta_excl_weekend,
-                columns.released_delta_excl_weekend,
-            ],
-        )
-        apply_conditional_formatting(
-            worksheet,
-            f"{columns.submitted_delta}{start_row}:{columns.submitted_delta}{worksheet.max_row}",
-            f'AND(ISNUMBER(${columns.submitted_delta}{start_row}),${columns.submitted_delta}{start_row}>=2,${columns.submitted}{start_row}="")',
-        )
-        apply_conditional_formatting(
-            worksheet,
-            f"{columns.released_delta}{start_row}:{columns.released_delta}{worksheet.max_row}",
-            f'AND(${columns.submitted}{start_row}<>"",${columns.released}{start_row}="",TODAY()-${columns.submitted}{start_row}>=3)',
-        )
-
-        workbook.save(workbook_path)
-    finally:
-        workbook.close()
+            workbook.save(workbook_path)
+            break
+        except Exception as exc:
+            if not is_local_conflict_error(exc):
+                raise
+            print(
+                f"Workbook is still open or locked. Retrying in {LOCAL_WORKBOOK_RETRY_DELAY_MINUTES} minutes."
+            )
+            time.sleep(LOCAL_WORKBOOK_RETRY_DELAY_MINUTES * 60)
+            continue
+        finally:
+            if workbook is not None:
+                workbook.close()
 
     reminder_sent = False
     if reminders:

@@ -8,7 +8,8 @@ Option Explicit
 Public Const CRF_SENDER As String = "donotreply@amat.com"
 
 ' Change Coordinator exclusion
-Public Const CHANGE_COORDINATOR_EMAIL As String = "change_coordinator@ichorsystems.com"
+Public Const CHANGE_COORDINATOR_EMAIL As String = "change_cordinator@ichorsystems.com"
+Public Const CHANGE_COORDINATOR_NAME As String = "austin change coordinator"
 
 ' Authorized senders for Spec Award emails
 Public SPEC_AWARD_SENDERS(3) As String
@@ -47,7 +48,7 @@ Public CRFRegex As Object             ' VBScript.RegExp - initialized once
 Public Sub InitSpecAwardSenders()
     SPEC_AWARD_SENDERS(0) = "faith_fan@amat.com"
     SPEC_AWARD_SENDERS(1) = "michael_leow@amat.com"
-    SPEC_AWARD_SENDERS(2) = "jason_tai@amat.com"
+    SPEC_AWARD_SENDERS(2) = "siewyeelim_jasmine@amat.com"
     SPEC_AWARD_SENDERS(3) = "francesca_chang@amat.com"
 End Sub
 

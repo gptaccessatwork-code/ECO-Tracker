@@ -59,7 +59,7 @@ Private Sub HandleCRFEmail(ByVal Mail As Outlook.MailItem)
 
     Dim recip As Outlook.Recipient
     For Each recip In Mail.Recipients
-        If InStr(LCase(GetSMTPAddress(recip)), CHANGE_COORDINATOR_EMAIL) > 0 Then
+        If RecipientMatchesChangeCoordinator(recip) Then
             LogEvent "CRF skipped - Change Coordinator already on thread: " & Mail.Subject
             Exit Sub
         End If
@@ -87,6 +87,39 @@ ErrorHandler:
     LogEvent "ERROR in HandleCRFEmail: " & Err.Number & " - " & Err.Description & _
              " | Subject: " & Mail.Subject
 End Sub
+
+Private Function RecipientMatchesChangeCoordinator(ByVal recip As Outlook.Recipient) As Boolean
+    Dim smtpAddress As String
+    smtpAddress = LCase$(Trim$(GetSMTPAddress(recip)))
+    If smtpAddress <> "" Then
+        If InStr(1, smtpAddress, LCase$(CHANGE_COORDINATOR_EMAIL), vbTextCompare) > 0 Then
+            RecipientMatchesChangeCoordinator = True
+            Exit Function
+        End If
+    End If
+
+    Dim recipientName As String
+    recipientName = LCase$(Trim$(recip.Name))
+    If recipientName <> "" Then
+        If InStr(1, recipientName, LCase$(CHANGE_COORDINATOR_NAME), vbTextCompare) > 0 Then
+            RecipientMatchesChangeCoordinator = True
+            Exit Function
+        End If
+    End If
+
+    Dim recipientAddress As String
+    recipientAddress = LCase$(Trim$(recip.Address))
+    If recipientAddress <> "" Then
+        If InStr(1, recipientAddress, LCase$(CHANGE_COORDINATOR_EMAIL), vbTextCompare) > 0 Then
+            RecipientMatchesChangeCoordinator = True
+            Exit Function
+        End If
+        If InStr(1, recipientAddress, LCase$(CHANGE_COORDINATOR_NAME), vbTextCompare) > 0 Then
+            RecipientMatchesChangeCoordinator = True
+            Exit Function
+        End If
+    End If
+End Function
 
 ' ===========================================================
 '   SPEC AWARD HANDLER
