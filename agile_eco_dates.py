@@ -13,11 +13,9 @@ Credentials are read from environment variables:
 from __future__ import annotations
 
 import argparse
-import ctypes
 import json
 import os
 import sys
-import time
 from dataclasses import dataclass
 from datetime import date, datetime, timedelta
 from html import escape
@@ -34,6 +32,13 @@ from requests import Session
 from requests.auth import HTTPBasicAuth
 from zeep import Client, Settings, helpers
 from zeep.transports import Transport
+from workbook_sync_utils import (
+    is_local_conflict_error,
+    log_event,
+    log_exception,
+    save_workbook_with_retry,
+    wait_for_workbook_ready,
+)
 
 
 AGILE_WSDL = "http://pagapps1.ichorsystems.com:7001/CoreService/services/Table?wsdl"
@@ -89,7 +94,7 @@ DEFAULT_REMINDER_BCC = os.getenv("ECO_REMINDER_BCC", "")
 REMINDER_STATE_FILE = Path(__file__).with_name(".eco_reminder_state.json")
 LOCAL_WORKBOOK_RETRY_DELAY_MINUTES = 15
 LOCAL_WORKBOOK_SETTLE_SECONDS = 30
-WINDOWS_LOCK_ERRORS = {5, 32, 33}
+SYNC_LOG_FILE = Path(__file__).with_name(".agile_eco_dates_sync.log")
 ALERT_FILL = PatternFill(fill_type="solid", start_color="FF5B5B", end_color="FF5B5B")
 ALERT_FONT = Font(color="000000", bold=True)
 CLEAR_FILL = PatternFill(fill_type=None)
@@ -416,71 +421,6 @@ def write_date_cell(cell, value: Optional[str]) -> None:
         cell.value = parsed
         cell.number_format = DISPLAY_DATE_FORMAT
     cell.alignment = CENTER_ALIGNMENT
-
-
-def is_local_conflict_error(exc: Exception) -> bool:
-    if isinstance(exc, PermissionError):
-        return True
-
-    winerror = getattr(exc, "winerror", None)
-    if winerror in WINDOWS_LOCK_ERRORS:
-        return True
-
-    text = str(exc).lower()
-    return "being used by another process" in text or "permission denied" in text
-
-
-def is_workbook_open(workbook_path: Path) -> bool:
-    kernel32 = ctypes.windll.kernel32
-    kernel32.CreateFileW.argtypes = [
-        ctypes.c_wchar_p,
-        ctypes.c_uint32,
-        ctypes.c_uint32,
-        ctypes.c_void_p,
-        ctypes.c_uint32,
-        ctypes.c_uint32,
-        ctypes.c_void_p,
-    ]
-    kernel32.CreateFileW.restype = ctypes.c_void_p
-    kernel32.CloseHandle.argtypes = [ctypes.c_void_p]
-    kernel32.CloseHandle.restype = ctypes.c_int
-
-    handle = kernel32.CreateFileW(
-        str(workbook_path),
-        0x80000000 | 0x40000000,
-        0,
-        None,
-        3,
-        0x80,
-        None,
-    )
-
-    if handle in (None, ctypes.c_void_p(-1).value):
-        return True
-
-    kernel32.CloseHandle(handle)
-    return False
-
-
-def wait_for_workbook_ready(workbook_path: Path, retry_delay_minutes: int) -> None:
-    while True:
-        if is_workbook_open(workbook_path):
-            print(
-                f"Workbook is still open or locked. Retrying in {retry_delay_minutes} minutes."
-            )
-            time.sleep(retry_delay_minutes * 60)
-            continue
-
-        print(
-            f"Workbook looks free. Waiting {LOCAL_WORKBOOK_SETTLE_SECONDS} seconds for OneDrive to settle..."
-        )
-        time.sleep(LOCAL_WORKBOOK_SETTLE_SECONDS)
-
-        if not is_workbook_open(workbook_path):
-            return
-
-        print(f"Workbook became busy again. Retrying in {retry_delay_minutes} minutes.")
-        time.sleep(retry_delay_minutes * 60)
 
 
 def apply_conditional_formatting(
@@ -909,13 +849,15 @@ def update_workbook_dates(
     )
 
     while True:
-        wait_for_workbook_ready(workbook_path, LOCAL_WORKBOOK_RETRY_DELAY_MINUTES)
+        wait_for_workbook_ready(
+            workbook_path,
+            LOCAL_WORKBOOK_RETRY_DELAY_MINUTES,
+            LOCAL_WORKBOOK_SETTLE_SECONDS,
+            SYNC_LOG_FILE,
+        )
 
         workbook = None
         try:
-            workbook = load_workbook(workbook_path)
-            worksheet = workbook[worksheet_name] if worksheet_name else workbook.active
-
             updated_rows = 0
             eco_cache: Dict[str, EcoDates] = {}
             today_sg = singapore_today()
@@ -923,6 +865,8 @@ def update_workbook_dates(
             reminder_state = load_reminder_state()
             sent_reminder_keys: List[str] = []
             agile_client = create_agile_client_from_env()
+            workbook = load_workbook(workbook_path)
+            worksheet = workbook[worksheet_name] if worksheet_name else workbook.active
 
             for row_idx in range(start_row, worksheet.max_row + 1):
                 eco_value = worksheet[f"{columns.eco}{row_idx}"].value
@@ -932,9 +876,9 @@ def update_workbook_dates(
                 eco_number = "" if eco_value is None else str(eco_value).strip()
 
                 if not eco_number or eco_number.upper() in {"NA", "N/A", "NONE"}:
-                    print(
-                        f"Skipping row {row_idx}: ECO value is empty or not usable "
-                        f"({eco_number or 'blank'})."
+                    log_event(
+                        f"Skipping row {row_idx}: ECO value is empty or not usable ({eco_number or 'blank'}).",
+                        SYNC_LOG_FILE,
                     )
                     continue
 
@@ -950,8 +894,16 @@ def update_workbook_dates(
                                 inspect=False,
                             )
                         except RuntimeError as exc:
-                            print(f"Skipping row {row_idx}: could not find ECO {eco_number} - {exc}")
-                            continue
+                            log_event(
+                                f"Row {row_idx}: ECO lookup failed for {eco_number}; treating as not submitted yet. {exc}",
+                                SYNC_LOG_FILE,
+                            )
+                            eco_cache[eco_number] = EcoDates(
+                                submitted_date=None,
+                                released_date=None,
+                                class_identifier="",
+                                table_identifier="",
+                            )
                     result = eco_cache[eco_number]
 
                 submitted_date_text = result.submitted_date if result else ""
@@ -1008,15 +960,17 @@ def update_workbook_dates(
                         reminders.append(reminder)
                         sent_reminder_keys.append(key)
                     else:
-                        print(
+                        log_event(
                             f"Reminder already sent today for row {row_idx}: "
-                            f"{system_number or '(blank system number)'} - {follow_up_reason}"
+                            f"{system_number or '(blank system number)'} - {follow_up_reason}",
+                            SYNC_LOG_FILE,
                         )
 
                 updated_rows += 1
-                print(
+                log_event(
                     f"Updated row {row_idx}: ECO={eco_number} "
-                    f"Submitted={submitted_date_text} Released={released_date_text}"
+                    f"Submitted={submitted_date_text} Released={released_date_text}",
+                    SYNC_LOG_FILE,
                 )
 
             clear_existing_conditional_formatting_for_columns(
@@ -1041,15 +995,23 @@ def update_workbook_dates(
                 f'AND(${columns.submitted}{start_row}<>"",${columns.released}{start_row}="",TODAY()-${columns.submitted}{start_row}>=3)',
             )
 
-            workbook.save(workbook_path)
+            save_workbook_with_retry(
+                workbook,
+                workbook_path,
+                LOCAL_WORKBOOK_RETRY_DELAY_MINUTES,
+                LOCAL_WORKBOOK_SETTLE_SECONDS,
+                SYNC_LOG_FILE,
+            )
             break
         except Exception as exc:
             if not is_local_conflict_error(exc):
+                log_exception("Unhandled workbook update error.", exc, SYNC_LOG_FILE)
                 raise
-            print(
-                f"Workbook is still open or locked. Retrying in {LOCAL_WORKBOOK_RETRY_DELAY_MINUTES} minutes."
+            log_exception("Workbook update conflict detected; will retry.", exc, SYNC_LOG_FILE)
+            log_event(
+                f"Workbook is still open or locked. Retrying in {LOCAL_WORKBOOK_RETRY_DELAY_MINUTES} minutes.",
+                SYNC_LOG_FILE,
             )
-            time.sleep(LOCAL_WORKBOOK_RETRY_DELAY_MINUTES * 60)
             continue
         finally:
             if workbook is not None:
@@ -1068,7 +1030,7 @@ def update_workbook_dates(
         for key in sent_reminder_keys:
             reminder_state[key] = True
         save_reminder_state(reminder_state)
-    print(f"Workbook updated: {workbook_file}")
+    log_event(f"Workbook updated: {workbook_file}", SYNC_LOG_FILE)
     return updated_rows
 
 

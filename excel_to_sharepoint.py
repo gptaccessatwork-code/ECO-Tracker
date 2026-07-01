@@ -9,10 +9,8 @@ from __future__ import annotations
 
 import argparse
 import base64
-import ctypes
 import os
 import sys
-import time
 from dataclasses import dataclass
 from datetime import date, datetime
 from pathlib import Path
@@ -23,6 +21,13 @@ import msal
 import requests
 from openpyxl import load_workbook
 from openpyxl.utils.cell import get_column_letter, range_boundaries
+from workbook_sync_utils import (
+    is_local_conflict_error,
+    log_event,
+    log_exception,
+    save_workbook_with_retry,
+    wait_for_workbook_ready,
+)
 
 
 GRAPH_BASE_URL = "https://graph.microsoft.com/v1.0"
@@ -32,7 +37,7 @@ DEFAULT_BATCH_SIZE = 50
 SYSTEM_NUMBER_COLUMN = "System Number"
 LOCAL_WORKBOOK_RETRY_DELAY_MINUTES = 15
 LOCAL_WORKBOOK_SETTLE_SECONDS = 30
-WINDOWS_LOCK_ERRORS = {5, 32, 33}
+SYNC_LOG_FILE = Path(__file__).with_name(".excel_to_sharepoint_sync.log")
 
 
 @dataclass
@@ -439,7 +444,7 @@ def append_rows_to_local_table(
     table_name: str,
     rows: List[List[Any]],
 ) -> None:
-    print(f"Opening target workbook: {target_workbook_file}")
+    log_event(f"Opening target workbook: {target_workbook_file}")
     context = get_local_table(target_workbook_file, table_name)
     try:
         if getattr(context.table, "totalsRowShown", False):
@@ -451,7 +456,7 @@ def append_rows_to_local_table(
         last_populated_row = find_last_populated_table_row(context.worksheet, context.table)
         next_row = last_populated_row + 1
 
-        print(f"Writing {len(rows)} row(s) into table '{table_name}'...")
+        log_event(f"Writing {len(rows)} row(s) into table '{table_name}'...")
         for row_values in rows:
             for offset, value in enumerate(row_values):
                 context.worksheet.cell(row=next_row, column=min_col + offset, value=value)
@@ -461,9 +466,13 @@ def append_rows_to_local_table(
         context.table.ref = (
             f"{get_column_letter(min_col)}{min_row}:{get_column_letter(max_col)}{new_max_row}"
         )
-        print("Saving workbook to local synced file...")
-        context.workbook.save(target_workbook_file)
-        print("Local workbook save complete.")
+        save_workbook_with_retry(
+            context.workbook,
+            target_workbook_file,
+            LOCAL_WORKBOOK_RETRY_DELAY_MINUTES,
+            LOCAL_WORKBOOK_SETTLE_SECONDS,
+            SYNC_LOG_FILE,
+        )
     finally:
         context.workbook.close()
 
@@ -478,11 +487,13 @@ def write_rows_to_local_workbook_with_retry(
         raise ValueError("A local target workbook file is required.")
 
     while True:
-        wait_for_local_workbook_ready(
-            config.target_workbook_file, config.retry_delay_minutes
-        )
-
         try:
+            wait_for_workbook_ready(
+                config.target_workbook_file,
+                config.retry_delay_minutes,
+                LOCAL_WORKBOOK_SETTLE_SECONDS,
+                SYNC_LOG_FILE,
+            )
             existing_keys = read_local_existing_keys(
                 config.target_workbook_file, config.table_name, SYSTEM_NUMBER_COLUMN
             )
@@ -491,12 +502,12 @@ def write_rows_to_local_workbook_with_retry(
             )
 
             if not rows_to_write:
-                print("No new rows to append after duplicate check.")
+                log_event("No new rows to append after duplicate check.")
                 if config.clear_source_on_success:
                     remove_excel_rows_by_keys(
                         config.excel_file, config.excel_sheet, source_keys
                     )
-                    print("Processed rows removed from source workbook queue.")
+                    log_event("Processed rows removed from source workbook queue.")
                 return 0
 
             append_rows_to_local_table(
@@ -504,15 +515,17 @@ def write_rows_to_local_workbook_with_retry(
             )
             if config.clear_source_on_success:
                 remove_excel_rows_by_keys(config.excel_file, config.excel_sheet, source_keys)
-                print("Processed rows removed from source workbook queue.")
+                log_event("Processed rows removed from source workbook queue.")
             return len(rows_to_write)
         except Exception as exc:
             if not is_local_conflict_error(exc):
+                log_exception("Non-lock error while writing to local workbook.", exc)
                 raise
-            print(
+            log_exception("Workbook save conflict detected; will retry.", exc)
+            log_event(
                 f"Workbook is still open or locked. Retrying in {config.retry_delay_minutes} minutes."
             )
-            time.sleep(config.retry_delay_minutes * 60)
+            continue
 
 
 def load_rows_from_excel(path: str, sheet_name: Optional[str]) -> List[Dict[str, Any]]:
@@ -617,73 +630,6 @@ def resolve_table_columns(config: Config) -> tuple[Optional[str], Optional[str],
     return workbook_base_url, token, table_columns
 
 
-def is_local_conflict_error(exc: Exception) -> bool:
-    if isinstance(exc, PermissionError):
-        return True
-
-    winerror = getattr(exc, "winerror", None)
-    if winerror in WINDOWS_LOCK_ERRORS:
-        return True
-
-    text = str(exc).lower()
-    return "being used by another process" in text or "permission denied" in text
-
-
-def is_workbook_open(target_workbook_file: str) -> bool:
-    kernel32 = ctypes.windll.kernel32
-    kernel32.CreateFileW.argtypes = [
-        ctypes.c_wchar_p,
-        ctypes.c_uint32,
-        ctypes.c_uint32,
-        ctypes.c_void_p,
-        ctypes.c_uint32,
-        ctypes.c_uint32,
-        ctypes.c_void_p,
-    ]
-    kernel32.CreateFileW.restype = ctypes.c_void_p
-    kernel32.CloseHandle.argtypes = [ctypes.c_void_p]
-    kernel32.CloseHandle.restype = ctypes.c_int
-
-    handle = kernel32.CreateFileW(
-        target_workbook_file,
-        0x80000000 | 0x40000000,
-        0,
-        None,
-        3,
-        0x80,
-        None,
-    )
-
-    if handle in (None, ctypes.c_void_p(-1).value):
-        return True
-
-    kernel32.CloseHandle(handle)
-    return False
-
-
-def wait_for_local_workbook_ready(target_workbook_file: str, retry_delay_minutes: int) -> None:
-    while True:
-        if is_workbook_open(target_workbook_file):
-            print(
-                f"Workbook is still open or locked. Retrying in {retry_delay_minutes} minutes."
-            )
-            time.sleep(retry_delay_minutes * 60)
-            continue
-
-        print(
-            f"Workbook looks free. Waiting {LOCAL_WORKBOOK_SETTLE_SECONDS} seconds for OneDrive to settle..."
-        )
-        time.sleep(LOCAL_WORKBOOK_SETTLE_SECONDS)
-
-        if not is_workbook_open(target_workbook_file):
-            return
-
-        print(
-            f"Workbook became busy again. Retrying in {retry_delay_minutes} minutes."
-        )
-        time.sleep(retry_delay_minutes * 60)
-
-
 def filter_duplicate_rows(
     prepared_rows: List[List[Any]],
     table_columns: List[str],
@@ -784,7 +730,7 @@ def run_once(config: Config) -> int:
             written += len(chunk)
             print(f"Appended {written}/{len(prepared_rows)} row(s).")
 
-    print(f"Upload complete. {written} row(s) appended.")
+    log_event(f"Upload complete. {written} row(s) appended.", SYNC_LOG_FILE)
     return 0
 
 
@@ -797,10 +743,12 @@ if __name__ == "__main__":
     try:
         raise SystemExit(main())
     except requests.HTTPError as exc:
+        log_exception("Graph request failed.", exc)
         print(f"Graph request failed: {exc}", file=sys.stderr)
         if exc.response is not None:
             print(exc.response.text, file=sys.stderr)
         raise SystemExit(1)
     except Exception as exc:
+        log_exception("Unhandled error.", exc)
         print(f"Error: {exc}", file=sys.stderr)
         raise SystemExit(1)

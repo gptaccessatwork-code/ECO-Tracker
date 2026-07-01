@@ -57,5 +57,8 @@
   "2026-06-15|6|C02171-EY3-GP2C||No ECO number after 2 days from Spec Award date": true,
   "2026-06-15|7|C02171-EY3-GP2D||No ECO number after 2 days from Spec Award date": true,
   "2026-06-15|8|C02251-EY3-GPA||No ECO number after 2 days from Spec Award date": true,
-  "2026-06-15|9|C02251-EY3-GPB||No ECO number after 2 days from Spec Award date": true
+  "2026-06-15|9|C02251-EY3-GPB||No ECO number after 2 days from Spec Award date": true,
+  "2026-07-01|124|710332-KA-GP|CA90141HB|ECO not submitted within 2 days from Spec Award date": true,
+  "2026-07-01|125|710333-KA-GP|CA90142HB|ECO not submitted within 2 days from Spec Award date": true,
+  "2026-07-01|126|710334-KA-GP|CA90137HB|ECO not submitted within 2 days from Spec Award date": true
 }
