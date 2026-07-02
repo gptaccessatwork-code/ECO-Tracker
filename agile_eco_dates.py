@@ -81,6 +81,8 @@ ACTION_FIELD_CANDIDATES = [
 
 DEFAULT_WORKBOOK_FILE = os.getenv("TARGET_WORKBOOK_FILE")
 DEFAULT_WORKSHEET_NAME = os.getenv("TARGET_WORKSHEET")
+DEFAULT_CRF_WORKBOOK_FILE = os.getenv("CRF_TARGET_WORKBOOK_FILE")
+DEFAULT_CRF_WORKSHEET_NAME = os.getenv("CRF_TARGET_WORKSHEET")
 DEFAULT_ECO_COLUMN = "C"
 DEFAULT_SUBMITTED_COLUMN = "D"
 DEFAULT_SUBMITTED_DELTA_COLUMN = "E"
@@ -88,10 +90,22 @@ DEFAULT_SUBMITTED_DELTA_EXCL_WEEKEND_COLUMN = "F"
 DEFAULT_RELEASED_COLUMN = "G"
 DEFAULT_RELEASED_DELTA_COLUMN = "H"
 DEFAULT_RELEASED_DELTA_EXCL_WEEKEND_COLUMN = "I"
+DEFAULT_CRF_NUMBER_COLUMN = "A"
+DEFAULT_CRF_RECEIVED_COLUMN = "B"
+DEFAULT_CRF_SUBMITTED_COLUMN = "C"
+DEFAULT_CRF_SUBMITTED_DELTA_COLUMN = "D"
+DEFAULT_CRF_SUBMITTED_DELTA_EXCL_WEEKEND_COLUMN = "E"
+DEFAULT_CRF_RELEASED_COLUMN = "F"
+DEFAULT_CRF_RELEASED_DELTA_COLUMN = "G"
+DEFAULT_CRF_RELEASED_DELTA_EXCL_WEEKEND_COLUMN = "H"
 DEFAULT_REMINDER_TO = os.getenv("ECO_REMINDER_TO", "")
 DEFAULT_REMINDER_CC = os.getenv("ECO_REMINDER_CC", "")
 DEFAULT_REMINDER_BCC = os.getenv("ECO_REMINDER_BCC", "")
+DEFAULT_CRF_REMINDER_TO = os.getenv("CRF_REMINDER_TO", "")
+DEFAULT_CRF_REMINDER_CC = os.getenv("CRF_REMINDER_CC", "")
+DEFAULT_CRF_REMINDER_BCC = os.getenv("CRF_REMINDER_BCC", "")
 REMINDER_STATE_FILE = Path(__file__).with_name(".eco_reminder_state.json")
+CRF_REMINDER_STATE_FILE = Path(__file__).with_name(".crf_reminder_state.json")
 LOCAL_WORKBOOK_RETRY_DELAY_MINUTES = 15
 LOCAL_WORKBOOK_SETTLE_SECONDS = 30
 SYNC_LOG_FILE = Path(__file__).with_name(".agile_eco_dates_sync.log")
@@ -136,6 +150,18 @@ class WorkbookColumns:
     released_delta_excl_weekend: str
 
 
+@dataclass(frozen=True)
+class CrfWorkbookColumns:
+    crf_number: str
+    received_date: str
+    submitted: str
+    submitted_delta: str
+    submitted_delta_excl_weekend: str
+    released: str
+    released_delta: str
+    released_delta_excl_weekend: str
+
+
 @dataclass
 class EcoDates:
     submitted_date: Optional[str]
@@ -150,6 +176,16 @@ class ReminderItem:
     system_number: str
     spec_award_date: str
     eco_number: str
+    submitted_date: str
+    released_date: str
+    reason: str
+
+
+@dataclass
+class CrfReminderItem:
+    row_number: int
+    crf_number: str
+    received_date: str
     submitted_date: str
     released_date: str
     reason: str
@@ -204,14 +240,29 @@ def parse_args() -> argparse.Namespace:
         help="Single ECO number to inspect. Omit this to update a workbook.",
     )
     parser.add_argument(
+        "--crf-number",
+        dest="crf_number",
+        help="Single CRF number to inspect. Omit this to update the CRF workbook.",
+    )
+    parser.add_argument(
         "--workbook-file",
         default=DEFAULT_WORKBOOK_FILE,
         help="Local synced workbook file to update in place.",
     )
     parser.add_argument(
+        "--crf-workbook-file",
+        default=DEFAULT_CRF_WORKBOOK_FILE,
+        help="Local synced CRF workbook file to update in place.",
+    )
+    parser.add_argument(
         "--worksheet",
         default=DEFAULT_WORKSHEET_NAME,
         help="Worksheet name to update. Defaults to the active sheet.",
+    )
+    parser.add_argument(
+        "--crf-worksheet",
+        default=DEFAULT_CRF_WORKSHEET_NAME,
+        help="Worksheet name for the CRF workbook. Defaults to the active sheet.",
     )
     parser.add_argument(
         "--eco-column",
@@ -254,10 +305,56 @@ def parse_args() -> argparse.Namespace:
         help="Column to write Delta (excl weekend)2. Default: I",
     )
     parser.add_argument(
+        "--crf-number-column",
+        default=DEFAULT_CRF_NUMBER_COLUMN,
+        help="Column containing CRF numbers. Default: A",
+    )
+    parser.add_argument(
+        "--crf-received-column",
+        default=DEFAULT_CRF_RECEIVED_COLUMN,
+        help="Column containing CRF received dates. Default: B",
+    )
+    parser.add_argument(
+        "--crf-submitted-column",
+        default=DEFAULT_CRF_SUBMITTED_COLUMN,
+        help="Column to write Submitted Date in the CRF tracker. Default: C",
+    )
+    parser.add_argument(
+        "--crf-submitted-delta-column",
+        default=DEFAULT_CRF_SUBMITTED_DELTA_COLUMN,
+        help="Column to write Delta (Received to Submitted) in the CRF tracker. Default: D",
+    )
+    parser.add_argument(
+        "--crf-submitted-delta-excl-weekend-column",
+        default=DEFAULT_CRF_SUBMITTED_DELTA_EXCL_WEEKEND_COLUMN,
+        help="Column to write Delta (excl weekend) in the CRF tracker. Default: E",
+    )
+    parser.add_argument(
+        "--crf-released-column",
+        default=DEFAULT_CRF_RELEASED_COLUMN,
+        help="Column to write Released Date in the CRF tracker. Default: F",
+    )
+    parser.add_argument(
+        "--crf-released-delta-column",
+        default=DEFAULT_CRF_RELEASED_DELTA_COLUMN,
+        help="Column to write Delta (Received to Released) in the CRF tracker. Default: G",
+    )
+    parser.add_argument(
+        "--crf-released-delta-excl-weekend-column",
+        default=DEFAULT_CRF_RELEASED_DELTA_EXCL_WEEKEND_COLUMN,
+        help="Column to write Delta (excl weekend) in the CRF tracker. Default: H",
+    )
+    parser.add_argument(
         "--start-row",
         type=int,
         default=2,
         help="First data row to process. Default: 2",
+    )
+    parser.add_argument(
+        "--crf-start-row",
+        type=int,
+        default=2,
+        help="First CRF data row to process. Default: 2",
     )
     parser.add_argument(
         "--class-identifier",
@@ -266,10 +363,22 @@ def parse_args() -> argparse.Namespace:
         help="Override Agile class identifier. Can be used multiple times.",
     )
     parser.add_argument(
+        "--crf-class-identifier",
+        action="append",
+        dest="crf_class_identifiers",
+        help="Override Agile class identifier for CRF. Can be used multiple times.",
+    )
+    parser.add_argument(
         "--table-identifier",
         action="append",
         dest="table_identifiers",
         help="Override Agile table identifier. Can be used multiple times.",
+    )
+    parser.add_argument(
+        "--crf-table-identifier",
+        action="append",
+        dest="crf_table_identifiers",
+        help="Override Agile table identifier for CRF. Can be used multiple times.",
     )
     parser.add_argument(
         "--inspect",
@@ -277,9 +386,19 @@ def parse_args() -> argparse.Namespace:
         help="Print discovered row fields to help tune class/table identifiers.",
     )
     parser.add_argument(
+        "--crf-inspect",
+        action="store_true",
+        help="Print discovered row fields while inspecting CRF Agile data.",
+    )
+    parser.add_argument(
         "--self-test",
         action="store_true",
         help="Run setup checks without updating the workbook or sending email.",
+    )
+    parser.add_argument(
+        "--crf-self-test",
+        action="store_true",
+        help="Run setup checks for the CRF workbook without updating it or sending email.",
     )
     parser.add_argument(
         "--preview-reminder",
@@ -289,6 +408,14 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--reminder-to", default=DEFAULT_REMINDER_TO, help="Semicolon-separated reminder recipients.")
     parser.add_argument("--reminder-cc", default=DEFAULT_REMINDER_CC, help="Semicolon-separated reminder CC recipients.")
     parser.add_argument("--reminder-bcc", default=DEFAULT_REMINDER_BCC, help="Semicolon-separated reminder BCC recipients.")
+    parser.add_argument(
+        "--crf-preview-reminder",
+        action="store_true",
+        help="Open the CRF reminder email as an Outlook draft instead of sending it.",
+    )
+    parser.add_argument("--crf-reminder-to", default=DEFAULT_CRF_REMINDER_TO, help="Semicolon-separated CRF reminder recipients.")
+    parser.add_argument("--crf-reminder-cc", default=DEFAULT_CRF_REMINDER_CC, help="Semicolon-separated CRF reminder CC recipients.")
+    parser.add_argument("--crf-reminder-bcc", default=DEFAULT_CRF_REMINDER_BCC, help="Semicolon-separated CRF reminder BCC recipients.")
     return parser.parse_args()
 
 
@@ -455,20 +582,36 @@ def clear_existing_conditional_formatting_for_columns(
         del cf_rules[key]
 
 
-def load_reminder_state() -> Dict[str, bool]:
-    if not REMINDER_STATE_FILE.exists():
+def load_json_state(state_file: Path) -> Dict[str, bool]:
+    if not state_file.exists():
         return {}
     try:
-        return json.loads(REMINDER_STATE_FILE.read_text(encoding="utf-8"))
+        return json.loads(state_file.read_text(encoding="utf-8"))
     except Exception:
         return {}
 
 
-def save_reminder_state(state: Dict[str, bool]) -> None:
-    REMINDER_STATE_FILE.write_text(
+def save_json_state(state_file: Path, state: Dict[str, bool]) -> None:
+    state_file.write_text(
         json.dumps(state, indent=2, sort_keys=True),
         encoding="utf-8",
     )
+
+
+def load_reminder_state() -> Dict[str, bool]:
+    return load_json_state(REMINDER_STATE_FILE)
+
+
+def save_reminder_state(state: Dict[str, bool]) -> None:
+    save_json_state(REMINDER_STATE_FILE, state)
+
+
+def load_crf_reminder_state() -> Dict[str, bool]:
+    return load_json_state(CRF_REMINDER_STATE_FILE)
+
+
+def save_crf_reminder_state(state: Dict[str, bool]) -> None:
+    save_json_state(CRF_REMINDER_STATE_FILE, state)
 
 
 def reminder_key(reminder: ReminderItem) -> str:
@@ -564,6 +707,82 @@ def send_reminder_email(
     else:
         mail.Send()
         print(f"Reminder email sent to: {to_recipients}")
+    return True
+
+
+def crf_reminder_key(reminder: CrfReminderItem) -> str:
+    return "|".join(
+        [
+            singapore_today().isoformat(),
+            str(reminder.row_number),
+            reminder.crf_number,
+            reminder.reason,
+        ]
+    )
+
+
+def build_crf_reminder_rows_html(reminders: List[CrfReminderItem]) -> str:
+    rows_html: List[str] = []
+    for item in reminders:
+        submitted_text = item.submitted_date if item.submitted_date else "Pending"
+        released_text = item.released_date if item.released_date else "Pending"
+        cells = [
+            item.crf_number,
+            item.received_date,
+            submitted_text,
+            released_text,
+            item.reason,
+        ]
+        rows_html.append("<tr>" + "".join(build_email_cell(cell) for cell in cells) + "</tr>")
+    return "".join(rows_html)
+
+
+def send_crf_reminder_email(
+    reminders: List[CrfReminderItem],
+    to_recipients: str,
+    cc_recipients: str,
+    bcc_recipients: str,
+    preview_only: bool = False,
+) -> bool:
+    if not reminders:
+        print("No CRF reminder email created: no overdue rows matched the follow-up rules.")
+        return False
+
+    if not to_recipients.strip():
+        print("No CRF reminder email created: reminder recipients are empty. Use --crf-reminder-to or set CRF_REMINDER_TO.")
+        return False
+
+    outlook = dispatch_outlook_application()
+    mail = outlook.CreateItem(0)
+    mail.To = to_recipients
+    mail.CC = cc_recipients
+    mail.BCC = bcc_recipients
+    mail.Subject = f"CRF Tracker Follow-Up - {singapore_today().strftime('%d %b %Y')}"
+    mail.HTMLBody = f"""
+<html>
+  <body style="font-family:Calibri,Arial,sans-serif;font-size:11pt;color:#1f1f1f;">
+    <p>Hi team,</p>
+    <p>The following CRF items need follow-up:</p>
+    <table style="border-collapse:collapse;border:1px solid #808080;">
+      <tr style="background-color:#d9e2f3;font-weight:bold;">
+        {build_email_cell("CRF Number", EMAIL_HEADER_STYLE)}
+        {build_email_cell("Received Date", EMAIL_HEADER_STYLE)}
+        {build_email_cell("Submitted Date", EMAIL_HEADER_STYLE)}
+        {build_email_cell("Released Date", EMAIL_HEADER_STYLE)}
+        {build_email_cell("Action Needed", EMAIL_HEADER_STYLE)}
+      </tr>
+      {build_crf_reminder_rows_html(reminders)}
+    </table>
+    <p>Please follow up accordingly.</p>
+  </body>
+</html>
+"""
+    if preview_only:
+        mail.Display()
+        print(f"CRF reminder preview opened for: {to_recipients}")
+    else:
+        mail.Send()
+        print(f"CRF reminder email sent to: {to_recipients}")
     return True
 
 
@@ -714,6 +933,31 @@ def build_follow_up_reason(
         days_since_submitted = (today_sg - submitted_date).days
         if days_since_submitted >= 3:
             return "ECO not released after 3 days from Submitted date"
+
+    return ""
+
+
+def build_crf_follow_up_reason(
+    received_date: Optional[date],
+    crf_number: str,
+    submitted_date: Optional[date],
+    released_date: Optional[date],
+    today_sg: date,
+) -> str:
+    if not received_date:
+        return ""
+
+    days_since_received = (today_sg - received_date).days
+    if not crf_number and days_since_received >= 2:
+        return "No CRF number after 2 days from Received date"
+
+    if not submitted_date and days_since_received >= 2:
+        return "CRF not submitted within 2 days from Received date"
+
+    if submitted_date and not released_date:
+        days_since_submitted = (today_sg - submitted_date).days
+        if days_since_submitted >= 3:
+            return "CRF not released after 3 days from Submitted date"
 
     return ""
 
@@ -1034,19 +1278,249 @@ def update_workbook_dates(
     return updated_rows
 
 
+def update_crf_workbook_dates(
+    workbook_file: str,
+    worksheet_name: Optional[str],
+    crf_number_column: str,
+    received_date_column: str,
+    submitted_column: str,
+    submitted_delta_column: str,
+    submitted_delta_excl_weekend_column: str,
+    released_column: str,
+    released_delta_column: str,
+    released_delta_excl_weekend_column: str,
+    start_row: int,
+    class_identifiers: List[str],
+    table_identifiers: List[str],
+    reminder_to: str,
+    reminder_cc: str,
+    reminder_bcc: str,
+    preview_reminder: bool,
+) -> int:
+    workbook_path = Path(workbook_file)
+    if not workbook_path.exists():
+        raise FileNotFoundError(f"Workbook file not found: {workbook_file}")
+
+    columns = CrfWorkbookColumns(
+        crf_number=crf_number_column.upper(),
+        received_date=received_date_column.upper(),
+        submitted=submitted_column.upper(),
+        submitted_delta=submitted_delta_column.upper(),
+        submitted_delta_excl_weekend=submitted_delta_excl_weekend_column.upper(),
+        released=released_column.upper(),
+        released_delta=released_delta_column.upper(),
+        released_delta_excl_weekend=released_delta_excl_weekend_column.upper(),
+    )
+
+    while True:
+        wait_for_workbook_ready(
+            workbook_path,
+            LOCAL_WORKBOOK_RETRY_DELAY_MINUTES,
+            LOCAL_WORKBOOK_SETTLE_SECONDS,
+            SYNC_LOG_FILE,
+        )
+
+        workbook = None
+        try:
+            updated_rows = 0
+            crf_cache: Dict[str, EcoDates] = {}
+            today_sg = singapore_today()
+            reminders: List[CrfReminderItem] = []
+            reminder_state = load_crf_reminder_state()
+            sent_reminder_keys: List[str] = []
+            agile_client = create_agile_client_from_env()
+            workbook = load_workbook(workbook_path)
+            worksheet = workbook[worksheet_name] if worksheet_name else workbook.active
+
+            for row_idx in range(start_row, worksheet.max_row + 1):
+                crf_value = worksheet[f"{columns.crf_number}{row_idx}"].value
+                received_date = parse_sheet_date(worksheet[f"{columns.received_date}{row_idx}"].value)
+                crf_number = "" if crf_value is None else str(crf_value).strip()
+
+                if not crf_number or crf_number.upper() in {"NA", "N/A", "NONE"}:
+                    log_event(
+                        f"Skipping row {row_idx}: CRF value is empty or not usable ({crf_number or 'blank'}).",
+                        SYNC_LOG_FILE,
+                    )
+                    continue
+
+                result: Optional[EcoDates] = None
+                if crf_number:
+                    if crf_number not in crf_cache:
+                        try:
+                            crf_cache[crf_number] = fetch_eco_dates(
+                                client=agile_client,
+                                eco_number=crf_number,
+                                class_identifiers=class_identifiers,
+                                table_identifiers=table_identifiers,
+                                inspect=False,
+                            )
+                        except RuntimeError as exc:
+                            log_event(
+                                f"Row {row_idx}: CRF lookup failed for {crf_number}; treating as not submitted yet. {exc}",
+                                SYNC_LOG_FILE,
+                            )
+                            crf_cache[crf_number] = EcoDates(
+                                submitted_date=None,
+                                released_date=None,
+                                class_identifier="",
+                                table_identifier="",
+                            )
+                    result = crf_cache[crf_number]
+
+                submitted_date_text = result.submitted_date if result else ""
+                released_date_text = result.released_date if result else ""
+                write_date_cell(worksheet[f"{columns.submitted}{row_idx}"], submitted_date_text)
+                write_date_cell(worksheet[f"{columns.released}{row_idx}"], released_date_text)
+
+                submitted_date = parse_sheet_date(submitted_date_text)
+                released_date = parse_sheet_date(released_date_text)
+                submitted_delta_end = submitted_date or today_sg
+                released_delta_end = released_date or today_sg
+
+                cell_updates = [
+                    (
+                        worksheet[f"{columns.submitted_delta}{row_idx}"],
+                        calculate_delta_days(received_date, submitted_delta_end),
+                    ),
+                    (
+                        worksheet[f"{columns.submitted_delta_excl_weekend}{row_idx}"],
+                        calculate_delta_excluding_weekends(received_date, submitted_delta_end),
+                    ),
+                    (
+                        worksheet[f"{columns.released_delta}{row_idx}"],
+                        calculate_delta_days(received_date, released_delta_end),
+                    ),
+                    (
+                        worksheet[f"{columns.released_delta_excl_weekend}{row_idx}"],
+                        calculate_delta_excluding_weekends(received_date, released_delta_end),
+                    ),
+                ]
+                for cell, value in cell_updates:
+                    cell.value = value
+                    clear_cell_style(cell)
+
+                follow_up_reason = build_crf_follow_up_reason(
+                    received_date=received_date,
+                    crf_number=crf_number,
+                    submitted_date=submitted_date,
+                    released_date=released_date,
+                    today_sg=today_sg,
+                )
+                if follow_up_reason and received_date:
+                    reminder = CrfReminderItem(
+                        row_number=row_idx,
+                        crf_number=crf_number,
+                        received_date=received_date.strftime("%d %b %Y"),
+                        submitted_date=submitted_date.strftime("%d %b %Y") if submitted_date else "",
+                        released_date=released_date.strftime("%d %b %Y") if released_date else "",
+                        reason=follow_up_reason,
+                    )
+                    key = crf_reminder_key(reminder)
+                    if not reminder_state.get(key):
+                        reminders.append(reminder)
+                        sent_reminder_keys.append(key)
+                    else:
+                        log_event(
+                            f"CRF reminder already sent today for row {row_idx}: "
+                            f"{crf_number or '(blank CRF number)'} - {follow_up_reason}",
+                            SYNC_LOG_FILE,
+                        )
+
+                updated_rows += 1
+                log_event(
+                    f"Updated row {row_idx}: CRF={crf_number} "
+                    f"Submitted={submitted_date_text} Released={released_date_text}",
+                    SYNC_LOG_FILE,
+                )
+
+            clear_existing_conditional_formatting_for_columns(
+                worksheet,
+                start_row,
+                worksheet.max_row,
+                [
+                    columns.submitted_delta,
+                    columns.released_delta,
+                    columns.submitted_delta_excl_weekend,
+                    columns.released_delta_excl_weekend,
+                ],
+            )
+            apply_conditional_formatting(
+                worksheet,
+                f"{columns.submitted_delta}{start_row}:{columns.submitted_delta}{worksheet.max_row}",
+                f'AND(ISNUMBER(${columns.submitted_delta}{start_row}),${columns.submitted_delta}{start_row}>=2,${columns.submitted}{start_row}="")',
+            )
+            apply_conditional_formatting(
+                worksheet,
+                f"{columns.released_delta}{start_row}:{columns.released_delta}{worksheet.max_row}",
+                f'AND(${columns.submitted}{start_row}<>"",${columns.released}{start_row}="",TODAY()-${columns.submitted}{start_row}>=3)',
+            )
+
+            save_workbook_with_retry(
+                workbook,
+                workbook_path,
+                LOCAL_WORKBOOK_RETRY_DELAY_MINUTES,
+                LOCAL_WORKBOOK_SETTLE_SECONDS,
+                SYNC_LOG_FILE,
+            )
+            break
+        except Exception as exc:
+            if not is_local_conflict_error(exc):
+                log_exception("Unhandled CRF workbook update error.", exc, SYNC_LOG_FILE)
+                raise
+            log_exception("CRF workbook update conflict detected; will retry.", exc, SYNC_LOG_FILE)
+            log_event(
+                f"CRF workbook is still open or locked. Retrying in {LOCAL_WORKBOOK_RETRY_DELAY_MINUTES} minutes.",
+                SYNC_LOG_FILE,
+            )
+            continue
+        finally:
+            if workbook is not None:
+                workbook.close()
+
+    reminder_sent = False
+    if reminders:
+        reminder_sent = send_crf_reminder_email(
+            reminders,
+            reminder_to,
+            reminder_cc,
+            reminder_bcc,
+            preview_only=preview_reminder,
+        )
+    if reminder_sent and not preview_reminder:
+        for key in sent_reminder_keys:
+            reminder_state[key] = True
+        save_crf_reminder_state(reminder_state)
+    log_event(f"CRF workbook updated: {workbook_file}", SYNC_LOG_FILE)
+    return updated_rows
+
+
 def main() -> int:
     args = parse_args()
     class_identifiers = args.class_identifiers or DEFAULT_CLASS_CANDIDATES
     table_identifiers = args.table_identifiers or DEFAULT_TABLE_CANDIDATES
+    crf_class_identifiers = args.crf_class_identifiers or class_identifiers
+    crf_table_identifiers = args.crf_table_identifiers or table_identifiers
 
-    if args.self_test:
-        return run_self_test(
-            workbook_file=args.workbook_file,
-            worksheet_name=args.worksheet,
-            reminder_to=args.reminder_to,
-            reminder_cc=args.reminder_cc,
-            reminder_bcc=args.reminder_bcc,
-        )
+    if args.self_test or args.crf_self_test:
+        exit_code = 0
+        if args.self_test:
+            exit_code |= run_self_test(
+                workbook_file=args.workbook_file,
+                worksheet_name=args.worksheet,
+                reminder_to=args.reminder_to,
+                reminder_cc=args.reminder_cc,
+                reminder_bcc=args.reminder_bcc,
+            )
+        if args.crf_self_test:
+            exit_code |= run_self_test(
+                workbook_file=args.crf_workbook_file,
+                worksheet_name=args.crf_worksheet,
+                reminder_to=args.crf_reminder_to,
+                reminder_cc=args.crf_reminder_cc,
+                reminder_bcc=args.crf_reminder_bcc,
+            )
+        return exit_code
 
     if args.eco_number:
         agile_client = create_agile_client_from_env()
@@ -1065,28 +1539,72 @@ def main() -> int:
         print(f"Released Date: {result.released_date or ''}")
         return 0
 
-    if not args.workbook_file:
-        raise RuntimeError("Provide either an ECO number or --workbook-file.")
+    if args.crf_number:
+        agile_client = create_agile_client_from_env()
+        result = fetch_eco_dates(
+            client=agile_client,
+            eco_number=args.crf_number,
+            class_identifiers=crf_class_identifiers,
+            table_identifiers=crf_table_identifiers,
+            inspect=args.crf_inspect,
+        )
 
-    update_workbook_dates(
-        workbook_file=args.workbook_file,
-        worksheet_name=args.worksheet,
-        spec_award_column=args.spec_award_column,
-        eco_column=args.eco_column,
-        submitted_column=args.submitted_column,
-        submitted_delta_column=args.submitted_delta_column,
-        submitted_delta_excl_weekend_column=args.submitted_delta_excl_weekend_column,
-        released_column=args.released_column,
-        released_delta_column=args.released_delta_column,
-        released_delta_excl_weekend_column=args.released_delta_excl_weekend_column,
-        start_row=args.start_row,
-        class_identifiers=class_identifiers,
-        table_identifiers=table_identifiers,
-        reminder_to=args.reminder_to,
-        reminder_cc=args.reminder_cc,
-        reminder_bcc=args.reminder_bcc,
-        preview_reminder=args.preview_reminder,
-    )
+        print(f"CRF: {args.crf_number}")
+        print(f"Class Identifier: {result.class_identifier}")
+        print(f"Table Identifier: {result.table_identifier}")
+        print(f"Submitted Date: {result.submitted_date or ''}")
+        print(f"Released Date: {result.released_date or ''}")
+        return 0
+
+    ran_workbook_update = False
+    if args.workbook_file:
+        update_workbook_dates(
+            workbook_file=args.workbook_file,
+            worksheet_name=args.worksheet,
+            spec_award_column=args.spec_award_column,
+            eco_column=args.eco_column,
+            submitted_column=args.submitted_column,
+            submitted_delta_column=args.submitted_delta_column,
+            submitted_delta_excl_weekend_column=args.submitted_delta_excl_weekend_column,
+            released_column=args.released_column,
+            released_delta_column=args.released_delta_column,
+            released_delta_excl_weekend_column=args.released_delta_excl_weekend_column,
+            start_row=args.start_row,
+            class_identifiers=class_identifiers,
+            table_identifiers=table_identifiers,
+            reminder_to=args.reminder_to,
+            reminder_cc=args.reminder_cc,
+            reminder_bcc=args.reminder_bcc,
+            preview_reminder=args.preview_reminder,
+        )
+        ran_workbook_update = True
+
+    if args.crf_workbook_file:
+        update_crf_workbook_dates(
+            workbook_file=args.crf_workbook_file,
+            worksheet_name=args.crf_worksheet,
+            crf_number_column=args.crf_number_column,
+            received_date_column=args.crf_received_column,
+            submitted_column=args.crf_submitted_column,
+            submitted_delta_column=args.crf_submitted_delta_column,
+            submitted_delta_excl_weekend_column=args.crf_submitted_delta_excl_weekend_column,
+            released_column=args.crf_released_column,
+            released_delta_column=args.crf_released_delta_column,
+            released_delta_excl_weekend_column=args.crf_released_delta_excl_weekend_column,
+            start_row=args.crf_start_row,
+            class_identifiers=crf_class_identifiers,
+            table_identifiers=crf_table_identifiers,
+            reminder_to=args.crf_reminder_to,
+            reminder_cc=args.crf_reminder_cc,
+            reminder_bcc=args.crf_reminder_bcc,
+            preview_reminder=args.crf_preview_reminder,
+        )
+        ran_workbook_update = True
+
+    if not ran_workbook_update:
+        raise RuntimeError(
+            "Provide either an ECO number, --crf-number, --workbook-file, or --crf-workbook-file."
+        )
     return 0
 
 

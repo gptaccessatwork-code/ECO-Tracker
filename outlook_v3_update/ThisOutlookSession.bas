@@ -81,6 +81,15 @@ Private Sub HandleCRFEmail(ByVal Mail As Outlook.MailItem)
     ForwardCRFEmail Mail, crfKey
     MarkRelatedMailsRead crfKey
 
+    On Error Resume Next
+    ProcessCRFData crfKey, Mail.Subject, Mail.ReceivedTime
+    If Err.Number <> 0 Then
+        LogEvent "ERROR while processing CRF data: " & Err.Number & " - " & Err.Description & _
+                 " | Subject: " & Mail.Subject
+        Err.Clear
+    End If
+    On Error GoTo ErrorHandler
+
     Exit Sub
 
 ErrorHandler:
@@ -283,7 +292,7 @@ End Function
 Private Function ExtractCRFKey(subject As String) As String
     If CRFRegex Is Nothing Then
         Set CRFRegex = CreateObject("VBScript.RegExp")
-        CRFRegex.Pattern = "CRF\s*:\s*(\d{5,})"
+        CRFRegex.Pattern = "CRF\s*[:#-]?\s*(\d{5,})"
         CRFRegex.IgnoreCase = True
     End If
     If CRFRegex.Test(subject) Then

@@ -192,3 +192,49 @@ Notes:
 - `--preview-reminder` still updates the workbook
 - the email opens as a draft window using Outlook instead of sending immediately
 - preview mode does not mark the reminder as sent in `.eco_reminder_state.json`
+
+## CRF support in `agile_eco_dates.py`
+
+The same script can now also update the CRF tracker workbook without changing the ECO path.
+
+CRF defaults:
+
+- workbook file: `CRF_TARGET_WORKBOOK_FILE`
+- worksheet: `CRF_TARGET_WORKSHEET`
+- number column: `A`
+- received date column: `B`
+- submitted date column: `C`
+- released date column: `F`
+
+Example:
+
+```powershell
+python .\agile_eco_dates.py `
+  --crf-workbook-file "C:\Users\kmageshkumar\OneDrive - Ichor Systems\AMAT SGP CRF Tracker.xlsx" `
+  --crf-worksheet "AMAT SGP CRF Tracker" `
+  --crf-reminder-to "your.email@ichorsystems.com"
+```
+
+## crf_tracker.py
+
+### Purpose
+
+This script uses the same offline queue pattern as the ECO tracker:
+
+- writes CRF rows into a staging workbook in `Downloads`
+- waits until the OneDrive workbook is stable and unlocked
+- appends all queued CRF rows to the synced workbook at once
+- removes only the processed rows from the staging queue after success
+- skips duplicate CRF numbers already present in the target workbook
+
+### Run
+
+```powershell
+python .\crf_tracker.py `
+  --staging-workbook-file "C:\Users\kmageshkumar\Downloads\AMAT SGP CRF Tracker.xlsx" `
+  --staging-sheet-name "Sheet1" `
+  --target-workbook-file "C:\Users\kmageshkumar\OneDrive - Ichor Systems\AMAT SGP CRF Tracker.xlsx" `
+  --target-sheet-name "AMAT SGP CRF Tracker" `
+  --crf-number "123456" `
+  --received-time "2026-07-02 08:30:00"
+```

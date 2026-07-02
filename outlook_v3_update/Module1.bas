@@ -27,11 +27,23 @@ Public Const MIN_BODY_LENGTH As Integer = 200
 Public Const SPEC_AWARD_STAGING_FILE As String = "C:\Users\kmageshkumar\Downloads\AMAT SGP ECO Tracker.xlsx"
 Public Const SPEC_AWARD_STAGING_SHEET As String = "Sheet1"
 
+' CRF staging workbook - Outlook queues detected CRFs here before sync.
+Public Const CRF_STAGING_FILE As String = "C:\Users\kmageshkumar\Downloads\AMAT SGP CRF Tracker.xlsx"
+Public Const CRF_STAGING_SHEET As String = "Sheet1"
+
+' CRF target workbook - synced OneDrive file that mirrors SharePoint.
+Public Const CRF_TARGET_WORKBOOK_FILE As String = "C:\Users\kmageshkumar\OneDrive - Ichor Systems\AMAT SGP CRF Tracker.xlsx"
+Public Const CRF_TARGET_SHEET As String = "AMAT SGP CRF Tracker"
+
 ' Python sync command - this reuses excel_to_sharepoint.py in local-file mode.
 Public Const SYNC_PYTHON_COMMAND As String = "py"
 Public Const SYNC_SCRIPT_PATH As String = "C:\Users\kmageshkumar\OneDrive - Ichor Systems\Scripts\ECO Tracker\excel_to_sharepoint.py"
 Public Const SYNC_TARGET_WORKBOOK_FILE As String = "C:\Users\kmageshkumar\OneDrive - Ichor Systems\AMAT SGP ECO Tracker.xlsx"
 Public Const SYNC_TARGET_TABLE_NAME As String = "Table1"
+
+' Python helper for CRF workbook writes.
+Public Const CRF_PYTHON_COMMAND As String = "py"
+Public Const CRF_SCRIPT_PATH As String = "C:\Users\kmageshkumar\OneDrive - Ichor Systems\Scripts\ECO & CRF Tracker\crf_tracker.py"
 
 ' ===========================================================
 '   RUNTIME STATE
@@ -65,7 +77,7 @@ Public Sub RebuildCRFTrackerFromSentItems()
 
     If CRFRegex Is Nothing Then
         Set CRFRegex = CreateObject("VBScript.RegExp")
-        CRFRegex.Pattern = "CRF\s*:\s*(\d{5,})"
+        CRFRegex.Pattern = "CRF\s*[:#-]?\s*(\d{5,})"
         CRFRegex.IgnoreCase = True
     End If
 
@@ -117,7 +129,7 @@ Public Function HasCRFBeenProcessed(crfKey As String) As Boolean
 
     Dim localRegex As Object
     Set localRegex = CreateObject("VBScript.RegExp")
-    localRegex.Pattern = "CRF\s*:\s*" & crfKey
+    localRegex.Pattern = "CRF\s*[:#-]?\s*" & crfKey
     localRegex.IgnoreCase = True
 
     Dim outboxFolder As Outlook.Folder
@@ -176,6 +188,55 @@ ErrorHandler:
 End Sub
 
 ' ===========================================================
+'   CRF: EXTRACT, STAGE, SYNC
+' ===========================================================
+
+Public Sub ProcessCRFData(ByVal crfKey As String, ByVal subjectText As String, ByVal receivedTime As Date)
+    On Error GoTo ErrorHandler
+
+    RunCRFTrackerWrite crfKey, receivedTime
+    LogEvent "CRF tracker workbook updated for " & crfKey & "."
+    Exit Sub
+
+ErrorHandler:
+    LogEvent "ERROR in ProcessCRFData: " & Err.Number & " - " & Err.Description & _
+             " | Subject: " & subjectText
+End Sub
+
+Public Sub RunCRFTrackerWrite(ByVal crfKey As String, ByVal receivedTime As Date)
+    On Error GoTo ErrorHandler
+
+    Dim shellObj As Object
+    Dim commandText As String
+    Dim exitCode As Long
+
+    commandText = QuoteArg(CRF_PYTHON_COMMAND) & " " & _
+                  QuoteArg(CRF_SCRIPT_PATH) & " " & _
+                  "--staging-workbook-file " & QuoteArg(CRF_STAGING_FILE) & " " & _
+                  "--staging-sheet-name " & QuoteArg(CRF_STAGING_SHEET) & " " & _
+                  "--target-workbook-file " & QuoteArg(CRF_TARGET_WORKBOOK_FILE) & " " & _
+                  "--target-sheet-name " & QuoteArg(CRF_TARGET_SHEET) & " " & _
+                  "--crf-number " & QuoteArg(crfKey) & " " & _
+                  "--retry-delay-minutes 15 " & _
+                  "--settle-seconds 30 " & _
+                  "--received-time " & QuoteArg(Format$(receivedTime, "yyyy-mm-dd hh:nn:ss"))
+
+    LogEvent "Starting CRF tracker write."
+    Set shellObj = CreateObject("WScript.Shell")
+    exitCode = shellObj.Run(commandText, 0, True)
+
+    If exitCode <> 0 Then
+        Err.Raise vbObjectError + 514, , "crf_tracker.py returned exit code " & exitCode
+    End If
+
+    LogEvent "CRF tracker write completed successfully."
+    Exit Sub
+
+ErrorHandler:
+    Err.Raise Err.Number, , "RunCRFTrackerWrite failed: " & Err.Description
+End Sub
+
+' ===========================================================
 '   MARK RELATED MAILS READ
 ' ===========================================================
 
@@ -193,7 +254,7 @@ Public Sub MarkRelatedMailsRead(ByVal crfKey As String)
 
     Dim markRegex As Object
     Set markRegex = CreateObject("VBScript.RegExp")
-    markRegex.Pattern = "CRF\s*:\s*" & crfKey
+    markRegex.Pattern = "CRF\s*[:#-]?\s*" & crfKey
     markRegex.IgnoreCase = True
 
     For Each obj In filteredItems

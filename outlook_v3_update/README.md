@@ -2,6 +2,7 @@ These files are updated Outlook VBA modules based on your current `v3` logic.
 
 What they add:
 - Keep the current CRF and Spec Award detection flow
+- Queue CRF mail into a Downloads staging workbook, then sync it into the OneDrive workbook when the target is free
 - Parse the latest Spec Award email table from the HTML body
 - Extract only `Slot Number` and `Part Number`
 - Build `System Number` by replacing the `SEMSYS` or `SEMNSO` placeholder with the slot number
@@ -21,6 +22,11 @@ Config values to check in `Module1.bas`:
 - `SYNC_SCRIPT_PATH`
 - `SYNC_TARGET_WORKBOOK_FILE`
 - `SYNC_TARGET_TABLE_NAME`
+- `CRF_STAGING_FILE`
+- `CRF_STAGING_SHEET`
+- `CRF_TARGET_WORKBOOK_FILE`
+- `CRF_TARGET_SHEET`
+- `CRF_SCRIPT_PATH`
 
 Recommended flow:
 1. Close the synced target workbook when possible so the first sync attempt can finish immediately.
