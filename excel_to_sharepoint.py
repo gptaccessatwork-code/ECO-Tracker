@@ -558,6 +558,7 @@ def remove_excel_rows_by_keys(
     sheet_name: Optional[str],
     keys_to_remove: set[str],
     key_column_index: int = 1,
+    log_file: Path = SYNC_LOG_FILE,
 ) -> None:
     if not keys_to_remove:
         return
@@ -571,7 +572,13 @@ def remove_excel_rows_by_keys(
                 continue
             if str(key_value).strip() in keys_to_remove:
                 sheet.delete_rows(row_idx, 1)
-        workbook.save(path)
+        save_workbook_with_retry(
+            workbook,
+            path,
+            LOCAL_WORKBOOK_RETRY_DELAY_MINUTES,
+            LOCAL_WORKBOOK_SETTLE_SECONDS,
+            log_file,
+        )
     finally:
         workbook.close()
 
