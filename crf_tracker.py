@@ -12,11 +12,12 @@ from __future__ import annotations
 import argparse
 import os
 import sys
-from datetime import datetime
+from datetime import date, datetime
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List
 
 from openpyxl import Workbook, load_workbook
+from openpyxl.utils.cell import get_column_letter, range_boundaries
 
 from workbook_sync_utils import (
     log_event,
@@ -36,6 +37,7 @@ DEFAULT_TARGET_FILE = os.getenv(
     r"C:\Users\kmageshkumar\OneDrive - Ichor Systems\AMAT SGP CRF Tracker.xlsx",
 )
 DEFAULT_TARGET_SHEET = os.getenv("CRF_TARGET_SHEET", "AMAT SGP CRF Tracker")
+DEFAULT_TARGET_TABLE_NAME = os.getenv("CRF_TARGET_TABLE_NAME", "Table1")
 DEFAULT_RETRY_DELAY_MINUTES = 15
 DEFAULT_SETTLE_SECONDS = 30
 SYNC_LOG_FILE = Path(__file__).with_name(".crf_tracker_sync.log")
@@ -64,6 +66,11 @@ def parse_args() -> argparse.Namespace:
         "--target-sheet-name",
         default=DEFAULT_TARGET_SHEET,
         help="Worksheet name in the target workbook.",
+    )
+    parser.add_argument(
+        "--target-table-name",
+        default=DEFAULT_TARGET_TABLE_NAME,
+        help="Table name in the target workbook.",
     )
     parser.add_argument(
         "--crf-number",
@@ -174,7 +181,13 @@ def load_rows_from_worksheet(path: str, sheet_name: str) -> List[Dict[str, Any]]
         workbook.close()
 
 
-def get_existing_crfs_from_sheet(worksheet) -> set[str]:
+def read_staging_rows(staging_file: str, staging_sheet: str) -> List[Dict[str, Any]]:
+    if not Path(staging_file).exists():
+        return []
+    return load_rows_from_worksheet(staging_file, staging_sheet)
+
+
+def get_existing_crfs_from_worksheet(worksheet) -> set[str]:
     existing: set[str] = set()
     for row_index in range(2, worksheet.max_row + 1):
         value = worksheet.cell(row=row_index, column=1).value
@@ -194,12 +207,6 @@ def append_rows_to_worksheet(worksheet, rows: List[List[Any]]) -> None:
         next_row += 1
 
 
-def read_staging_rows(staging_file: str, staging_sheet: str) -> List[Dict[str, Any]]:
-    if not Path(staging_file).exists():
-        return []
-    return load_rows_from_worksheet(staging_file, staging_sheet)
-
-
 def write_row_to_staging_queue(
     staging_file: str,
     staging_sheet: str,
@@ -211,17 +218,14 @@ def write_row_to_staging_queue(
 ) -> int:
     staging_path = Path(staging_file)
     workbook_exists = staging_path.exists()
-    if workbook_exists:
-        workbook = load_workbook(staging_path)
-    else:
-        workbook = Workbook()
+    workbook = load_workbook(staging_path) if workbook_exists else Workbook()
 
     try:
         worksheet = get_or_create_worksheet(workbook, staging_sheet)
         ensure_headers(worksheet)
 
         normalized_crf = normalize_crf_number(crf_number)
-        existing_crfs = get_existing_crfs_from_sheet(worksheet)
+        existing_crfs = get_existing_crfs_from_worksheet(worksheet)
         if normalized_crf in existing_crfs:
             log_event(
                 f"CRF {normalized_crf} already exists in the staging queue; skipping.",
@@ -229,7 +233,7 @@ def write_row_to_staging_queue(
             )
             return 0
 
-        received_value = received_time.strftime("%d %b %Y %H:%M:%S")
+        received_value = received_time.date()
         if dry_run:
             print(f"[DRY RUN] Staging row: [{normalized_crf!r}, {received_value!r}]")
             return 0
@@ -260,76 +264,127 @@ def write_row_to_staging_queue(
         workbook.close()
 
 
-def convert_source_rows_to_target_values(rows: List[Dict[str, Any]]) -> List[List[Any]]:
-    converted: List[List[Any]] = []
+def get_table_context(workbook, table_name: str):
+    for worksheet in workbook.worksheets:
+        if table_name in worksheet.tables:
+            return worksheet, worksheet.tables[table_name]
+        for table in worksheet.tables.values():
+            if getattr(table, "displayName", None) == table_name:
+                return worksheet, table
+    raise RuntimeError(f"Could not find table '{table_name}' in workbook.")
+
+
+def get_table_columns(worksheet, table) -> List[str]:
+    min_col, min_row, max_col, _ = range_boundaries(table.ref)
+    headers: List[str] = []
+    for col_idx in range(min_col, max_col + 1):
+        value = worksheet.cell(row=min_row, column=col_idx).value
+        headers.append("" if value is None else str(value).strip())
+    return headers
+
+
+def get_table_rows(worksheet, table) -> List[List[Any]]:
+    min_col, min_row, max_col, max_row = range_boundaries(table.ref)
+    rows: List[List[Any]] = []
+    for row_idx in range(min_row + 1, max_row + 1):
+        row_values: List[Any] = []
+        for col_idx in range(min_col, max_col + 1):
+            row_values.append(worksheet.cell(row=row_idx, column=col_idx).value)
+        rows.append(row_values)
+    return rows
+
+
+def read_existing_crfs_from_table(worksheet, table) -> set[str]:
+    columns = get_table_columns(worksheet, table)
+    if not columns:
+        return set()
+
+    if "CRF Number" in columns:
+        key_index = columns.index("CRF Number")
+    else:
+        key_index = 0
+
+    existing: set[str] = set()
+    for row in get_table_rows(worksheet, table):
+        if key_index >= len(row):
+            continue
+        value = row[key_index]
+        if value is None:
+            continue
+        crf_number = normalize_crf_number(value)
+        if crf_number:
+            existing.add(crf_number)
+    return existing
+
+
+def align_row_to_table(row: Dict[str, Any], table_columns: List[str]) -> List[Any]:
+    return [row.get(column) for column in table_columns]
+
+
+def append_rows_to_target_table(
+    workbook,
+    workbook_path: Path,
+    table_name: str,
+    rows: List[Dict[str, Any]],
+    retry_delay_minutes: int,
+    settle_seconds: int,
+) -> int:
+    worksheet, table = get_table_context(workbook, table_name)
+    columns = get_table_columns(worksheet, table)
+    existing_crfs = read_existing_crfs_from_table(worksheet, table)
+
+    rows_to_write: List[List[Any]] = []
+    for row in rows:
+        crf_number = normalize_crf_number(row.get("CRF Number", ""))
+        if not crf_number:
+            continue
+        if crf_number in existing_crfs:
+            log_event(f"Skipping duplicate CRF in target table: {crf_number}", SYNC_LOG_FILE)
+            continue
+        existing_crfs.add(crf_number)
+        rows_to_write.append(align_row_to_table(row, columns))
+
+    if not rows_to_write:
+        log_event("No new CRF rows to append after duplicate check.", SYNC_LOG_FILE)
+        return 0
+
+    min_col, min_row, max_col, max_row = range_boundaries(table.ref)
+    next_row = max_row + 1
+    for row_values in rows_to_write:
+        for offset, value in enumerate(row_values):
+            worksheet.cell(row=next_row, column=min_col + offset, value=value)
+        next_row += 1
+
+    new_max_row = max_row + len(rows_to_write)
+    table.ref = f"{get_column_letter(min_col)}{min_row}:{get_column_letter(max_col)}{new_max_row}"
+
+    save_workbook_with_retry(
+        workbook,
+        workbook_path,
+        retry_delay_minutes,
+        settle_seconds,
+        SYNC_LOG_FILE,
+    )
+    log_event(
+        f"CRF target table '{table_name}' updated with {len(rows_to_write)} row(s).",
+        SYNC_LOG_FILE,
+    )
+    return len(rows_to_write)
+
+
+def convert_source_rows_to_target_values(rows: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+    converted: List[Dict[str, Any]] = []
     for row in rows:
         crf_number = normalize_crf_number(row.get("CRF Number", ""))
         received_date = row.get("Received Date", "")
         if crf_number:
-            converted.append([crf_number, received_date])
-    return converted
-
-
-def write_rows_to_target_with_retry(
-    target_file: str,
-    target_sheet: str,
-    rows: List[List[Any]],
-    retry_delay_minutes: int,
-    settle_seconds: int,
-) -> int:
-    target_path = Path(target_file)
-    workbook_exists = target_path.exists()
-
-    if workbook_exists:
-        wait_for_workbook_ready(
-            target_path,
-            retry_delay_minutes,
-            settle_seconds,
-            SYNC_LOG_FILE,
-        )
-        workbook = load_workbook(target_path)
-    else:
-        workbook = Workbook()
-
-    try:
-        worksheet = get_or_create_worksheet(workbook, target_sheet)
-        ensure_headers(worksheet)
-
-        existing_crfs = get_existing_crfs_from_sheet(worksheet)
-        rows_to_write: List[List[Any]] = []
-        for row in rows:
-            crf_number = normalize_crf_number(row[0] if row else "")
-            if not crf_number:
-                continue
-            if crf_number in existing_crfs:
-                log_event(f"Skipping duplicate CRF in target workbook: {crf_number}", SYNC_LOG_FILE)
-                continue
-            existing_crfs.add(crf_number)
-            rows_to_write.append(row)
-
-        if not rows_to_write:
-            log_event("No new CRF rows to append after duplicate check.", SYNC_LOG_FILE)
-            return 0
-
-        append_rows_to_worksheet(worksheet, rows_to_write)
-
-        if workbook_exists:
-            save_workbook_with_retry(
-                workbook,
-                target_path,
-                retry_delay_minutes,
-                settle_seconds,
-                SYNC_LOG_FILE,
+            converted.append(
+                {
+                    "CRF Number": crf_number,
+                    "Received Date": received_date,
+                }
             )
-        else:
-            target_path.parent.mkdir(parents=True, exist_ok=True)
-            workbook.save(target_path)
-            log_event(f"Created new CRF target workbook at {target_path}.", SYNC_LOG_FILE)
-
-        log_event(f"CRF target workbook updated with {len(rows_to_write)} row(s).", SYNC_LOG_FILE)
-        return len(rows_to_write)
-    finally:
-        workbook.close()
+    return converted
 
 
 def remove_rows_from_staging_by_crf(
@@ -371,7 +426,7 @@ def run_sync(
     staging_file: str,
     staging_sheet: str,
     target_file: str,
-    target_sheet: str,
+    target_table: str,
     retry_delay_minutes: int,
     settle_seconds: int,
 ) -> int:
@@ -387,13 +442,29 @@ def run_sync(
         if normalize_crf_number(row.get("CRF Number", ""))
     }
 
-    written = write_rows_to_target_with_retry(
-        target_file=target_file,
-        target_sheet=target_sheet,
-        rows=converted_rows,
-        retry_delay_minutes=retry_delay_minutes,
-        settle_seconds=settle_seconds,
+    target_path = Path(target_file)
+    if not target_path.exists():
+        raise FileNotFoundError(f"Target workbook not found: {target_file}")
+
+    wait_for_workbook_ready(
+        target_path,
+        retry_delay_minutes,
+        settle_seconds,
+        SYNC_LOG_FILE,
     )
+
+    workbook = load_workbook(target_path)
+    try:
+        written = append_rows_to_target_table(
+            workbook=workbook,
+            workbook_path=target_path,
+            table_name=target_table,
+            rows=converted_rows,
+            retry_delay_minutes=retry_delay_minutes,
+            settle_seconds=settle_seconds,
+        )
+    finally:
+        workbook.close()
 
     if written or crf_numbers_to_clear:
         remove_rows_from_staging_by_crf(
@@ -436,7 +507,7 @@ def main() -> int:
         staging_file=args.staging_workbook_file,
         staging_sheet=args.staging_sheet_name,
         target_file=args.target_workbook_file,
-        target_sheet=args.target_sheet_name,
+        target_table=args.target_table_name,
         retry_delay_minutes=args.retry_delay_minutes,
         settle_seconds=args.settle_seconds,
     )

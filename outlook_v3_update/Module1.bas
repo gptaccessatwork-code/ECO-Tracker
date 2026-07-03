@@ -34,6 +34,7 @@ Public Const CRF_STAGING_SHEET As String = "Sheet1"
 ' CRF target workbook - synced OneDrive file that mirrors SharePoint.
 Public Const CRF_TARGET_WORKBOOK_FILE As String = "C:\Users\kmageshkumar\OneDrive - Ichor Systems\AMAT SGP CRF Tracker.xlsx"
 Public Const CRF_TARGET_SHEET As String = "AMAT SGP CRF Tracker"
+Public Const CRF_TARGET_TABLE_NAME As String = "Table1"
 
 ' Python sync command - this reuses excel_to_sharepoint.py in local-file mode.
 Public Const SYNC_PYTHON_COMMAND As String = "py"
@@ -216,6 +217,7 @@ Public Sub RunCRFTrackerWrite(ByVal crfKey As String, ByVal receivedTime As Date
                   "--staging-sheet-name " & QuoteArg(CRF_STAGING_SHEET) & " " & _
                   "--target-workbook-file " & QuoteArg(CRF_TARGET_WORKBOOK_FILE) & " " & _
                   "--target-sheet-name " & QuoteArg(CRF_TARGET_SHEET) & " " & _
+                  "--target-table-name " & QuoteArg(CRF_TARGET_TABLE_NAME) & " " & _
                   "--crf-number " & QuoteArg(crfKey) & " " & _
                   "--retry-delay-minutes 15 " & _
                   "--settle-seconds 30 " & _
