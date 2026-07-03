@@ -382,6 +382,7 @@ def convert_source_rows_to_target_values(rows: List[Dict[str, Any]]) -> List[Dic
                 {
                     "CRF Number": crf_number,
                     "Received Date": received_date,
+                    "CRF Date": received_date,
                 }
             )
     return converted
