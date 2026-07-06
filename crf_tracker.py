@@ -143,6 +143,18 @@ def ensure_headers(worksheet) -> None:
             worksheet.cell(row=1, column=index, value=header)
 
 
+def find_last_populated_row(worksheet) -> int:
+    for row_index in range(worksheet.max_row, 1, -1):
+        for cell in worksheet[row_index]:
+            value = cell.value
+            if value is None:
+                continue
+            if isinstance(value, str) and not value.strip():
+                continue
+            return row_index
+    return 1
+
+
 def is_row_empty(values: List[Any]) -> bool:
     for value in values:
         if value is None:
@@ -238,9 +250,10 @@ def write_row_to_staging_queue(
             print(f"[DRY RUN] Staging row: [{normalized_crf!r}, {received_value!r}]")
             return 0
 
-        next_row = max(2, worksheet.max_row + 1)
+        next_row = max(2, find_last_populated_row(worksheet) + 1)
         worksheet.cell(row=next_row, column=1, value=normalized_crf)
         worksheet.cell(row=next_row, column=2, value=received_value)
+        worksheet.cell(row=next_row, column=2).number_format = "dd mmm yyyy"
 
         if workbook_exists:
             save_workbook_with_retry(
@@ -352,7 +365,9 @@ def append_rows_to_target_table(
     next_row = max_row + 1
     for row_values in rows_to_write:
         for offset, value in enumerate(row_values):
-            worksheet.cell(row=next_row, column=min_col + offset, value=value)
+            cell = worksheet.cell(row=next_row, column=min_col + offset, value=value)
+            if isinstance(value, (datetime, date)):
+                cell.number_format = "dd mmm yyyy"
         next_row += 1
 
     new_max_row = max_row + len(rows_to_write)
@@ -378,6 +393,10 @@ def convert_source_rows_to_target_values(rows: List[Dict[str, Any]]) -> List[Dic
         crf_number = normalize_crf_number(row.get("CRF Number", ""))
         received_date = row.get("Received Date", "")
         if crf_number:
+            if isinstance(received_date, datetime):
+                received_date = received_date.date()
+            if isinstance(received_date, date):
+                received_date = received_date.strftime("%d %b %Y")
             converted.append(
                 {
                     "CRF Number": crf_number,
@@ -412,6 +431,14 @@ def remove_rows_from_staging_by_crf(
             if normalize_crf_number(key_value) in crf_numbers:
                 sheet.delete_rows(row_idx, 1)
 
+        last_populated_row = find_last_populated_row(sheet)
+        if last_populated_row < sheet.max_row:
+            sheet.delete_rows(last_populated_row + 1, sheet.max_row - last_populated_row)
+
+        for table in sheet.tables.values():
+            min_col, min_row, max_col, _ = range_boundaries(table.ref)
+            table.ref = f"{get_column_letter(min_col)}{min_row}:{get_column_letter(max_col)}{last_populated_row}"
+
         save_workbook_with_retry(
             workbook,
             staging_path,
@@ -431,6 +458,26 @@ def run_sync(
     retry_delay_minutes: int,
     settle_seconds: int,
 ) -> int:
+    target_path = Path(target_file)
+    if not target_path.exists():
+        raise FileNotFoundError(f"Target workbook not found: {target_file}")
+
+    wait_for_workbook_ready(
+        target_path,
+        retry_delay_minutes,
+        settle_seconds,
+        SYNC_LOG_FILE,
+    )
+
+    staging_path = Path(staging_file)
+    if staging_path.exists():
+        wait_for_workbook_ready(
+            staging_path,
+            retry_delay_minutes,
+            settle_seconds,
+            SYNC_LOG_FILE,
+        )
+
     source_rows = read_staging_rows(staging_file, staging_sheet)
     if not source_rows:
         log_event("No queued CRF rows found in the staging workbook.", SYNC_LOG_FILE)
@@ -442,17 +489,6 @@ def run_sync(
         for row in source_rows
         if normalize_crf_number(row.get("CRF Number", ""))
     }
-
-    target_path = Path(target_file)
-    if not target_path.exists():
-        raise FileNotFoundError(f"Target workbook not found: {target_file}")
-
-    wait_for_workbook_ready(
-        target_path,
-        retry_delay_minutes,
-        settle_seconds,
-        SYNC_LOG_FILE,
-    )
 
     workbook = load_workbook(target_path)
     try:

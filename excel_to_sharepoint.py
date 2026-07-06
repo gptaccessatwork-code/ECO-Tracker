@@ -444,7 +444,7 @@ def append_rows_to_local_table(
     table_name: str,
     rows: List[List[Any]],
 ) -> None:
-    log_event(f"Opening target workbook: {target_workbook_file}")
+    log_event(f"Opening target workbook: {target_workbook_file}", SYNC_LOG_FILE)
     context = get_local_table(target_workbook_file, table_name)
     try:
         if getattr(context.table, "totalsRowShown", False):
@@ -456,7 +456,10 @@ def append_rows_to_local_table(
         last_populated_row = find_last_populated_table_row(context.worksheet, context.table)
         next_row = last_populated_row + 1
 
-        log_event(f"Writing {len(rows)} row(s) into table '{table_name}'...")
+        log_event(
+            f"Writing {len(rows)} row(s) into table '{table_name}'...",
+            SYNC_LOG_FILE,
+        )
         for row_values in rows:
             for offset, value in enumerate(row_values):
                 context.worksheet.cell(row=next_row, column=min_col + offset, value=value)
@@ -479,9 +482,6 @@ def append_rows_to_local_table(
 
 def write_rows_to_local_workbook_with_retry(
     config: Config,
-    rows: List[List[Any]],
-    table_columns: List[str],
-    source_keys: set[str],
 ) -> int:
     if not config.target_workbook_file:
         raise ValueError("A local target workbook file is required.")
@@ -494,20 +494,52 @@ def write_rows_to_local_workbook_with_retry(
                 LOCAL_WORKBOOK_SETTLE_SECONDS,
                 SYNC_LOG_FILE,
             )
+            if config.excel_file and Path(config.excel_file).exists():
+                wait_for_workbook_ready(
+                    config.excel_file,
+                    config.retry_delay_minutes,
+                    LOCAL_WORKBOOK_SETTLE_SECONDS,
+                    SYNC_LOG_FILE,
+                )
+
+            source_rows = load_rows_from_excel(config.excel_file, config.excel_sheet)
+            if not source_rows:
+                log_event("No source rows found in the staging workbook.", SYNC_LOG_FILE)
+                return 0
+
+            source_keys = {
+                str(row.get(SYSTEM_NUMBER_COLUMN)).strip()
+                for row in source_rows
+                if row.get(SYSTEM_NUMBER_COLUMN) is not None
+                and str(row.get(SYSTEM_NUMBER_COLUMN)).strip()
+            }
+
+            table_columns = read_local_table_columns(
+                config.target_workbook_file, config.table_name
+            )
+            prepared_rows = prepare_rows_for_table(
+                source_rows=source_rows,
+                field_map=config.field_map,
+                table_columns=table_columns,
+                dry_run=False,
+            )
             existing_keys = read_local_existing_keys(
                 config.target_workbook_file, config.table_name, SYSTEM_NUMBER_COLUMN
             )
             rows_to_write = filter_duplicate_rows(
-                rows, table_columns, existing_keys, SYSTEM_NUMBER_COLUMN
+                prepared_rows, table_columns, existing_keys, SYSTEM_NUMBER_COLUMN
             )
 
             if not rows_to_write:
-                log_event("No new rows to append after duplicate check.")
+                log_event("No new rows to append after duplicate check.", SYNC_LOG_FILE)
                 if config.clear_source_on_success:
                     remove_excel_rows_by_keys(
                         config.excel_file, config.excel_sheet, source_keys
                     )
-                    log_event("Processed rows removed from source workbook queue.")
+                    log_event(
+                        "Processed rows removed from source workbook queue.",
+                        SYNC_LOG_FILE,
+                    )
                 return 0
 
             append_rows_to_local_table(
@@ -515,7 +547,7 @@ def write_rows_to_local_workbook_with_retry(
             )
             if config.clear_source_on_success:
                 remove_excel_rows_by_keys(config.excel_file, config.excel_sheet, source_keys)
-                log_event("Processed rows removed from source workbook queue.")
+                log_event("Processed rows removed from source workbook queue.", SYNC_LOG_FILE)
             return len(rows_to_write)
         except Exception as exc:
             if not is_local_conflict_error(exc):
@@ -523,7 +555,8 @@ def write_rows_to_local_workbook_with_retry(
                 raise
             log_exception("Workbook save conflict detected; will retry.", exc)
             log_event(
-                f"Workbook is still open or locked. Retrying in {config.retry_delay_minutes} minutes."
+                f"Workbook is still open or locked. Retrying in {config.retry_delay_minutes} minutes.",
+                SYNC_LOG_FILE,
             )
             continue
 
@@ -683,54 +716,71 @@ def append_rows_to_table(
 
 
 def run_once(config: Config) -> int:
-    source_rows = load_rows_from_excel(config.excel_file, config.excel_sheet)
-    source_keys = {
-        str(row.get(SYSTEM_NUMBER_COLUMN)).strip()
-        for row in source_rows
-        if row.get(SYSTEM_NUMBER_COLUMN) is not None and str(row.get(SYSTEM_NUMBER_COLUMN)).strip()
-    }
-
-    if not source_rows:
-        print("No data rows found in the Excel file.")
-        return 0
-
-    workbook_base_url, token, table_columns = resolve_table_columns(config)
-
-    print(f"Found {len(source_rows)} source row(s).")
-    print(
-        f"Target workbook: "
-        f"{config.target_workbook_file or config.workbook_url or config.workbook_path}"
-    )
-    print(f"Target table: {config.table_name}")
-    print(f"Table columns: {', '.join(table_columns)}")
-
-    prepared_rows = prepare_rows_for_table(
-        source_rows=source_rows,
-        field_map=config.field_map,
-        table_columns=table_columns,
-        dry_run=config.dry_run,
-    )
-
-    if config.dry_run:
-        print("Dry run complete. No SharePoint data was changed.")
-        return 0
-
-    if not prepared_rows:
-        print("No new rows to append after duplicate check.")
-        if config.clear_source_on_success:
-            remove_excel_rows_by_keys(config.excel_file, config.excel_sheet, source_keys)
-            print("Processed rows removed from source workbook queue.")
-        return 0
-
     if config.target_workbook_file:
-        written = write_rows_to_local_workbook_with_retry(
-            config=config,
-            rows=prepared_rows,
-            table_columns=table_columns,
-            source_keys=source_keys,
-        )
-        print(f"Appended {written}/{len(prepared_rows)} row(s).")
+        if config.dry_run:
+            source_rows = load_rows_from_excel(config.excel_file, config.excel_sheet)
+            if not source_rows:
+                print("No data rows found in the Excel file.")
+                return 0
+
+            table_columns = read_local_table_columns(config.target_workbook_file, config.table_name)
+            print(f"Found {len(source_rows)} source row(s).")
+            print(f"Target workbook: {config.target_workbook_file}")
+            print(f"Target table: {config.table_name}")
+            print(f"Table columns: {', '.join(table_columns)}")
+
+            prepare_rows_for_table(
+                source_rows=source_rows,
+                field_map=config.field_map,
+                table_columns=table_columns,
+                dry_run=True,
+            )
+            print("Dry run complete. No SharePoint data was changed.")
+            return 0
+
+        written = write_rows_to_local_workbook_with_retry(config=config)
+        print(f"Appended {written} row(s).")
     else:
+        source_rows = load_rows_from_excel(config.excel_file, config.excel_sheet)
+        source_keys = {
+            str(row.get(SYSTEM_NUMBER_COLUMN)).strip()
+            for row in source_rows
+            if row.get(SYSTEM_NUMBER_COLUMN) is not None
+            and str(row.get(SYSTEM_NUMBER_COLUMN)).strip()
+        }
+
+        if not source_rows:
+            print("No data rows found in the Excel file.")
+            return 0
+
+        workbook_base_url, token, table_columns = resolve_table_columns(config)
+
+        print(f"Found {len(source_rows)} source row(s).")
+        print(
+            f"Target workbook: "
+            f"{config.target_workbook_file or config.workbook_url or config.workbook_path}"
+        )
+        print(f"Target table: {config.table_name}")
+        print(f"Table columns: {', '.join(table_columns)}")
+
+        prepared_rows = prepare_rows_for_table(
+            source_rows=source_rows,
+            field_map=config.field_map,
+            table_columns=table_columns,
+            dry_run=config.dry_run,
+        )
+
+        if config.dry_run:
+            print("Dry run complete. No SharePoint data was changed.")
+            return 0
+
+        if not prepared_rows:
+            print("No new rows to append after duplicate check.")
+            if config.clear_source_on_success:
+                remove_excel_rows_by_keys(config.excel_file, config.excel_sheet, source_keys)
+                print("Processed rows removed from source workbook queue.")
+            return 0
+
         written = 0
         for chunk in batch_rows(prepared_rows, config.batch_size):
             append_rows_to_table(workbook_base_url, config.table_name, token, chunk)
