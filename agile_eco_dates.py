@@ -5,9 +5,8 @@ workflow-related table for a given ECO, and looks for workflow statuses named
 "Submitted" and "Released". For each matching status, it returns the
 "local client time" if present.
 
-Credentials are read from environment variables:
-- AGILE_USER
-- AGILE_PASS
+Credentials are read from the shared JSON file in the Scripts root:
+- script_credentials.json
 """
 
 from __future__ import annotations
@@ -128,6 +127,15 @@ DATE_PARSE_FORMATS = (
     "%Y-%m-%dT%H:%M:%S",
     "%Y-%m-%d %H:%M:%S",
 )
+
+SCRIPT_ROOT = next(
+    (parent for parent in Path(__file__).resolve().parents if (parent / "script_credentials.py").exists()),
+    Path(__file__).resolve().parent,
+)
+if str(SCRIPT_ROOT) not in sys.path:
+    sys.path.insert(0, str(SCRIPT_ROOT))
+
+from script_credentials import get_agile_credentials
 SHEET_DATE_FORMATS = ("%d %b %Y", "%d %B %Y", "%m/%d/%Y", "%Y-%m-%d", "%d/%m/%Y")
 EMAIL_CELL_STYLE = (
     "border:1px solid #808080;padding:6px 10px;"
@@ -626,11 +634,12 @@ def reminder_key(reminder: ReminderItem) -> str:
     )
 
 
-def create_agile_client_from_env() -> AgileEcoClient:
-    agile_user = os.getenv("AGILE_USER")
-    agile_pass = os.getenv("AGILE_PASS")
-    if not agile_user or not agile_pass:
-        raise RuntimeError("AGILE_USER and AGILE_PASS must be set in the environment.")
+def load_agile_credentials() -> tuple[str, str]:
+    return get_agile_credentials()
+
+
+def create_agile_client_from_file() -> AgileEcoClient:
+    agile_user, agile_pass = load_agile_credentials()
     return AgileEcoClient(agile_user, agile_pass)
 
 
@@ -795,22 +804,37 @@ def collect_self_test_results(
 ) -> List[SelfTestResult]:
     results: List[SelfTestResult] = []
 
-    agile_user = os.getenv("AGILE_USER")
-    agile_pass = os.getenv("AGILE_PASS")
-    results.append(
-        SelfTestResult(
-            label="AGILE_USER",
-            ok=bool(agile_user),
-            detail="Found in environment." if agile_user else "Missing from environment.",
+    try:
+        agile_user, agile_pass = load_agile_credentials()
+        results.append(
+            SelfTestResult(
+                label="Agile credentials file",
+                ok=True,
+                detail=f"Loaded from {AGILE_CREDENTIALS_FILE.name}.",
+            )
         )
-    )
-    results.append(
-        SelfTestResult(
-            label="AGILE_PASS",
-            ok=bool(agile_pass),
-            detail="Found in environment." if agile_pass else "Missing from environment.",
+        results.append(
+            SelfTestResult(
+                label="AGILE_USER",
+                ok=bool(agile_user),
+                detail="Found in JSON." if agile_user else "Missing from JSON.",
+            )
         )
-    )
+        results.append(
+            SelfTestResult(
+                label="AGILE_PASS",
+                ok=bool(agile_pass),
+                detail="Found in JSON." if agile_pass else "Missing from JSON.",
+            )
+        )
+    except Exception as exc:
+        results.append(
+            SelfTestResult(
+                label="Agile credentials file",
+                ok=False,
+                detail=str(exc),
+            )
+        )
 
     try:
         dispatch_outlook_application()
@@ -1108,7 +1132,7 @@ def update_workbook_dates(
             reminders: List[ReminderItem] = []
             reminder_state = load_reminder_state()
             sent_reminder_keys: List[str] = []
-            agile_client = create_agile_client_from_env()
+            agile_client = create_agile_client_from_file()
             workbook = load_workbook(workbook_path)
             worksheet = workbook[worksheet_name] if worksheet_name else workbook.active
 
@@ -1328,7 +1352,7 @@ def update_crf_workbook_dates(
             reminders: List[CrfReminderItem] = []
             reminder_state = load_crf_reminder_state()
             sent_reminder_keys: List[str] = []
-            agile_client = create_agile_client_from_env()
+            agile_client = create_agile_client_from_file()
             workbook = load_workbook(workbook_path)
             worksheet = workbook[worksheet_name] if worksheet_name else workbook.active
 
@@ -1523,7 +1547,7 @@ def main() -> int:
         return exit_code
 
     if args.eco_number:
-        agile_client = create_agile_client_from_env()
+        agile_client = create_agile_client_from_file()
         result = fetch_eco_dates(
             client=agile_client,
             eco_number=args.eco_number,
@@ -1540,7 +1564,7 @@ def main() -> int:
         return 0
 
     if args.crf_number:
-        agile_client = create_agile_client_from_env()
+        agile_client = create_agile_client_from_file()
         result = fetch_eco_dates(
             client=agile_client,
             eco_number=args.crf_number,

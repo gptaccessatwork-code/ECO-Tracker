@@ -122,10 +122,16 @@ Default workbook columns:
 
 ### Required setup
 
-Environment variables:
+Create a `script_credentials.json` file in the root `Scripts` folder with:
 
-- `AGILE_USER`
-- `AGILE_PASS`
+```json
+{
+  "AGILE_USER": "your-agile-username",
+  "AGILE_PASS": "your-agile-password"
+}
+```
+
+The script reads Agile credentials from that shared JSON file instead of environment variables.
 
 Optional environment variables:
 
@@ -173,6 +179,7 @@ This checks items such as:
 
 - `AGILE_USER`
 - `AGILE_PASS`
+- `script_credentials.json`
 - Outlook COM availability
 - workbook file existence
 - worksheet availability
