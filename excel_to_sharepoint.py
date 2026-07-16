@@ -34,10 +34,13 @@ GRAPH_BASE_URL = "https://graph.microsoft.com/v1.0"
 GRAPH_SCOPES = ["Files.ReadWrite"]
 DEFAULT_CACHE_FILE = ".msal_token_cache.bin"
 DEFAULT_BATCH_SIZE = 50
+DEFAULT_QUEUE_POLL_SECONDS = 10
+DEFAULT_QUEUE_IDLE_CHECKS = 3
 SYSTEM_NUMBER_COLUMN = "System Number"
 LOCAL_WORKBOOK_RETRY_DELAY_MINUTES = 15
 LOCAL_WORKBOOK_SETTLE_SECONDS = 30
 SYNC_LOG_FILE = Path(__file__).with_name(".excel_to_sharepoint_sync.log")
+SYNC_LOCK_FILE = Path(__file__).with_name(".excel_to_sharepoint_sync.lock")
 
 
 @dataclass
@@ -58,6 +61,9 @@ class Config:
     dry_run: bool
     retry_delay_minutes: int
     clear_source_on_success: bool
+    sync_until_empty: bool
+    queue_poll_seconds: int
+    queue_idle_checks: int
 
 
 @dataclass(frozen=True)
@@ -146,6 +152,23 @@ def parse_args() -> Config:
         action="store_true",
         help="Clear the source workbook rows after a successful sync.",
     )
+    parser.add_argument(
+        "--sync-until-empty",
+        action="store_true",
+        help="Keep polling the source workbook until it stays empty for a few checks.",
+    )
+    parser.add_argument(
+        "--queue-poll-seconds",
+        type=int,
+        default=int(os.getenv("QUEUE_POLL_SECONDS", str(DEFAULT_QUEUE_POLL_SECONDS))),
+        help="Seconds to wait between empty-queue checks when --sync-until-empty is set.",
+    )
+    parser.add_argument(
+        "--queue-idle-checks",
+        type=int,
+        default=int(os.getenv("QUEUE_IDLE_CHECKS", str(DEFAULT_QUEUE_IDLE_CHECKS))),
+        help="How many consecutive empty-queue checks to tolerate before exiting.",
+    )
 
     args = parser.parse_args()
 
@@ -169,6 +192,9 @@ def parse_args() -> Config:
         dry_run=args.dry_run,
         retry_delay_minutes=args.retry_delay_minutes,
         clear_source_on_success=args.clear_source_on_success,
+        sync_until_empty=args.sync_until_empty,
+        queue_poll_seconds=args.queue_poll_seconds,
+        queue_idle_checks=args.queue_idle_checks,
     )
 
 
@@ -209,6 +235,10 @@ def validate_args(parser: argparse.ArgumentParser, args: argparse.Namespace) -> 
         parser.error("--batch-size must be at least 1")
     if args.retry_delay_minutes < 1:
         parser.error("--retry-delay-minutes must be at least 1")
+    if args.queue_poll_seconds < 1:
+        parser.error("--queue-poll-seconds must be at least 1")
+    if args.queue_idle_checks < 1:
+        parser.error("--queue-idle-checks must be at least 1")
 
 
 def parse_field_map(
@@ -353,7 +383,13 @@ def get_table_columns(workbook_base_url: str, table_name: str, token: str) -> Li
 
 
 def get_local_table(target_workbook_file: str, table_name: str) -> LocalTableContext:
-    workbook = load_workbook(target_workbook_file)
+    try:
+        workbook = load_workbook(target_workbook_file)
+    except PermissionError as exc:
+        raise RuntimeError(
+            f"Could not open local target workbook '{target_workbook_file}'. "
+            "Close Excel or any app using the file, then try again."
+        ) from exc
     for worksheet in workbook.worksheets:
         if table_name in worksheet.tables:
             return LocalTableContext(workbook, worksheet, worksheet.tables[table_name])
@@ -704,6 +740,58 @@ def batch_rows(items: List[List[Any]], batch_size: int) -> Iterable[List[List[An
         yield items[start : start + batch_size]
 
 
+def acquire_sync_lock(lock_file: Path, log_file: Path) -> Optional[Any]:
+    try:
+        handle = lock_file.open("x", encoding="utf-8")
+    except FileExistsError:
+        log_event("A Spec Award sync worker is already running; skipping this launch.", log_file)
+        return None
+
+    handle.write(f"pid={os.getpid()}\nstarted={datetime.now().isoformat()}\n")
+    handle.flush()
+    return handle
+
+
+def release_sync_lock(handle: Any, lock_file: Path) -> None:
+    try:
+        handle.close()
+    finally:
+        try:
+            lock_file.unlink()
+        except FileNotFoundError:
+            pass
+
+
+def sync_until_queue_is_empty(config: Config) -> int:
+    total_written = 0
+    idle_checks = 0
+
+    while True:
+        source_rows = load_rows_from_excel(config.excel_file, config.excel_sheet)
+        if not source_rows:
+            idle_checks += 1
+            if idle_checks >= config.queue_idle_checks:
+                return total_written
+            log_event(
+                f"Spec Award queue is empty. Rechecking in {config.queue_poll_seconds} seconds...",
+                SYNC_LOG_FILE,
+            )
+            time.sleep(config.queue_poll_seconds)
+            continue
+
+        idle_checks = 0
+        written = write_rows_to_local_workbook_with_retry(config=config)
+        total_written += written
+
+        if written > 0:
+            log_event(
+                f"Spec Award sync pass complete. Total appended so far: {total_written} row(s).",
+                SYNC_LOG_FILE,
+            )
+
+    return total_written
+
+
 def append_rows_to_table(
     workbook_base_url: str,
     table_name: str,
@@ -793,6 +881,14 @@ def run_once(config: Config) -> int:
 
 def main() -> int:
     config = parse_args()
+    if config.sync_until_empty and config.target_workbook_file:
+        lock_handle = acquire_sync_lock(SYNC_LOCK_FILE, SYNC_LOG_FILE)
+        if lock_handle is None:
+            return 0
+        try:
+            return sync_until_queue_is_empty(config)
+        finally:
+            release_sync_lock(lock_handle, SYNC_LOCK_FILE)
     return run_once(config)
 
 
@@ -800,12 +896,12 @@ if __name__ == "__main__":
     try:
         raise SystemExit(main())
     except requests.HTTPError as exc:
-        log_exception("Graph request failed.", exc)
+        log_exception("Graph request failed.", exc, SYNC_LOG_FILE)
         print(f"Graph request failed: {exc}", file=sys.stderr)
         if exc.response is not None:
             print(exc.response.text, file=sys.stderr)
         raise SystemExit(1)
     except Exception as exc:
-        log_exception("Unhandled error.", exc)
+        log_exception("Unhandled error.", exc, SYNC_LOG_FILE)
         print(f"Error: {exc}", file=sys.stderr)
         raise SystemExit(1)

@@ -12,7 +12,7 @@ Public Const CHANGE_COORDINATOR_EMAIL As String = "change_cordinator@ichorsystem
 Public Const CHANGE_COORDINATOR_NAME As String = "austin change coordinator"
 
 ' Authorized senders for Spec Award emails
-Public SPEC_AWARD_SENDERS(3) As String
+Public SPEC_AWARD_SENDERS(4) As String
 
 ' Forward recipients - defined once, used for both CRF and Spec Award
 Public Const FORWARD_TO As String = "sreshmi@ichorsystems.com; schiniwar@ichorsystems.com; ukallibaddi@ichorsystems.com"
@@ -37,8 +37,8 @@ Public Const CRF_TARGET_SHEET As String = "AMAT SGP CRF Tracker"
 Public Const CRF_TARGET_TABLE_NAME As String = "Table1"
 
 ' Python sync command - this reuses excel_to_sharepoint.py in local-file mode.
-Public Const SYNC_PYTHON_COMMAND As String = "py"
-Public Const SYNC_SCRIPT_PATH As String = "C:\Users\kmageshkumar\OneDrive - Ichor Systems\Scripts\ECO Tracker\excel_to_sharepoint.py"
+Public Const SYNC_PYTHON_COMMAND As String = "C:\Users\kmageshkumar\AppData\Local\Programs\Python\Python313\python.exe"
+Public Const SYNC_SCRIPT_PATH As String = "C:\Users\kmageshkumar\OneDrive - Ichor Systems\Scripts\ECO & CRF Tracker\excel_to_sharepoint.py"
 Public Const SYNC_TARGET_WORKBOOK_FILE As String = "C:\Users\kmageshkumar\OneDrive - Ichor Systems\AMAT SGP ECO Tracker.xlsx"
 Public Const SYNC_TARGET_TABLE_NAME As String = "Table1"
 
@@ -61,8 +61,9 @@ Public CRFRegex As Object             ' VBScript.RegExp - initialized once
 Public Sub InitSpecAwardSenders()
     SPEC_AWARD_SENDERS(0) = "faith_fan@amat.com"
     SPEC_AWARD_SENDERS(1) = "michael_leow@amat.com"
-    SPEC_AWARD_SENDERS(2) = "siewyeelim_jasmine@amat.com"
+    SPEC_AWARD_SENDERS(2) = "siewyeejasmine_lim@amat.com"
     SPEC_AWARD_SENDERS(3) = "francesca_chang@amat.com"
+    SPEC_AWARD_SENDERS(4) = "kehhaw_lee@amat.com"
 End Sub
 
 ' ===========================================================
@@ -579,19 +580,17 @@ Public Sub RunSpecAwardSync()
                   "--table-name " & QuoteArg(SYNC_TARGET_TABLE_NAME) & " " & _
                   "--excel-file " & QuoteArg(SPEC_AWARD_STAGING_FILE) & " " & _
                   "--excel-sheet " & QuoteArg(SPEC_AWARD_STAGING_SHEET) & " " & _
-                  "--retry-on-conflict " & _
                   "--retry-delay-minutes 15 " & _
+                  "--sync-until-empty " & _
+                  "--queue-poll-seconds 10 " & _
+                  "--queue-idle-checks 3 " & _
                   "--clear-source-on-success"
 
-    LogEvent "Starting SharePoint sync."
+    LogEvent "Starting SharePoint sync worker."
     Set shellObj = CreateObject("WScript.Shell")
-    exitCode = shellObj.Run(commandText, 0, True)
+    exitCode = shellObj.Run(commandText, 0, False)
 
-    If exitCode <> 0 Then
-        Err.Raise vbObjectError + 513, , "excel_to_sharepoint.py returned exit code " & exitCode
-    End If
-
-    LogEvent "SharePoint sync completed successfully."
+    LogEvent "SharePoint sync worker launched."
     Exit Sub
 
 ErrorHandler:
