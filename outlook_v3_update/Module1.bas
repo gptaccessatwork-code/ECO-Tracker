@@ -23,6 +23,22 @@ Public Const FORWARD_BCC As String = "kmageshkumar@ichorsystems.com"
 ' to use as the forward content. Does NOT affect keyword checking.
 Public Const MIN_BODY_LENGTH As Integer = 200
 
+' Power Automate owns Spec Award writes to the ECO workbook.
+' Keep this False after cloud cutover. Set it back to True only for rollback.
+Public Const ENABLE_SPEC_AWARD_WORKBOOK_SYNC As Boolean = False
+
+' Outlook VBA continues to own Spec Award forwarding until the combined
+' Power Automate flow has been tested. Change this to False at cutover.
+Public Const ENABLE_SPEC_AWARD_FORWARDING As Boolean = True
+
+' Power Automate owns CRF writes to the CRF workbook.
+' Keep this False after cloud cutover. Set it back to True only for rollback.
+Public Const ENABLE_CRF_WORKBOOK_SYNC As Boolean = False
+
+' Outlook VBA continues to own CRF forwarding until the Power Automate flow
+' has been tested. Change this to False at the forwarding cutover.
+Public Const ENABLE_CRF_FORWARDING As Boolean = True
+
 ' Spec Award staging workbook - Outlook writes the latest detected rows here.
 Public Const SPEC_AWARD_STAGING_FILE As String = "C:\Users\kmageshkumar\Downloads\AMAT SGP ECO Tracker.xlsx"
 Public Const SPEC_AWARD_STAGING_SHEET As String = "Sheet1"

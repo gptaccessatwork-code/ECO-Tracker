@@ -1,0 +1,55 @@
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "eventType",
+    "eventId",
+    "sentAt",
+    "items"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "type": "string",
+      "enum": [
+        "1.0"
+      ]
+    },
+    "eventType": {
+      "type": "string",
+      "enum": [
+        "crf.received"
+      ]
+    },
+    "eventId": {
+      "type": "string",
+      "minLength": 1
+    },
+    "sentAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "items": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "crfNumber",
+          "receivedDate"
+        ],
+        "properties": {
+          "crfNumber": {
+            "type": "string",
+            "pattern": "^[0-9]{5,}$"
+          },
+          "receivedDate": {
+            "type": "string",
+            "format": "date"
+          }
+        }
+      }
+    }
+  }
+}

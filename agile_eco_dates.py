@@ -54,6 +54,7 @@ DEFAULT_CLASS_CANDIDATES = [
 
 DEFAULT_TABLE_CANDIDATES = [
     "History",
+    "Cover Page",
     "Workflow",
     "Workflow Status",
 ]
@@ -77,6 +78,17 @@ TIME_FIELD_CANDIDATES = [
 ACTION_FIELD_CANDIDATES = [
     "action",
 ]
+
+DETAILS_FIELD_CANDIDATES = [
+    "details",
+]
+
+RELEASED_DATE_FIELD_CANDIDATES = [
+    "datereleased",
+    "releaseddate",
+]
+
+UNUSABLE_TRACKING_NUMBERS = frozenset({"", "na", "none", "notapplicable"})
 
 DEFAULT_WORKBOOK_FILE = os.getenv("TARGET_WORKBOOK_FILE")
 DEFAULT_WORKSHEET_NAME = os.getenv("TARGET_WORKSHEET")
@@ -135,7 +147,7 @@ SCRIPT_ROOT = next(
 if str(SCRIPT_ROOT) not in sys.path:
     sys.path.insert(0, str(SCRIPT_ROOT))
 
-from script_credentials import get_agile_credentials
+from script_credentials import credentials_file, get_agile_credentials
 SHEET_DATE_FORMATS = ("%d %b %Y", "%d %B %Y", "%m/%d/%Y", "%Y-%m-%d", "%d/%m/%Y")
 EMAIL_CELL_STYLE = (
     "border:1px solid #808080;padding:6px 10px;"
@@ -414,21 +426,45 @@ def parse_args() -> argparse.Namespace:
         help="Open the reminder email as an Outlook draft instead of sending it.",
     )
     parser.add_argument("--reminder-to", default=DEFAULT_REMINDER_TO, help="Semicolon-separated reminder recipients.")
-    parser.add_argument("--reminder-cc", default=DEFAULT_REMINDER_CC, help="Semicolon-separated reminder CC recipients.")
-    parser.add_argument("--reminder-bcc", default=DEFAULT_REMINDER_BCC, help="Semicolon-separated reminder BCC recipients.")
+    parser.add_argument(
+        "--reminder-cc",
+        default=DEFAULT_REMINDER_CC,
+        help="Semicolon-separated reminder CC recipients.",
+    )
+    parser.add_argument(
+        "--reminder-bcc",
+        default=DEFAULT_REMINDER_BCC,
+        help="Semicolon-separated reminder BCC recipients.",
+    )
     parser.add_argument(
         "--crf-preview-reminder",
         action="store_true",
         help="Open the CRF reminder email as an Outlook draft instead of sending it.",
     )
-    parser.add_argument("--crf-reminder-to", default=DEFAULT_CRF_REMINDER_TO, help="Semicolon-separated CRF reminder recipients.")
-    parser.add_argument("--crf-reminder-cc", default=DEFAULT_CRF_REMINDER_CC, help="Semicolon-separated CRF reminder CC recipients.")
-    parser.add_argument("--crf-reminder-bcc", default=DEFAULT_CRF_REMINDER_BCC, help="Semicolon-separated CRF reminder BCC recipients.")
+    parser.add_argument(
+        "--crf-reminder-to",
+        default=DEFAULT_CRF_REMINDER_TO,
+        help="Semicolon-separated CRF reminder recipients.",
+    )
+    parser.add_argument(
+        "--crf-reminder-cc",
+        default=DEFAULT_CRF_REMINDER_CC,
+        help="Semicolon-separated CRF reminder CC recipients.",
+    )
+    parser.add_argument(
+        "--crf-reminder-bcc",
+        default=DEFAULT_CRF_REMINDER_BCC,
+        help="Semicolon-separated CRF reminder BCC recipients.",
+    )
     return parser.parse_args()
 
 
 def normalize_key(name: str) -> str:
     return "".join(ch.lower() for ch in name if ch.isalnum())
+
+
+def is_unusable_tracking_number(value: str) -> bool:
+    return normalize_key(value) in UNUSABLE_TRACKING_NUMBERS
 
 
 def collapse_text(value: str) -> str:
@@ -588,6 +624,45 @@ def clear_existing_conditional_formatting_for_columns(
 
     for key in to_remove:
         del cf_rules[key]
+
+
+def refresh_delta_conditional_formatting(
+    worksheet,
+    start_row: int,
+    end_row: int,
+    submitted_column: str,
+    released_column: str,
+    submitted_delta_column: str,
+    released_delta_column: str,
+    delta_columns: List[str],
+) -> None:
+    if end_row < start_row:
+        return
+
+    clear_existing_conditional_formatting_for_columns(
+        worksheet,
+        start_row,
+        end_row,
+        delta_columns,
+    )
+    apply_conditional_formatting(
+        worksheet,
+        f"{submitted_delta_column}{start_row}:{submitted_delta_column}{end_row}",
+        (
+            f"AND(ISNUMBER(${submitted_delta_column}{start_row}),"
+            f"${submitted_delta_column}{start_row}>=2,"
+            f'${submitted_column}{start_row}="")'
+        ),
+    )
+    apply_conditional_formatting(
+        worksheet,
+        f"{released_delta_column}{start_row}:{released_delta_column}{end_row}",
+        (
+            f'AND(${submitted_column}{start_row}<>"",'
+            f'${released_column}{start_row}="",'
+            f"TODAY()-${submitted_column}{start_row}>=3)"
+        ),
+    )
 
 
 def load_json_state(state_file: Path) -> Dict[str, bool]:
@@ -758,7 +833,10 @@ def send_crf_reminder_email(
         return False
 
     if not to_recipients.strip():
-        print("No CRF reminder email created: reminder recipients are empty. Use --crf-reminder-to or set CRF_REMINDER_TO.")
+        print(
+            "No CRF reminder email created: reminder recipients are empty. "
+            "Use --crf-reminder-to or set CRF_REMINDER_TO."
+        )
         return False
 
     outlook = dispatch_outlook_application()
@@ -805,12 +883,13 @@ def collect_self_test_results(
     results: List[SelfTestResult] = []
 
     try:
+        agile_credentials_file = credentials_file(Path(__file__))
         agile_user, agile_pass = load_agile_credentials()
         results.append(
             SelfTestResult(
                 label="Agile credentials file",
                 ok=True,
-                detail=f"Loaded from {AGILE_CREDENTIALS_FILE.name}.",
+                detail=f"Loaded from {agile_credentials_file}.",
             )
         )
         results.append(
@@ -998,6 +1077,12 @@ def extract_status_dates(
         if inspect:
             print(f"Row {index} fields: {fields}")
 
+        explicit_released_date = find_first_value(
+            fields, RELEASED_DATE_FIELD_CANDIDATES
+        )
+        if explicit_released_date:
+            released_matches.append((2, explicit_released_date))
+
         action_value = find_first_value(fields, ACTION_FIELD_CANDIDATES) or ""
         time_value = find_first_value(fields, TIME_FIELD_CANDIDATES)
         if not time_value:
@@ -1009,12 +1094,16 @@ def extract_status_dates(
             if field_key in fields and fields[field_key]:
                 status_candidates.append(fields[field_key])
 
+        is_status_change = "changestatus" in normalize_key(action_value)
+        if is_status_change:
+            details_value = find_first_value(fields, DETAILS_FIELD_CANDIDATES)
+            if details_value:
+                status_candidates.append(details_value)
+
         if not status_candidates:
             continue
 
-        row_weight = 0
-        if "changestatus" in normalize_key(action_value):
-            row_weight = 1
+        row_weight = 1 if is_status_change else 0
 
         if any(contains_status_name(value, "submitted") for value in status_candidates):
             submitted_matches.append((row_weight, time_value))
@@ -1046,6 +1135,11 @@ def fetch_eco_dates(
     inspect: bool,
 ) -> EcoDates:
     errors: List[str] = []
+    submitted_date: Optional[str] = None
+    released_date: Optional[str] = None
+    matched_classes: List[str] = []
+    matched_tables: List[str] = []
+    first_nonempty_source: Optional[tuple[str, str]] = None
 
     for class_identifier in class_identifiers:
         for table_identifier in table_identifiers:
@@ -1058,22 +1152,48 @@ def fetch_eco_dates(
             if not rows:
                 continue
 
-            submitted_date, released_date = extract_status_dates(rows, inspect=inspect)
-            if submitted_date or released_date:
+            if first_nonempty_source is None:
+                first_nonempty_source = (class_identifier, table_identifier)
+
+            table_submitted_date, table_released_date = extract_status_dates(
+                rows, inspect=inspect
+            )
+            found_date = False
+            if submitted_date is None and table_submitted_date:
+                submitted_date = table_submitted_date
+                found_date = True
+            if released_date is None and table_released_date:
+                released_date = table_released_date
+                found_date = True
+            if found_date:
+                if class_identifier not in matched_classes:
+                    matched_classes.append(class_identifier)
+                if table_identifier not in matched_tables:
+                    matched_tables.append(table_identifier)
+
+            if submitted_date and released_date:
                 return EcoDates(
                     submitted_date=submitted_date,
                     released_date=released_date,
-                    class_identifier=class_identifier,
-                    table_identifier=table_identifier,
+                    class_identifier=", ".join(matched_classes),
+                    table_identifier=", ".join(matched_tables),
                 )
 
-            if inspect:
-                return EcoDates(
-                    submitted_date=None,
-                    released_date=None,
-                    class_identifier=class_identifier,
-                    table_identifier=table_identifier,
-                )
+    if submitted_date or released_date:
+        return EcoDates(
+            submitted_date=submitted_date,
+            released_date=released_date,
+            class_identifier=", ".join(matched_classes),
+            table_identifier=", ".join(matched_tables),
+        )
+
+    if inspect and first_nonempty_source:
+        return EcoDates(
+            submitted_date=None,
+            released_date=None,
+            class_identifier=first_nonempty_source[0],
+            table_identifier=first_nonempty_source[1],
+        )
 
     error_text = "\n".join(errors[-5:]) if errors else "No matching workflow rows found."
     raise RuntimeError(
@@ -1127,52 +1247,63 @@ def update_workbook_dates(
         workbook = None
         try:
             updated_rows = 0
+            skipped_released_rows = 0
+            skipped_unusable_rows = 0
             eco_cache: Dict[str, EcoDates] = {}
             today_sg = singapore_today()
             reminders: List[ReminderItem] = []
             reminder_state = load_reminder_state()
             sent_reminder_keys: List[str] = []
-            agile_client = create_agile_client_from_file()
+            agile_client: Optional[AgileEcoClient] = None
             workbook = load_workbook(workbook_path)
             worksheet = workbook[worksheet_name] if worksheet_name else workbook.active
 
             for row_idx in range(start_row, worksheet.max_row + 1):
                 eco_value = worksheet[f"{columns.eco}{row_idx}"].value
-                spec_award_date = parse_sheet_date(worksheet[f"{columns.spec_award}{row_idx}"].value)
+                existing_released_date = parse_sheet_date(
+                    worksheet[f"{columns.released}{row_idx}"].value
+                )
+                spec_award_date = parse_sheet_date(
+                    worksheet[f"{columns.spec_award}{row_idx}"].value
+                )
                 system_number_value = worksheet[f"A{row_idx}"].value
-                system_number = "" if system_number_value is None else str(system_number_value).strip()
+                system_number = (
+                    "" if system_number_value is None else str(system_number_value).strip()
+                )
                 eco_number = "" if eco_value is None else str(eco_value).strip()
 
-                if not eco_number or eco_number.upper() in {"NA", "N/A", "NONE"}:
-                    log_event(
-                        f"Skipping row {row_idx}: ECO value is empty or not usable ({eco_number or 'blank'}).",
-                        SYNC_LOG_FILE,
-                    )
+                if existing_released_date:
+                    skipped_released_rows += 1
                     continue
 
-                result: Optional[EcoDates] = None
-                if eco_number:
-                    if eco_number not in eco_cache:
-                        try:
-                            eco_cache[eco_number] = fetch_eco_dates(
-                                client=agile_client,
-                                eco_number=eco_number,
-                                class_identifiers=class_identifiers,
-                                table_identifiers=table_identifiers,
-                                inspect=False,
-                            )
-                        except RuntimeError as exc:
-                            log_event(
-                                f"Row {row_idx}: ECO lookup failed for {eco_number}; treating as not submitted yet. {exc}",
-                                SYNC_LOG_FILE,
-                            )
-                            eco_cache[eco_number] = EcoDates(
-                                submitted_date=None,
-                                released_date=None,
-                                class_identifier="",
-                                table_identifier="",
-                            )
-                    result = eco_cache[eco_number]
+                if is_unusable_tracking_number(eco_number):
+                    skipped_unusable_rows += 1
+                    continue
+
+                if eco_number not in eco_cache:
+                    try:
+                        if agile_client is None:
+                            agile_client = create_agile_client_from_file()
+                        eco_cache[eco_number] = fetch_eco_dates(
+                            client=agile_client,
+                            eco_number=eco_number,
+                            class_identifiers=class_identifiers,
+                            table_identifiers=table_identifiers,
+                            inspect=False,
+                        )
+                    except RuntimeError as exc:
+                        log_event(
+                            f"Row {row_idx}: ECO lookup failed for {eco_number}; "
+                            f"treating as not submitted yet. {exc}",
+                            SYNC_LOG_FILE,
+                        )
+                        eco_cache[eco_number] = EcoDates(
+                            submitted_date=None,
+                            released_date=None,
+                            class_identifier="",
+                            table_identifier="",
+                        )
+                result = eco_cache[eco_number]
 
                 submitted_date_text = result.submitted_date if result else ""
                 released_date_text = result.released_date if result else ""
@@ -1241,26 +1372,20 @@ def update_workbook_dates(
                     SYNC_LOG_FILE,
                 )
 
-            clear_existing_conditional_formatting_for_columns(
+            refresh_delta_conditional_formatting(
                 worksheet,
                 start_row,
                 worksheet.max_row,
+                columns.submitted,
+                columns.released,
+                columns.submitted_delta,
+                columns.released_delta,
                 [
                     columns.submitted_delta,
                     columns.released_delta,
                     columns.submitted_delta_excl_weekend,
                     columns.released_delta_excl_weekend,
                 ],
-            )
-            apply_conditional_formatting(
-                worksheet,
-                f"{columns.submitted_delta}{start_row}:{columns.submitted_delta}{worksheet.max_row}",
-                f'AND(ISNUMBER(${columns.submitted_delta}{start_row}),${columns.submitted_delta}{start_row}>=2,${columns.submitted}{start_row}="")',
-            )
-            apply_conditional_formatting(
-                worksheet,
-                f"{columns.released_delta}{start_row}:{columns.released_delta}{worksheet.max_row}",
-                f'AND(${columns.submitted}{start_row}<>"",${columns.released}{start_row}="",TODAY()-${columns.submitted}{start_row}>=3)',
             )
 
             save_workbook_with_retry(
@@ -1298,7 +1423,12 @@ def update_workbook_dates(
         for key in sent_reminder_keys:
             reminder_state[key] = True
         save_reminder_state(reminder_state)
-    log_event(f"Workbook updated: {workbook_file}", SYNC_LOG_FILE)
+    log_event(
+        f"Workbook updated: {workbook_file}; rows updated={updated_rows}; "
+        f"rows skipped (already released)={skipped_released_rows}; "
+        f"rows skipped (blank/not applicable)={skipped_unusable_rows}",
+        SYNC_LOG_FILE,
+    )
     return updated_rows
 
 
@@ -1347,50 +1477,59 @@ def update_crf_workbook_dates(
         workbook = None
         try:
             updated_rows = 0
+            skipped_released_rows = 0
+            skipped_unusable_rows = 0
             crf_cache: Dict[str, EcoDates] = {}
             today_sg = singapore_today()
             reminders: List[CrfReminderItem] = []
             reminder_state = load_crf_reminder_state()
             sent_reminder_keys: List[str] = []
-            agile_client = create_agile_client_from_file()
+            agile_client: Optional[AgileEcoClient] = None
             workbook = load_workbook(workbook_path)
             worksheet = workbook[worksheet_name] if worksheet_name else workbook.active
 
             for row_idx in range(start_row, worksheet.max_row + 1):
                 crf_value = worksheet[f"{columns.crf_number}{row_idx}"].value
-                received_date = parse_sheet_date(worksheet[f"{columns.received_date}{row_idx}"].value)
+                existing_released_date = parse_sheet_date(
+                    worksheet[f"{columns.released}{row_idx}"].value
+                )
+                received_date = parse_sheet_date(
+                    worksheet[f"{columns.received_date}{row_idx}"].value
+                )
                 crf_number = "" if crf_value is None else str(crf_value).strip()
 
-                if not crf_number or crf_number.upper() in {"NA", "N/A", "NONE"}:
-                    log_event(
-                        f"Skipping row {row_idx}: CRF value is empty or not usable ({crf_number or 'blank'}).",
-                        SYNC_LOG_FILE,
-                    )
+                if existing_released_date:
+                    skipped_released_rows += 1
                     continue
 
-                result: Optional[EcoDates] = None
-                if crf_number:
-                    if crf_number not in crf_cache:
-                        try:
-                            crf_cache[crf_number] = fetch_eco_dates(
-                                client=agile_client,
-                                eco_number=crf_number,
-                                class_identifiers=class_identifiers,
-                                table_identifiers=table_identifiers,
-                                inspect=False,
-                            )
-                        except RuntimeError as exc:
-                            log_event(
-                                f"Row {row_idx}: CRF lookup failed for {crf_number}; treating as not submitted yet. {exc}",
-                                SYNC_LOG_FILE,
-                            )
-                            crf_cache[crf_number] = EcoDates(
-                                submitted_date=None,
-                                released_date=None,
-                                class_identifier="",
-                                table_identifier="",
-                            )
-                    result = crf_cache[crf_number]
+                if is_unusable_tracking_number(crf_number):
+                    skipped_unusable_rows += 1
+                    continue
+
+                if crf_number not in crf_cache:
+                    try:
+                        if agile_client is None:
+                            agile_client = create_agile_client_from_file()
+                        crf_cache[crf_number] = fetch_eco_dates(
+                            client=agile_client,
+                            eco_number=crf_number,
+                            class_identifiers=class_identifiers,
+                            table_identifiers=table_identifiers,
+                            inspect=False,
+                        )
+                    except RuntimeError as exc:
+                        log_event(
+                            f"Row {row_idx}: CRF lookup failed for {crf_number}; "
+                            f"treating as not submitted yet. {exc}",
+                            SYNC_LOG_FILE,
+                        )
+                        crf_cache[crf_number] = EcoDates(
+                            submitted_date=None,
+                            released_date=None,
+                            class_identifier="",
+                            table_identifier="",
+                        )
+                result = crf_cache[crf_number]
 
                 submitted_date_text = result.submitted_date if result else ""
                 released_date_text = result.released_date if result else ""
@@ -1458,26 +1597,20 @@ def update_crf_workbook_dates(
                     SYNC_LOG_FILE,
                 )
 
-            clear_existing_conditional_formatting_for_columns(
+            refresh_delta_conditional_formatting(
                 worksheet,
                 start_row,
                 worksheet.max_row,
+                columns.submitted,
+                columns.released,
+                columns.submitted_delta,
+                columns.released_delta,
                 [
                     columns.submitted_delta,
                     columns.released_delta,
                     columns.submitted_delta_excl_weekend,
                     columns.released_delta_excl_weekend,
                 ],
-            )
-            apply_conditional_formatting(
-                worksheet,
-                f"{columns.submitted_delta}{start_row}:{columns.submitted_delta}{worksheet.max_row}",
-                f'AND(ISNUMBER(${columns.submitted_delta}{start_row}),${columns.submitted_delta}{start_row}>=2,${columns.submitted}{start_row}="")',
-            )
-            apply_conditional_formatting(
-                worksheet,
-                f"{columns.released_delta}{start_row}:{columns.released_delta}{worksheet.max_row}",
-                f'AND(${columns.submitted}{start_row}<>"",${columns.released}{start_row}="",TODAY()-${columns.submitted}{start_row}>=3)',
             )
 
             save_workbook_with_retry(
@@ -1515,7 +1648,12 @@ def update_crf_workbook_dates(
         for key in sent_reminder_keys:
             reminder_state[key] = True
         save_crf_reminder_state(reminder_state)
-    log_event(f"CRF workbook updated: {workbook_file}", SYNC_LOG_FILE)
+    log_event(
+        f"CRF workbook updated: {workbook_file}; rows updated={updated_rows}; "
+        f"rows skipped (already released)={skipped_released_rows}; "
+        f"rows skipped (blank/not applicable)={skipped_unusable_rows}",
+        SYNC_LOG_FILE,
+    )
     return updated_rows
 
 

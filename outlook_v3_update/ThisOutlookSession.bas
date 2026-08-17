@@ -78,17 +78,25 @@ Private Sub HandleCRFEmail(ByVal Mail As Outlook.MailItem)
         CRFSentTracker.Add crfKey, True
     End If
 
-    ForwardCRFEmail Mail, crfKey
-    MarkRelatedMailsRead crfKey
-
-    On Error Resume Next
-    ProcessCRFData crfKey, Mail.Subject, Mail.ReceivedTime
-    If Err.Number <> 0 Then
-        LogEvent "ERROR while processing CRF data: " & Err.Number & " - " & Err.Description & _
-                 " | Subject: " & Mail.Subject
-        Err.Clear
+    If ENABLE_CRF_FORWARDING Then
+        ForwardCRFEmail Mail, crfKey
+        MarkRelatedMailsRead crfKey
+    Else
+        LogEvent "CRF forwarding skipped; Power Automate owns CRF forwarding: " & crfKey
     End If
-    On Error GoTo ErrorHandler
+
+    If ENABLE_CRF_WORKBOOK_SYNC Then
+        On Error Resume Next
+        ProcessCRFData crfKey, Mail.Subject, Mail.ReceivedTime
+        If Err.Number <> 0 Then
+            LogEvent "ERROR while processing CRF data: " & Err.Number & " - " & Err.Description & _
+                     " | Subject: " & Mail.Subject
+            Err.Clear
+        End If
+        On Error GoTo ErrorHandler
+    Else
+        LogEvent "CRF workbook sync skipped; Power Automate owns the CRF workbook intake."
+    End If
 
     Exit Sub
 
@@ -168,14 +176,6 @@ Private Sub HandleSpecAwardEmail(ByVal Mail As Outlook.MailItem)
 
     LogEvent "SPEC AWARD detected: " & Mail.Subject
 
-    Dim fwd As Outlook.MailItem
-    Set fwd = Mail.Forward
-
-    Dim intro As String
-    intro = "Hi guys," & vbCrLf & vbCrLf & _
-            "Please help to release below GPs to Agile. Thanks." & vbCrLf & vbCrLf & _
-            "Best regards," & vbCrLf & "Sankar"
-
     Dim finalBody As String
     If Len(latestBody) < MIN_BODY_LENGTH Then
         finalBody = Mail.HTMLBody
@@ -183,26 +183,42 @@ Private Sub HandleSpecAwardEmail(ByVal Mail As Outlook.MailItem)
         finalBody = latestBody
     End If
 
-    fwd.HTMLBody = "<div style='font-family:Verdana; font-size:11pt;'>" & _
-                   Replace(intro, vbCrLf, "<br>") & _
-                   "<hr>" & finalBody & "</div>"
+    If ENABLE_SPEC_AWARD_FORWARDING Then
+        Dim fwd As Outlook.MailItem
+        Set fwd = Mail.Forward
 
-    fwd.To = FORWARD_TO
-    fwd.CC = FORWARD_CC
-    fwd.BCC = FORWARD_BCC
-    fwd.Send
+        Dim intro As String
+        intro = "Hi guys," & vbCrLf & vbCrLf & _
+                "Please help to release below GPs to Agile. Thanks." & vbCrLf & vbCrLf & _
+                "Best regards," & vbCrLf & "Sankar"
+
+        fwd.HTMLBody = "<div style='font-family:Verdana; font-size:11pt;'>" & _
+                       Replace(intro, vbCrLf, "<br>") & _
+                       "<hr>" & finalBody & "</div>"
+
+        fwd.To = FORWARD_TO
+        fwd.CC = FORWARD_CC
+        fwd.BCC = FORWARD_BCC
+        fwd.Send
+        LogEvent "Spec Award forwarded: " & Mail.Subject
+    Else
+        LogEvent "Spec Award forwarding skipped; Power Automate owns Spec Award forwarding: " & Mail.Subject
+    End If
 
     SpecAwardSentTracker.Add entryKey, True
-    LogEvent "Spec Award forwarded: " & Mail.Subject
 
-    On Error Resume Next
-    ProcessSpecAwardData latestBody, Mail.Subject, Mail.ReceivedTime
-    If Err.Number <> 0 Then
-        LogEvent "ERROR while processing Spec Award data: " & Err.Number & " - " & Err.Description & _
-                 " | Subject: " & Mail.Subject
-        Err.Clear
+    If ENABLE_SPEC_AWARD_WORKBOOK_SYNC Then
+        On Error Resume Next
+        ProcessSpecAwardData latestBody, Mail.Subject, Mail.ReceivedTime
+        If Err.Number <> 0 Then
+            LogEvent "ERROR while processing Spec Award data: " & Err.Number & " - " & Err.Description & _
+                     " | Subject: " & Mail.Subject
+            Err.Clear
+        End If
+        On Error GoTo ErrorHandler
+    Else
+        LogEvent "Spec Award workbook sync skipped; Power Automate owns the ECO workbook intake."
     End If
-    On Error GoTo ErrorHandler
 
     Exit Sub
 

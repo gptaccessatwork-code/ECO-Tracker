@@ -1,5 +1,11 @@
 # ECO Tracker Scripts
 
+## Power Automate migration
+
+See [POWER_AUTOMATE_MIGRATION.md](POWER_AUTOMATE_MIGRATION.md) for the phased
+migration plan, the first CRF HTTP flow, retry/deduplication rules, and the JSON
+request schemas in `power_automate/`.
+
 This folder contains two main scripts:
 
 - `excel_to_sharepoint.py`
@@ -108,6 +114,15 @@ This script updates the tracker workbook in place by:
 - applying overdue highlighting
 - sending reminder emails for overdue rows
 
+For efficient repeat runs, rows that already contain a valid Released Date are
+left unchanged and are not looked up in Agile. Blank and not-applicable ECO
+values are also ignored; matching is case-insensitive and accepts punctuation
+variants such as `NA`, `N/A`, `N.A.`, and `Not Applicable`.
+
+Date lookup uses Agile History first. If History supplies only one workflow
+date, the script continues through its fallback tables and can read the
+authoritative `Date Released` value from Cover Page.
+
 Default workbook columns:
 
 - `A`: System Number
@@ -184,6 +199,13 @@ This checks items such as:
 - workbook file existence
 - worksheet availability
 - reminder recipient configuration
+
+Run the offline regression tests without changing a workbook or contacting
+Agile:
+
+```powershell
+python -m unittest discover -s tests -v
+```
 
 Preview the reminder email as an Outlook draft instead of sending it:
 

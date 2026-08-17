@@ -1,0 +1,55 @@
+{
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "eventType",
+    "eventId",
+    "sentAt",
+    "items"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "type": "string",
+      "enum": [
+        "1.0"
+      ]
+    },
+    "eventType": {
+      "type": "string",
+      "enum": [
+        "spec-award.received"
+      ]
+    },
+    "eventId": {
+      "type": "string",
+      "minLength": 1
+    },
+    "sentAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "items": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "systemNumber",
+          "specAwardDate"
+        ],
+        "properties": {
+          "systemNumber": {
+            "type": "string",
+            "minLength": 1
+          },
+          "specAwardDate": {
+            "type": "string",
+            "format": "date"
+          }
+        }
+      }
+    }
+  }
+}
