@@ -75,6 +75,32 @@ class TrackingNumberTests(unittest.TestCase):
             with self.subTest(value=value):
                 self.assertFalse(subject.is_unusable_tracking_number(value))
 
+    def test_only_explicit_not_applicable_values_request_delta_cleanup(self) -> None:
+        for value in ("NA", "n/a", "N.A.", "None", "Not Applicable"):
+            with self.subTest(value=value):
+                self.assertTrue(subject.is_not_applicable_tracking_number(value))
+
+        self.assertFalse(subject.is_not_applicable_tracking_number(""))
+        self.assertFalse(subject.is_not_applicable_tracking_number("CA90662HB"))
+
+    def test_delta_cleanup_preserves_non_delta_cells(self) -> None:
+        workbook = Workbook()
+        worksheet = workbook.active
+        worksheet["C2"] = "N/A"
+        worksheet["E2"] = 14
+        worksheet["F2"] = 10
+        worksheet["H2"] = 14
+        worksheet["I2"] = 10
+        worksheet["J2"] = "Slot has been cancelled by AMAT."
+
+        subject.clear_row_delta_cells(worksheet, 2, ["E", "F", "H", "I"])
+
+        self.assertEqual(worksheet["C2"].value, "N/A")
+        for column in ("E", "F", "H", "I"):
+            self.assertIsNone(worksheet[f"{column}2"].value)
+        self.assertEqual(worksheet["J2"].value, "Slot has been cancelled by AMAT.")
+        workbook.close()
+
 
 class SelfTestTests(unittest.TestCase):
     def test_credentials_result_uses_shared_credentials_path(self) -> None:
@@ -206,7 +232,7 @@ class ConditionalFormattingTests(unittest.TestCase):
             formulas,
             [
                 'AND(ISNUMBER($E2),$E2>=2,$D2="")',
-                'AND($D2<>"",$G2="",TODAY()-$D2>=3)',
+                'AND(ISNUMBER($H2),$D2<>"",$G2="",TODAY()-$D2>=3)',
             ],
         )
         workbook.close()

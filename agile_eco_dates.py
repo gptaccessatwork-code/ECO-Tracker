@@ -88,7 +88,7 @@ RELEASED_DATE_FIELD_CANDIDATES = [
     "releaseddate",
 ]
 
-UNUSABLE_TRACKING_NUMBERS = frozenset({"", "na", "none", "notapplicable"})
+NOT_APPLICABLE_TRACKING_NUMBERS = frozenset({"na", "none", "notapplicable"})
 
 DEFAULT_WORKBOOK_FILE = os.getenv("TARGET_WORKBOOK_FILE")
 DEFAULT_WORKSHEET_NAME = os.getenv("TARGET_WORKSHEET")
@@ -464,7 +464,12 @@ def normalize_key(name: str) -> str:
 
 
 def is_unusable_tracking_number(value: str) -> bool:
-    return normalize_key(value) in UNUSABLE_TRACKING_NUMBERS
+    normalized_value = normalize_key(value)
+    return not normalized_value or normalized_value in NOT_APPLICABLE_TRACKING_NUMBERS
+
+
+def is_not_applicable_tracking_number(value: str) -> bool:
+    return normalize_key(value) in NOT_APPLICABLE_TRACKING_NUMBERS
 
 
 def collapse_text(value: str) -> str:
@@ -584,6 +589,17 @@ def clear_cell_style(cell) -> None:
     cell.alignment = CENTER_ALIGNMENT
 
 
+def clear_row_delta_cells(
+    worksheet,
+    row_number: int,
+    delta_columns: Iterable[str],
+) -> None:
+    for column in delta_columns:
+        cell = worksheet[f"{column}{row_number}"]
+        cell.value = None
+        clear_cell_style(cell)
+
+
 def write_date_cell(cell, value: Optional[str]) -> None:
     parsed = parse_sheet_date(value)
     if parsed is None:
@@ -658,7 +674,8 @@ def refresh_delta_conditional_formatting(
         worksheet,
         f"{released_delta_column}{start_row}:{released_delta_column}{end_row}",
         (
-            f'AND(${submitted_column}{start_row}<>"",'
+            f"AND(ISNUMBER(${released_delta_column}{start_row}),"
+            f'${submitted_column}{start_row}<>"",'
             f'${released_column}{start_row}="",'
             f"TODAY()-${submitted_column}{start_row}>=3)"
         ),
@@ -1249,6 +1266,7 @@ def update_workbook_dates(
             updated_rows = 0
             skipped_released_rows = 0
             skipped_unusable_rows = 0
+            cleared_not_applicable_rows = 0
             eco_cache: Dict[str, EcoDates] = {}
             today_sg = singapore_today()
             reminders: List[ReminderItem] = []
@@ -1271,6 +1289,21 @@ def update_workbook_dates(
                     "" if system_number_value is None else str(system_number_value).strip()
                 )
                 eco_number = "" if eco_value is None else str(eco_value).strip()
+
+                if is_not_applicable_tracking_number(eco_number):
+                    clear_row_delta_cells(
+                        worksheet,
+                        row_idx,
+                        [
+                            columns.submitted_delta,
+                            columns.submitted_delta_excl_weekend,
+                            columns.released_delta,
+                            columns.released_delta_excl_weekend,
+                        ],
+                    )
+                    skipped_unusable_rows += 1
+                    cleared_not_applicable_rows += 1
+                    continue
 
                 if existing_released_date:
                     skipped_released_rows += 1
@@ -1426,7 +1459,8 @@ def update_workbook_dates(
     log_event(
         f"Workbook updated: {workbook_file}; rows updated={updated_rows}; "
         f"rows skipped (already released)={skipped_released_rows}; "
-        f"rows skipped (blank/not applicable)={skipped_unusable_rows}",
+        f"rows skipped (blank/not applicable)={skipped_unusable_rows}; "
+        f"not-applicable rows with deltas cleared={cleared_not_applicable_rows}",
         SYNC_LOG_FILE,
     )
     return updated_rows

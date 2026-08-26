@@ -118,6 +118,8 @@ For efficient repeat runs, rows that already contain a valid Released Date are
 left unchanged and are not looked up in Agile. Blank and not-applicable ECO
 values are also ignored; matching is case-insensitive and accepts punctuation
 variants such as `NA`, `N/A`, `N.A.`, and `Not Applicable`.
+For these explicit not-applicable values, the four delta cells are cleared to
+empty cells while other row data, including Remarks, is preserved.
 
 Date lookup uses Agile History first. If History supplies only one workflow
 date, the script continues through its fallback tables and can read the

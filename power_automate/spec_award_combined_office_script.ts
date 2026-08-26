@@ -64,7 +64,7 @@ function main(
   const parsedSystemNumbers = extractSystemNumbers(latestHtml);
   if (parsedSystemNumbers.length === 0) {
     const reason =
-      "No HTML table containing Slot Number and Part Number data rows was found.";
+      "No HTML table containing Slot/Slot Number and Part Number data rows was found.";
     console.log(reason);
     return {
       detected: false,
@@ -340,8 +340,11 @@ function extractSystemNumbers(html: string): string[] {
     }
 
     const headerCells = extractCells(rows[0]);
-    const normalizedHeaders = headerCells.map(normalizeHeader);
-    const slotNumberIndex = normalizedHeaders.indexOf("slotnumber");
+    const normalizedHeaders = headerCells.map((value) => normalizeHeader(value));
+    const slotNumberIndex = findFirstHeaderIndex(normalizedHeaders, [
+      "slotnumber",
+      "slot"
+    ]);
     const partNumberIndex = normalizedHeaders.indexOf("partnumber");
 
     if (slotNumberIndex < 0 || partNumberIndex < 0) {
@@ -372,6 +375,18 @@ function extractSystemNumbers(html: string): string[] {
   }
 
   return [];
+}
+
+function findFirstHeaderIndex(
+  normalizedHeaders: string[],
+  acceptedHeaders: string[]
+): number {
+  for (let headerIndex = 0; headerIndex < normalizedHeaders.length; headerIndex += 1) {
+    if (acceptedHeaders.includes(normalizedHeaders[headerIndex])) {
+      return headerIndex;
+    }
+  }
+  return -1;
 }
 
 function extractCells(rowHtml: string): string[] {

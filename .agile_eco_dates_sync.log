@@ -23224,3 +23224,1290 @@ No matching workflow rows found.
 [2026-08-17 06:06:30] Workbook protection and editable-range metadata preserved.
 [2026-08-17 06:06:30] Workbook save complete.
 [2026-08-17 06:06:30] CRF workbook updated: C:\Users\kmageshkumar\OneDrive - Ichor Systems\AMAT SGP CRF Tracker.xlsx
+[2026-08-18 06:00:03] Workbook looks free. Waiting 30 seconds for OneDrive to settle...
+[2026-08-18 06:00:37] Row 360: ECO lookup failed for CA90450HB; treating as not submitted yet. Could not find Submitted/Released workflow dates for CA90450HB.
+Tried classes=['Change', 'ECO', 'Change Orders'] tables=['History', 'Cover Page', 'Workflow', 'Workflow Status']
+No matching workflow rows found.
+[2026-08-18 06:00:37] Updated row 360: ECO=CA90450HB Submitted=None Released=None
+[2026-08-18 06:00:37] Updated row 361: ECO=CA90450HB Submitted=None Released=None
+[2026-08-18 06:00:41] Row 443: ECO lookup failed for CA90605HB; treating as not submitted yet. Could not find Submitted/Released workflow dates for CA90605HB.
+Tried classes=['Change', 'ECO', 'Change Orders'] tables=['History', 'Cover Page', 'Workflow', 'Workflow Status']
+No matching workflow rows found.
+[2026-08-18 06:00:41] Updated row 443: ECO=CA90605HB Submitted=None Released=None
+[2026-08-18 06:00:41] Updated row 444: ECO=CA90605HB Submitted=None Released=None
+[2026-08-18 06:00:41] Workbook looks free. Waiting 30 seconds for OneDrive to settle...
+[2026-08-18 06:01:11] Saving workbook to C:\Users\kmageshkumar\OneDrive - Ichor Systems\AMAT SGP ECO Tracker.xlsx...
+[2026-08-18 06:01:11] Workbook protection and editable-range metadata preserved.
+[2026-08-18 06:01:11] Workbook save complete.
+[2026-08-18 06:01:12] Workbook updated: C:\Users\kmageshkumar\OneDrive - Ichor Systems\AMAT SGP ECO Tracker.xlsx; rows updated=4; rows skipped (already released)=510; rows skipped (blank/not applicable)=79
+[2026-08-18 06:01:12] Workbook looks free. Waiting 30 seconds for OneDrive to settle...
+[2026-08-18 06:01:47] Row 2: CRF lookup failed for 1392045; treating as not submitted yet. Could not find Submitted/Released workflow dates for 1392045.
+Tried classes=['Change', 'ECO', 'Change Orders'] tables=['History', 'Cover Page', 'Workflow', 'Workflow Status']
+No matching workflow rows found.
+[2026-08-18 06:01:47] Updated row 2: CRF=1392045 Submitted=None Released=None
+[2026-08-18 06:01:49] Row 3: CRF lookup failed for 1392046; treating as not submitted yet. Could not find Submitted/Released workflow dates for 1392046.
+Tried classes=['Change', 'ECO', 'Change Orders'] tables=['History', 'Cover Page', 'Workflow', 'Workflow Status']
+No matching workflow rows found.
+[2026-08-18 06:01:49] Updated row 3: CRF=1392046 Submitted=None Released=None
+[2026-08-18 06:01:52] Row 4: CRF lookup failed for 1392048; treating as not submitted yet. Could not find Submitted/Released workflow dates for 1392048.
+Tried classes=['Change', 'ECO', 'Change Orders'] tables=['History', 'Cover Page', 'Workflow', 'Workflow Status']
+No matching workflow rows found.
+[2026-08-18 06:01:52] Updated row 4: CRF=1392048 Submitted=None Released=None
+[2026-08-18 06:01:55] Row 5: CRF lookup failed for 1382229; treating as not submitted yet. Could not find Submitted/Released workflow dates for 1382229.
+Tried classes=['Change', 'ECO', 'Change Orders'] tables=['History', 'Cover Page', 'Workflow', 'Workflow Status']
+No matching workflow rows found.
+[2026-08-18 06:01:55] Updated row 5: CRF=1382229 Submitted=None Released=None
+[2026-08-18 06:01:58] Row 6: CRF lookup failed for 1387625; treating as not submitted yet. Could not find Submitted/Released workflow dates for 1387625.
+Tried classes=['Change', 'ECO', 'Change Orders'] tables=['History', 'Cover Page', 'Workflow', 'Workflow Status']
+No matching workflow rows found.
+[2026-08-18 06:01:58] Updated row 6: CRF=1387625 Submitted=None Released=None
+[2026-08-18 06:02:01] Row 7: CRF lookup failed for 1394327; treating as not submitted yet. Could not find Submitted/Released workflow dates for 1394327.
+Tried classes=['Change', 'ECO', 'Change Orders'] tables=['History', 'Cover Page', 'Workflow', 'Workflow Status']
+No matching workflow rows found.
+[2026-08-18 06:02:01] Updated row 7: CRF=1394327 Submitted=None Released=None
+[2026-08-18 06:02:03] Row 8: CRF lookup failed for 1393125; treating as not submitted yet. Could not find Submitted/Released workflow dates for 1393125.
+Tried classes=['Change', 'ECO', 'Change Orders'] tables=['History', 'Cover Page', 'Workflow', 'Workflow Status']
+No matching workflow rows found.
+[2026-08-18 06:02:03] Updated row 8: CRF=1393125 Submitted=None Released=None
+[2026-08-18 06:02:06] Row 9: CRF lookup failed for 1397033; treating as not submitted yet. Could not find Submitted/Released workflow dates for 1397033.
+Tried classes=['Change', 'ECO', 'Change Orders'] tables=['History', 'Cover Page', 'Workflow', 'Workflow Status']
+No matching workflow rows found.
+[2026-08-18 06:02:06] Updated row 9: CRF=1397033 Submitted=None Released=None
+[2026-08-18 06:02:09] Row 10: CRF lookup failed for 1397034; treating as not submitted yet. Could not find Submitted/Released workflow dates for 1397034.
+Tried classes=['Change', 'ECO', 'Change Orders'] tables=['History', 'Cover Page', 'Workflow', 'Workflow Status']
+No matching workflow rows found.
+[2026-08-18 06:02:09] Updated row 10: CRF=1397034 Submitted=None Released=None
+[2026-08-18 06:02:09] Workbook looks free. Waiting 30 seconds for OneDrive to settle...
+[2026-08-18 06:02:39] Saving workbook to C:\Users\kmageshkumar\OneDrive - Ichor Systems\AMAT SGP CRF Tracker.xlsx...
+[2026-08-18 06:02:39] Workbook protection and editable-range metadata preserved.
+[2026-08-18 06:02:39] Workbook save complete.
+[2026-08-18 06:02:39] CRF workbook updated: C:\Users\kmageshkumar\OneDrive - Ichor Systems\AMAT SGP CRF Tracker.xlsx; rows updated=9; rows skipped (already released)=0; rows skipped (blank/not applicable)=0
+[2026-08-19 06:00:03] Workbook looks free. Waiting 30 seconds for OneDrive to settle...
+[2026-08-19 06:38:46] Row 360: ECO lookup failed for CA90450HB; treating as not submitted yet. Could not find Submitted/Released workflow dates for CA90450HB.
+Tried classes=['Change', 'ECO', 'Change Orders'] tables=['History', 'Cover Page', 'Workflow', 'Workflow Status']
+ECO/Workflow: ('Connection aborted.', RemoteDisconnected('Remote end closed connection without response'))
+Change Orders/Cover Page: ('Connection aborted.', RemoteDisconnected('Remote end closed connection without response'))
+Change Orders/Workflow Status: ('Connection aborted.', RemoteDisconnected('Remote end closed connection without response'))
+[2026-08-19 06:38:46] Updated row 360: ECO=CA90450HB Submitted=None Released=None
+[2026-08-19 06:38:46] Updated row 361: ECO=CA90450HB Submitted=None Released=None
+[2026-08-19 06:40:54] Row 443: ECO lookup failed for CA90605HB; treating as not submitted yet. Could not find Submitted/Released workflow dates for CA90605HB.
+Tried classes=['Change', 'ECO', 'Change Orders'] tables=['History', 'Cover Page', 'Workflow', 'Workflow Status']
+ECO/Workflow Status: HTTPConnectionPool(host='pagapps1.ichorsystems.com', port=7001): Max retries exceeded with url: /CoreService/services/Table (Caused by NewConnectionError("HTTPConnection(host='pagapps1.ichorsystems.com', port=7001): Failed to establish a new connection: [WinError 10061] No connection could be made because the target machine actively refused it"))
+Change Orders/History: HTTPConnectionPool(host='pagapps1.ichorsystems.com', port=7001): Max retries exceeded with url: /CoreService/services/Table (Caused by NewConnectionError("HTTPConnection(host='pagapps1.ichorsystems.com', port=7001): Failed to establish a new connection: [WinError 10061] No connection could be made because the target machine actively refused it"))
+Change Orders/Cover Page: HTTPConnectionPool(host='pagapps1.ichorsystems.com', port=7001): Max retries exceeded with url: /CoreService/services/Table (Caused by NewConnectionError("HTTPConnection(host='pagapps1.ichorsystems.com', port=7001): Failed to establish a new connection: [WinError 10061] No connection could be made because the target machine actively refused it"))
+Change Orders/Workflow: HTTPConnectionPool(host='pagapps1.ichorsystems.com', port=7001): Max retries exceeded with url: /CoreService/services/Table (Caused by NewConnectionError("HTTPConnection(host='pagapps1.ichorsystems.com', port=7001): Failed to establish a new connection: [WinError 10061] No connection could be made because the target machine actively refused it"))
+Change Orders/Workflow Status: HTTPConnectionPool(host='pagapps1.ichorsystems.com', port=7001): Max retries exceeded with url: /CoreService/services/Table (Caused by NewConnectionError("HTTPConnection(host='pagapps1.ichorsystems.com', port=7001): Failed to establish a new connection: [WinError 10061] No connection could be made because the target machine actively refused it"))
+[2026-08-19 06:40:54] Updated row 443: ECO=CA90605HB Submitted=None Released=None
+[2026-08-19 06:40:54] Updated row 444: ECO=CA90605HB Submitted=None Released=None
+[2026-08-19 06:40:54] Workbook looks free. Waiting 30 seconds for OneDrive to settle...
+[2026-08-19 06:41:24] Saving workbook to C:\Users\kmageshkumar\OneDrive - Ichor Systems\AMAT SGP ECO Tracker.xlsx...
+[2026-08-19 06:41:24] Workbook protection and editable-range metadata preserved.
+[2026-08-19 06:41:24] Workbook save complete.
+[2026-08-19 06:41:25] Workbook updated: C:\Users\kmageshkumar\OneDrive - Ichor Systems\AMAT SGP ECO Tracker.xlsx; rows updated=4; rows skipped (already released)=510; rows skipped (blank/not applicable)=79; not-applicable rows with deltas cleared=23
+[2026-08-19 06:41:25] Workbook looks free. Waiting 30 seconds for OneDrive to settle...
+[2026-08-19 06:41:59] Unhandled CRF workbook update error.
+[2026-08-19 06:41:59] Traceback (most recent call last):
+  File "C:\Users\kmageshkumar\AppData\Local\Programs\Python\Python313\Lib\site-packages\urllib3\connection.py", line 204, in _new_conn
+    sock = connection.create_connection(
+        (self._dns_host, self.port),
+    ...<2 lines>...
+        socket_options=self.socket_options,
+    )
+  File "C:\Users\kmageshkumar\AppData\Local\Programs\Python\Python313\Lib\site-packages\urllib3\util\connection.py", line 85, in create_connection
+    raise err
+  File "C:\Users\kmageshkumar\AppData\Local\Programs\Python\Python313\Lib\site-packages\urllib3\util\connection.py", line 73, in create_connection
+    sock.connect(sa)
+    ~~~~~~~~~~~~^^^^
+ConnectionRefusedError: [WinError 10061] No connection could be made because the target machine actively refused it
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\Users\kmageshkumar\AppData\Local\Programs\Python\Python313\Lib\site-packages\urllib3\connectionpool.py", line 788, in urlopen
+    response = self._make_request(
+        conn,
+    ...<10 lines>...
+        **response_kw,
+    )
+  File "C:\Users\kmageshkumar\AppData\Local\Programs\Python\Python313\Lib\site-packages\urllib3\connectionpool.py", line 493, in _make_request
+    conn.request(
+    ~~~~~~~~~~~~^
+        method,
+        ^^^^^^^
+    ...<6 lines>...
+        enforce_content_length=enforce_content_length,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\kmageshkumar\AppData\Local\Programs\Python\Python313\Lib\site-packages\urllib3\connection.py", line 500, in request
+    self.endheaders()
+    ~~~~~~~~~~~~~~~^^
+  File "C:\Users\kmageshkumar\AppData\Local\Programs\Python\Python313\Lib\http\client.py", line 1333, in endheaders
+    self._send_output(message_body, encode_chunked=encode_chunked)
+    ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\kmageshkumar\AppData\Local\Programs\Python\Python313\Lib\http\client.py", line 1093, in _send_output
+    self.send(msg)
+    ~~~~~~~~~^^^^^
+  File "C:\Users\kmageshkumar\AppData\Local\Programs\Python\Python313\Lib\http\client.py", line 1037, in send
+    self.connect()
+    ~~~~~~~~~~~~^^
+  File "C:\Users\kmageshkumar\AppData\Local\Programs\Python\Python313\Lib\site-packages\urllib3\connection.py", line 331, in connect
+    self.sock = self._new_conn()
+                ~~~~~~~~~~~~~~^^
+  File "C:\Users\kmageshkumar\AppData\Local\Programs\Python\Python313\Lib\site-packages\urllib3\connection.py", line 219, in _new_conn
+    raise NewConnectionError(
+        self, f"Failed to establish a new connection: {e}"
+    ) from e
+urllib3.exceptions.NewConnectionError: HTTPConnection(host='pagapps1.ichorsystems.com', port=7001): Failed to establish a new connection: [WinError 10061] No connection could be made because the target machine actively refused it
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\Users\kmageshkumar\AppData\Local\Programs\Python\Python313\Lib\site-packages\requests\adapters.py", line 696, in send
+    resp = conn.urlopen(
+        method=request.method,
+    ...<9 lines>...
+        chunked=chunked,
+    )
+  File "C:\Users\kmageshkumar\AppData\Local\Programs\Python\Python313\Lib\site-packages\urllib3\connectionpool.py", line 842, in urlopen
+    retries = retries.increment(
+        method, url, error=new_e, _pool=self, _stacktrace=sys.exc_info()[2]
+    )
+  File "C:\Users\kmageshkumar\AppData\Local\Programs\Python\Python313\Lib\site-packages\urllib3\util\retry.py", line 543, in increment
+    raise MaxRetryError(_pool, url, reason) from reason  # type: ignore[arg-type]
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+urllib3.exceptions.MaxRetryError: HTTPConnectionPool(host='pagapps1.ichorsystems.com', port=7001): Max retries exceeded with url: /CoreService/services/Table?wsdl (Caused by NewConnectionError("HTTPConnection(host='pagapps1.ichorsystems.com', port=7001): Failed to establish a new connection: [WinError 10061] No connection could be made because the target machine actively refused it"))
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\kmageshkumar\OneDrive - Ichor Systems\Scripts\ECO & CRF Tracker\agile_eco_dates.py", line 1546, in update_crf_workbook_dates
+    agile_client = create_agile_client_from_file()
+  File "C:\Users\kmageshkumar\OneDrive - Ichor Systems\Scripts\ECO & CRF Tracker\agile_eco_dates.py", line 735, in create_agile_client_from_file
+    return AgileEcoClient(agile_user, agile_pass)
+  File "C:\Users\kmageshkumar\OneDrive - Ichor Systems\Scripts\ECO & CRF Tracker\agile_eco_dates.py", line 229, in __init__
+    self.client = Client(AGILE_WSDL, transport=transport, settings=settings)
+                  ~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\kmageshkumar\AppData\Local\Programs\Python\Python313\Lib\site-packages\zeep\client.py", line 76, in __init__
+    self.wsdl = Document(wsdl, self.transport, settings=self.settings)
+                ~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\kmageshkumar\AppData\Local\Programs\Python\Python313\Lib\site-packages\zeep\wsdl\wsdl.py", line 84, in __init__
+    self.load(location)
+    ~~~~~~~~~^^^^^^^^^^
+  File "C:\Users\kmageshkumar\AppData\Local\Programs\Python\Python313\Lib\site-packages\zeep\wsdl\wsdl.py", line 87, in load
+    document = self._get_xml_document(location, _initial=True)
+  File "C:\Users\kmageshkumar\AppData\Local\Programs\Python\Python313\Lib\site-packages\zeep\wsdl\wsdl.py", line 152, in _get_xml_document
+    return load_external(
+        location,
+    ...<3 lines>...
+        _initial=_initial,
+    )
+  File "C:\Users\kmageshkumar\AppData\Local\Programs\Python\Python313\Lib\site-packages\zeep\loader.py", line 108, in load_external
+    content = transport.load(url)
+  File "C:\Users\kmageshkumar\AppData\Local\Programs\Python\Python313\Lib\site-packages\zeep\transports.py", line 132, in load
+    content = self._load_remote_data(url)
+  File "C:\Users\kmageshkumar\AppData\Local\Programs\Python\Python313\Lib\site-packages\zeep\transports.py", line 144, in _load_remote_data
+    response = self.session.get(url, timeout=self.load_timeout)
+  File "C:\Users\kmageshkumar\AppData\Local\Programs\Python\Python313\Lib\site-packages\requests\sessions.py", line 671, in get
+    return self.request("GET", url, params=params, **kwargs)
+           ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\kmageshkumar\AppData\Local\Programs\Python\Python313\Lib\site-packages\requests\sessions.py", line 651, in request
+    resp = self.send(prep, **send_kwargs)
+  File "C:\Users\kmageshkumar\AppData\Local\Programs\Python\Python313\Lib\site-packages\requests\sessions.py", line 784, in send
+    r = adapter.send(request, **kwargs)
+  File "C:\Users\kmageshkumar\AppData\Local\Programs\Python\Python313\Lib\site-packages\requests\adapters.py", line 729, in send
+    raise ConnectionError(e, request=request)
+requests.exceptions.ConnectionError: HTTPConnectionPool(host='pagapps1.ichorsystems.com', port=7001): Max retries exceeded with url: /CoreService/services/Table?wsdl (Caused by NewConnectionError("HTTPConnection(host='pagapps1.ichorsystems.com', port=7001): Failed to establish a new connection: [WinError 10061] No connection could be made because the target machine actively refused it"))
+[2026-08-19 09:40:51] Workbook looks free. Waiting 30 seconds for OneDrive to settle...
+[2026-08-19 09:41:31] Updated row 426: ECO=CA90754HB Submitted=13 Aug 2026 Released=18 Aug 2026
+[2026-08-19 09:41:35] Updated row 430: ECO=DSM26112 Submitted=28 Jul 2026 Released=31 Jul 2026
+[2026-08-19 09:41:35] Updated row 431: ECO=DSM26112 Submitted=28 Jul 2026 Released=31 Jul 2026
+[2026-08-19 09:41:35] Updated row 432: ECO=DSM26112 Submitted=28 Jul 2026 Released=31 Jul 2026
+[2026-08-19 09:41:44] Updated row 443: ECO=CA90605HB Submitted=18 Aug 2026 Released=None
+[2026-08-19 09:41:44] Updated row 444: ECO=CA90605HB Submitted=18 Aug 2026 Released=None
+[2026-08-19 09:41:46] Updated row 456: ECO=DSM26122 Submitted=29 Jul 2026 Released=31 Jul 2026
+[2026-08-19 09:41:46] Updated row 457: ECO=DSM26122 Submitted=29 Jul 2026 Released=31 Jul 2026
+[2026-08-19 09:41:46] Updated row 458: ECO=DSM26122 Submitted=29 Jul 2026 Released=31 Jul 2026
+[2026-08-19 09:41:46] Updated row 459: ECO=DSM26122 Submitted=29 Jul 2026 Released=31 Jul 2026
+[2026-08-19 09:41:46] Updated row 460: ECO=DSM26122 Submitted=29 Jul 2026 Released=31 Jul 2026
+[2026-08-19 09:41:47] Updated row 466: ECO=CA90616HB Submitted=29 Jul 2026 Released=30 Jul 2026
+[2026-08-19 09:41:49] Updated row 467: ECO=DSM26123 Submitted=04 Aug 2026 Released=05 Aug 2026
+[2026-08-19 09:41:49] Updated row 468: ECO=DSM26123 Submitted=04 Aug 2026 Released=05 Aug 2026
+[2026-08-19 09:41:49] Updated row 469: ECO=DSM26123 Submitted=04 Aug 2026 Released=05 Aug 2026
+[2026-08-19 09:41:50] Updated row 477: ECO=CA90677HB Submitted=29 Jul 2026 Released=31 Jul 2026
+[2026-08-19 09:41:50] Updated row 478: ECO=CA90677HB Submitted=29 Jul 2026 Released=31 Jul 2026
+[2026-08-19 09:41:54] Updated row 481: ECO=CA90667HB Submitted=29 Jul 2026 Released=30 Jul 2026
+[2026-08-19 09:42:01] Updated row 496: ECO=CA90648HB Submitted=29 Jul 2026 Released=31 Jul 2026
+[2026-08-19 09:42:01] Updated row 497: ECO=CA90648HB Submitted=29 Jul 2026 Released=31 Jul 2026
+[2026-08-19 09:42:01] Updated row 498: ECO=CA90648HB Submitted=29 Jul 2026 Released=31 Jul 2026
+[2026-08-19 09:42:01] Updated row 499: ECO=CA90648HB Submitted=29 Jul 2026 Released=31 Jul 2026
+[2026-08-19 09:42:06] Updated row 530: ECO=DSM26134 Submitted=29 Jul 2026 Released=30 Jul 2026
+[2026-08-19 09:42:06] Updated row 531: ECO=DSM26134 Submitted=29 Jul 2026 Released=30 Jul 2026
+[2026-08-19 09:42:06] Updated row 532: ECO=DSM26134 Submitted=29 Jul 2026 Released=30 Jul 2026
+[2026-08-19 09:42:06] Updated row 533: ECO=DSM26134 Submitted=29 Jul 2026 Released=30 Jul 2026
+[2026-08-19 09:42:06] Updated row 534: ECO=DSM26134 Submitted=29 Jul 2026 Released=30 Jul 2026
+[2026-08-19 09:42:09] Updated row 546: ECO=DSM26140 Submitted=30 Jul 2026 Released=31 Jul 2026
+[2026-08-19 09:42:09] Updated row 547: ECO=DSM26140 Submitted=30 Jul 2026 Released=31 Jul 2026
+[2026-08-19 09:42:09] Updated row 548: ECO=DSM26140 Submitted=30 Jul 2026 Released=31 Jul 2026
+[2026-08-19 09:42:09] Updated row 549: ECO=DSM26140 Submitted=30 Jul 2026 Released=31 Jul 2026
+[2026-08-19 09:42:09] Updated row 550: ECO=DSM26140 Submitted=30 Jul 2026 Released=31 Jul 2026
+[2026-08-19 09:42:10] Updated row 551: ECO=DSM26143 Submitted=30 Jul 2026 Released=04 Aug 2026
+[2026-08-19 09:42:10] Updated row 552: ECO=DSM26143 Submitted=30 Jul 2026 Released=04 Aug 2026
+[2026-08-19 09:42:10] Updated row 553: ECO=DSM26143 Submitted=30 Jul 2026 Released=04 Aug 2026
+[2026-08-19 09:42:10] Updated row 554: ECO=DSM26143 Submitted=30 Jul 2026 Released=04 Aug 2026
+[2026-08-19 09:42:10] Updated row 555: ECO=DSM26143 Submitted=30 Jul 2026 Released=04 Aug 2026
+[2026-08-19 09:42:12] Updated row 556: ECO=DSM26144 Submitted=31 Jul 2026 Released=04 Aug 2026
+[2026-08-19 09:42:12] Updated row 557: ECO=DSM26144 Submitted=31 Jul 2026 Released=04 Aug 2026
+[2026-08-19 09:42:12] Updated row 558: ECO=DSM26144 Submitted=31 Jul 2026 Released=04 Aug 2026
+[2026-08-19 09:42:12] Updated row 559: ECO=DSM26144 Submitted=31 Jul 2026 Released=04 Aug 2026
+[2026-08-19 09:42:12] Updated row 560: ECO=DSM26144 Submitted=31 Jul 2026 Released=04 Aug 2026
+[2026-08-19 09:42:14] Updated row 561: ECO=DSM26145 Submitted=05 Aug 2026 Released=07 Aug 2026
+[2026-08-19 09:42:16] Updated row 562: ECO=DSM26138 Submitted=30 Jul 2026 Released=04 Aug 2026
+[2026-08-19 09:42:16] Updated row 563: ECO=DSM26138 Submitted=30 Jul 2026 Released=04 Aug 2026
+[2026-08-19 09:42:16] Updated row 564: ECO=DSM26138 Submitted=30 Jul 2026 Released=04 Aug 2026
+[2026-08-19 09:42:18] Updated row 565: ECO=DSM26139 Submitted=30 Jul 2026 Released=30 Jul 2026
+[2026-08-19 09:42:18] Updated row 566: ECO=DSM26139 Submitted=30 Jul 2026 Released=30 Jul 2026
+[2026-08-19 09:42:18] Updated row 567: ECO=DSM26139 Submitted=30 Jul 2026 Released=30 Jul 2026
+[2026-08-19 09:42:18] Updated row 568: ECO=DSM26139 Submitted=30 Jul 2026 Released=30 Jul 2026
+[2026-08-19 09:42:18] Updated row 569: ECO=DSM26139 Submitted=30 Jul 2026 Released=30 Jul 2026
+[2026-08-19 09:42:20] Updated row 570: ECO=CA90703HB Submitted=30 Jul 2026 Released=30 Jul 2026
+[2026-08-19 09:42:20] Updated row 571: ECO=CA90703HB Submitted=30 Jul 2026 Released=30 Jul 2026
+[2026-08-19 09:42:20] Updated row 572: ECO=CA90703HB Submitted=30 Jul 2026 Released=30 Jul 2026
+[2026-08-19 09:42:22] Updated row 573: ECO=CA90725HB Submitted=31 Jul 2026 Released=01 Aug 2026
+[2026-08-19 09:42:22] Updated row 574: ECO=CA90725HB Submitted=31 Jul 2026 Released=01 Aug 2026
+[2026-08-19 09:42:22] Updated row 575: ECO=CA90725HB Submitted=31 Jul 2026 Released=01 Aug 2026
+[2026-08-19 09:42:24] Updated row 576: ECO=CA90697HB Submitted=30 Jul 2026 Released=30 Jul 2026
+[2026-08-19 09:42:24] Updated row 577: ECO=CA90697HB Submitted=30 Jul 2026 Released=30 Jul 2026
+[2026-08-19 09:42:24] Updated row 578: ECO=CA90697HB Submitted=30 Jul 2026 Released=30 Jul 2026
+[2026-08-19 09:42:25] Updated row 579: ECO=DSM26141 Submitted=31 Jul 2026 Released=04 Aug 2026
+[2026-08-19 09:42:25] Updated row 580: ECO=DSM26141 Submitted=31 Jul 2026 Released=04 Aug 2026
+[2026-08-19 09:42:25] Updated row 581: ECO=DSM26141 Submitted=31 Jul 2026 Released=04 Aug 2026
+[2026-08-19 09:42:27] Updated row 582: ECO=CA90710HB Submitted=30 Jul 2026 Released=01 Aug 2026
+[2026-08-19 09:42:27] Updated row 583: ECO=CA90710HB Submitted=30 Jul 2026 Released=01 Aug 2026
+[2026-08-19 09:42:27] Updated row 584: ECO=CA90710HB Submitted=30 Jul 2026 Released=01 Aug 2026
+[2026-08-19 09:42:28] Updated row 585: ECO=CA90698HB Submitted=30 Jul 2026 Released=30 Jul 2026
+[2026-08-19 09:42:28] Updated row 586: ECO=CA90698HB Submitted=30 Jul 2026 Released=30 Jul 2026
+[2026-08-19 09:42:28] Updated row 587: ECO=CA90698HB Submitted=30 Jul 2026 Released=30 Jul 2026
+[2026-08-19 09:42:30] Updated row 588: ECO=CA90701HB Submitted=30 Jul 2026 Released=30 Jul 2026
+[2026-08-19 09:42:30] Updated row 589: ECO=CA90701HB Submitted=30 Jul 2026 Released=30 Jul 2026
+[2026-08-19 09:42:30] Updated row 590: ECO=CA90701HB Submitted=30 Jul 2026 Released=30 Jul 2026
+[2026-08-19 09:42:31] Updated row 591: ECO=CA90743HB Submitted=31 Jul 2026 Released=01 Aug 2026
+[2026-08-19 09:42:32] Updated row 592: ECO=CA90699HB Submitted=04 Aug 2026 Released=06 Aug 2026
+[2026-08-19 09:42:32] Updated row 593: ECO=CA90699HB Submitted=04 Aug 2026 Released=06 Aug 2026
+[2026-08-19 09:42:32] Updated row 594: ECO=CA90699HB Submitted=04 Aug 2026 Released=06 Aug 2026
+[2026-08-19 09:42:34] Updated row 595: ECO=CA90767HB Submitted=04 Aug 2026 Released=05 Aug 2026
+[2026-08-19 09:42:34] Updated row 596: ECO=CA90767HB Submitted=04 Aug 2026 Released=05 Aug 2026
+[2026-08-19 09:42:34] Updated row 597: ECO=CA90767HB Submitted=04 Aug 2026 Released=05 Aug 2026
+[2026-08-19 09:42:35] Updated row 598: ECO=CA90761HB Submitted=01 Aug 2026 Released=04 Aug 2026
+[2026-08-19 09:42:35] Updated row 599: ECO=CA90761HB Submitted=01 Aug 2026 Released=04 Aug 2026
+[2026-08-19 09:42:37] Updated row 600: ECO=CA90766HB Submitted=01 Aug 2026 Released=04 Aug 2026
+[2026-08-19 09:42:37] Updated row 601: ECO=CA90766HB Submitted=01 Aug 2026 Released=04 Aug 2026
+[2026-08-19 09:42:37] Updated row 602: ECO=CA90766HB Submitted=01 Aug 2026 Released=04 Aug 2026
+[2026-08-19 09:42:37] Updated row 603: ECO=CA90766HB Submitted=01 Aug 2026 Released=04 Aug 2026
+[2026-08-19 09:42:38] Updated row 604: ECO=CA90763HB Submitted=04 Aug 2026 Released=05 Aug 2026
+[2026-08-19 09:42:40] Updated row 605: ECO=DSM26148 Submitted=01 Aug 2026 Released=04 Aug 2026
+[2026-08-19 09:42:40] Updated row 606: ECO=DSM26148 Submitted=01 Aug 2026 Released=04 Aug 2026
+[2026-08-19 09:42:40] Updated row 607: ECO=DSM26148 Submitted=01 Aug 2026 Released=04 Aug 2026
+[2026-08-19 09:42:41] Updated row 608: ECO=DSM26146 Submitted=01 Aug 2026 Released=04 Aug 2026
+[2026-08-19 09:42:41] Updated row 609: ECO=DSM26146 Submitted=01 Aug 2026 Released=04 Aug 2026
+[2026-08-19 09:42:41] Updated row 610: ECO=DSM26146 Submitted=01 Aug 2026 Released=04 Aug 2026
+[2026-08-19 09:42:43] Updated row 611: ECO=CA90787HB Submitted=04 Aug 2026 Released=05 Aug 2026
+[2026-08-19 09:42:43] Updated row 612: ECO=CA90787HB Submitted=04 Aug 2026 Released=05 Aug 2026
+[2026-08-19 09:42:44] Updated row 613: ECO=CA90780HB Submitted=03 Aug 2026 Released=05 Aug 2026
+[2026-08-19 09:42:44] Updated row 614: ECO=CA90780HB Submitted=03 Aug 2026 Released=05 Aug 2026
+[2026-08-19 09:42:44] Updated row 615: ECO=CA90780HB Submitted=03 Aug 2026 Released=05 Aug 2026
+[2026-08-19 09:42:46] Updated row 617: ECO=DSM26153 Submitted=04 Aug 2026 Released=05 Aug 2026
+[2026-08-19 09:42:46] Updated row 618: ECO=DSM26153 Submitted=04 Aug 2026 Released=05 Aug 2026
+[2026-08-19 09:42:46] Updated row 619: ECO=DSM26153 Submitted=04 Aug 2026 Released=05 Aug 2026
+[2026-08-19 09:42:47] Updated row 620: ECO=DSM26157 Submitted=12 Aug 2026 Released=13 Aug 2026
+[2026-08-19 09:42:47] Updated row 621: ECO=DSM26157 Submitted=12 Aug 2026 Released=13 Aug 2026
+[2026-08-19 09:42:47] Updated row 622: ECO=DSM26157 Submitted=12 Aug 2026 Released=13 Aug 2026
+[2026-08-19 09:42:49] Updated row 623: ECO=DSM26158 Submitted=05 Aug 2026 Released=07 Aug 2026
+[2026-08-19 09:42:49] Updated row 624: ECO=DSM26158 Submitted=05 Aug 2026 Released=07 Aug 2026
+[2026-08-19 09:42:49] Updated row 625: ECO=DSM26158 Submitted=05 Aug 2026 Released=07 Aug 2026
+[2026-08-19 09:42:50] Updated row 626: ECO=DSM26155 Submitted=04 Aug 2026 Released=05 Aug 2026
+[2026-08-19 09:42:52] Updated row 627: ECO=DSM26154 Submitted=05 Aug 2026 Released=07 Aug 2026
+[2026-08-19 09:42:52] Updated row 628: ECO=DSM26154 Submitted=05 Aug 2026 Released=07 Aug 2026
+[2026-08-19 09:42:52] Updated row 629: ECO=DSM26154 Submitted=05 Aug 2026 Released=07 Aug 2026
+[2026-08-19 09:42:52] Updated row 630: ECO=DSM26154 Submitted=05 Aug 2026 Released=07 Aug 2026
+[2026-08-19 09:42:53] Updated row 631: ECO=CA90839HB Submitted=07 Aug 2026 Released=11 Aug 2026
+[2026-08-19 09:42:53] Updated row 632: ECO=CA90839HB Submitted=07 Aug 2026 Released=11 Aug 2026
+[2026-08-19 09:42:53] Updated row 633: ECO=CA90839HB Submitted=07 Aug 2026 Released=11 Aug 2026
+[2026-08-19 09:42:53] Updated row 634: ECO=CA90839HB Submitted=07 Aug 2026 Released=11 Aug 2026
+[2026-08-19 09:42:55] Updated row 635: ECO=CA90814HB Submitted=05 Aug 2026 Released=06 Aug 2026
+[2026-08-19 09:42:55] Updated row 636: ECO=CA90814HB Submitted=05 Aug 2026 Released=06 Aug 2026
+[2026-08-19 09:42:55] Updated row 637: ECO=CA90814HB Submitted=05 Aug 2026 Released=06 Aug 2026
+[2026-08-19 09:42:56] Updated row 638: ECO=CA90840HB Submitted=07 Aug 2026 Released=11 Aug 2026
+[2026-08-19 09:42:56] Updated row 639: ECO=CA90840HB Submitted=07 Aug 2026 Released=11 Aug 2026
+[2026-08-19 09:42:56] Updated row 640: ECO=CA90840HB Submitted=07 Aug 2026 Released=11 Aug 2026
+[2026-08-19 09:42:58] Updated row 641: ECO=CA90819HB Submitted=05 Aug 2026 Released=06 Aug 2026
+[2026-08-19 09:42:58] Updated row 642: ECO=CA90819HB Submitted=05 Aug 2026 Released=06 Aug 2026
+[2026-08-19 09:42:58] Updated row 643: ECO=CA90819HB Submitted=05 Aug 2026 Released=06 Aug 2026
+[2026-08-19 09:43:00] Updated row 644: ECO=CA90830HB Submitted=11 Aug 2026 Released=12 Aug 2026
+[2026-08-19 09:43:01] Updated row 645: ECO=CA90812HB Submitted=13 Aug 2026 Released=15 Aug 2026
+[2026-08-19 09:43:03] Updated row 646: ECO=CA90821HB Submitted=05 Aug 2026 Released=06 Aug 2026
+[2026-08-19 09:43:06] Updated row 647: ECO=CA90950HB Submitted=08 Aug 2026 Released=11 Aug 2026
+[2026-08-19 09:43:06] Updated row 648: ECO=CA90950HB Submitted=08 Aug 2026 Released=11 Aug 2026
+[2026-08-19 09:43:08] Updated row 649: ECO=DSM26179 Submitted=07 Aug 2026 Released=11 Aug 2026
+[2026-08-19 09:43:09] Updated row 650: ECO=DSM26171 Submitted=08 Aug 2026 Released=11 Aug 2026
+[2026-08-19 09:43:09] Updated row 651: ECO=DSM26171 Submitted=08 Aug 2026 Released=11 Aug 2026
+[2026-08-19 09:43:09] Updated row 652: ECO=DSM26171 Submitted=08 Aug 2026 Released=11 Aug 2026
+[2026-08-19 09:43:09] Updated row 653: ECO=DSM26171 Submitted=08 Aug 2026 Released=11 Aug 2026
+[2026-08-19 09:43:09] Updated row 654: ECO=DSM26171 Submitted=08 Aug 2026 Released=11 Aug 2026
+[2026-08-19 09:43:11] Updated row 656: ECO=DSM26174 Submitted=07 Aug 2026 Released=11 Aug 2026
+[2026-08-19 09:43:11] Updated row 657: ECO=DSM26174 Submitted=07 Aug 2026 Released=11 Aug 2026
+[2026-08-19 09:43:11] Updated row 658: ECO=DSM26174 Submitted=07 Aug 2026 Released=11 Aug 2026
+[2026-08-19 09:43:12] Updated row 659: ECO=DSM26180 Submitted=08 Aug 2026 Released=11 Aug 2026
+[2026-08-19 09:43:12] Updated row 660: ECO=DSM26180 Submitted=08 Aug 2026 Released=11 Aug 2026
+[2026-08-19 09:43:12] Updated row 661: ECO=DSM26180 Submitted=08 Aug 2026 Released=11 Aug 2026
+[2026-08-19 09:43:12] Updated row 662: ECO=DSM26180 Submitted=08 Aug 2026 Released=11 Aug 2026
+[2026-08-19 09:43:14] Updated row 663: ECO=DSM26181 Submitted=08 Aug 2026 Released=11 Aug 2026
+[2026-08-19 09:43:14] Updated row 664: ECO=DSM26181 Submitted=08 Aug 2026 Released=11 Aug 2026
+[2026-08-19 09:43:14] Updated row 665: ECO=DSM26181 Submitted=08 Aug 2026 Released=11 Aug 2026
+[2026-08-19 09:43:14] Updated row 666: ECO=DSM26181 Submitted=08 Aug 2026 Released=11 Aug 2026
+[2026-08-19 09:43:14] Updated row 667: ECO=DSM26181 Submitted=08 Aug 2026 Released=11 Aug 2026
+[2026-08-19 09:43:15] Updated row 668: ECO=DSM26172 Submitted=10 Aug 2026 Released=12 Aug 2026
+[2026-08-19 09:43:15] Updated row 669: ECO=DSM26172 Submitted=10 Aug 2026 Released=12 Aug 2026
+[2026-08-19 09:43:15] Updated row 670: ECO=DSM26172 Submitted=10 Aug 2026 Released=12 Aug 2026
+[2026-08-19 09:43:15] Updated row 671: ECO=DSM26172 Submitted=10 Aug 2026 Released=12 Aug 2026
+[2026-08-19 09:43:15] Updated row 672: ECO=DSM26172 Submitted=10 Aug 2026 Released=12 Aug 2026
+[2026-08-19 09:43:17] Updated row 673: ECO=DSM26173 Submitted=08 Aug 2026 Released=11 Aug 2026
+[2026-08-19 09:43:18] Updated row 674: ECO=DSM26176 Submitted=08 Aug 2026 Released=11 Aug 2026
+[2026-08-19 09:43:18] Updated row 675: ECO=DSM26176 Submitted=08 Aug 2026 Released=11 Aug 2026
+[2026-08-19 09:43:18] Updated row 676: ECO=DSM26176 Submitted=08 Aug 2026 Released=11 Aug 2026
+[2026-08-19 09:43:20] Updated row 677: ECO=DSM26177 Submitted=10 Aug 2026 Released=15 Aug 2026
+[2026-08-19 09:43:20] Updated row 678: ECO=DSM26177 Submitted=10 Aug 2026 Released=15 Aug 2026
+[2026-08-19 09:43:20] Updated row 679: ECO=DSM26177 Submitted=10 Aug 2026 Released=15 Aug 2026
+[2026-08-19 09:43:21] Updated row 680: ECO=DSM26175 Submitted=08 Aug 2026 Released=11 Aug 2026
+[2026-08-19 09:43:21] Updated row 681: ECO=DSM26175 Submitted=08 Aug 2026 Released=11 Aug 2026
+[2026-08-19 09:43:21] Updated row 682: ECO=DSM26175 Submitted=08 Aug 2026 Released=11 Aug 2026
+[2026-08-19 09:43:23] Updated row 686: ECO=DSM26182 Submitted=08 Aug 2026 Released=11 Aug 2026
+[2026-08-19 09:43:23] Updated row 687: ECO=DSM26182 Submitted=08 Aug 2026 Released=11 Aug 2026
+[2026-08-19 09:43:23] Updated row 688: ECO=DSM26182 Submitted=08 Aug 2026 Released=11 Aug 2026
+[2026-08-19 09:43:30] Updated row 689: ECO=CA90974HB Submitted=11 Aug 2026 Released=14 Aug 2026
+[2026-08-19 09:43:30] Updated row 690: ECO=CA90974HB Submitted=11 Aug 2026 Released=14 Aug 2026
+[2026-08-19 09:43:30] Updated row 691: ECO=CA90974HB Submitted=11 Aug 2026 Released=14 Aug 2026
+[2026-08-19 09:43:30] Updated row 692: ECO=CA90974HB Submitted=11 Aug 2026 Released=14 Aug 2026
+[2026-08-19 09:43:32] Updated row 693: ECO=CA90968HB Submitted=10 Aug 2026 Released=12 Aug 2026
+[2026-08-19 09:43:32] Updated row 694: ECO=CA90968HB Submitted=10 Aug 2026 Released=12 Aug 2026
+[2026-08-19 09:43:35] Updated row 695: ECO=CA90981HB Submitted=11 Aug 2026 Released=12 Aug 2026
+[2026-08-19 09:43:35] Updated row 696: ECO=CA90981HB Submitted=11 Aug 2026 Released=12 Aug 2026
+[2026-08-19 09:43:35] Updated row 697: ECO=CA90981HB Submitted=11 Aug 2026 Released=12 Aug 2026
+[2026-08-19 09:43:35] Updated row 698: ECO=CA90981HB Submitted=11 Aug 2026 Released=12 Aug 2026
+[2026-08-19 09:43:37] Updated row 701: ECO=CA90983HB Submitted=11 Aug 2026 Released=12 Aug 2026
+[2026-08-19 09:43:40] Row 702: ECO lookup failed for CA90984HB; treating as not submitted yet. Could not find Submitted/Released workflow dates for CA90984HB.
+Tried classes=['Change', 'ECO', 'Change Orders'] tables=['History', 'Cover Page', 'Workflow', 'Workflow Status']
+No matching workflow rows found.
+[2026-08-19 09:43:40] Updated row 702: ECO=CA90984HB Submitted=None Released=None
+[2026-08-19 09:43:42] Updated row 703: ECO=DSM26185 Submitted=10 Aug 2026 Released=12 Aug 2026
+[2026-08-19 09:43:44] Updated row 704: ECO=CA90982HB Submitted=11 Aug 2026 Released=14 Aug 2026
+[2026-08-19 09:43:44] Updated row 705: ECO=CA90982HB Submitted=11 Aug 2026 Released=14 Aug 2026
+[2026-08-19 09:43:44] Updated row 706: ECO=CA90982HB Submitted=11 Aug 2026 Released=14 Aug 2026
+[2026-08-19 09:43:44] Updated row 707: ECO=CA90982HB Submitted=11 Aug 2026 Released=14 Aug 2026
+[2026-08-19 09:43:45] Updated row 708: ECO=DSM26194 Submitted=12 Aug 2026 Released=15 Aug 2026
+[2026-08-19 09:43:45] Updated row 709: ECO=DSM26194 Submitted=12 Aug 2026 Released=15 Aug 2026
+[2026-08-19 09:43:45] Updated row 710: ECO=DSM26194 Submitted=12 Aug 2026 Released=15 Aug 2026
+[2026-08-19 09:43:47] Updated row 711: ECO=DSM26195 Submitted=17 Aug 2026 Released=18 Aug 2026
+[2026-08-19 09:43:47] Updated row 712: ECO=DSM26195 Submitted=17 Aug 2026 Released=18 Aug 2026
+[2026-08-19 09:43:47] Updated row 713: ECO=DSM26195 Submitted=17 Aug 2026 Released=18 Aug 2026
+[2026-08-19 09:43:48] Updated row 714: ECO=DSM26187 Submitted=12 Aug 2026 Released=13 Aug 2026
+[2026-08-19 09:43:48] Updated row 715: ECO=DSM26187 Submitted=12 Aug 2026 Released=13 Aug 2026
+[2026-08-19 09:43:48] Updated row 716: ECO=DSM26187 Submitted=12 Aug 2026 Released=13 Aug 2026
+[2026-08-19 09:43:50] Updated row 717: ECO=DSM26188 Submitted=12 Aug 2026 Released=13 Aug 2026
+[2026-08-19 09:43:51] Updated row 718: ECO=DSM26191 Submitted=11 Aug 2026 Released=13 Aug 2026
+[2026-08-19 09:43:51] Updated row 719: ECO=DSM26191 Submitted=11 Aug 2026 Released=13 Aug 2026
+[2026-08-19 09:43:51] Updated row 720: ECO=DSM26191 Submitted=11 Aug 2026 Released=13 Aug 2026
+[2026-08-19 09:43:53] Updated row 721: ECO=DSM26184 Submitted=12 Aug 2026 Released=13 Aug 2026
+[2026-08-19 09:43:53] Updated row 722: ECO=DSM26184 Submitted=12 Aug 2026 Released=13 Aug 2026
+[2026-08-19 09:43:53] Updated row 723: ECO=DSM26184 Submitted=12 Aug 2026 Released=13 Aug 2026
+[2026-08-19 09:43:53] Updated row 724: ECO=DSM26184 Submitted=12 Aug 2026 Released=13 Aug 2026
+[2026-08-19 09:43:54] Updated row 725: ECO=DSM26102 Submitted=12 Aug 2026 Released=13 Aug 2026
+[2026-08-19 09:43:54] Updated row 726: ECO=DSM26102 Submitted=12 Aug 2026 Released=13 Aug 2026
+[2026-08-19 09:43:54] Updated row 727: ECO=DSM26102 Submitted=12 Aug 2026 Released=13 Aug 2026
+[2026-08-19 09:43:56] Updated row 728: ECO=DSM26190 Submitted=12 Aug 2026 Released=13 Aug 2026
+[2026-08-19 09:43:57] Updated row 729: ECO=DSM26196 Submitted=12 Aug 2026 Released=13 Aug 2026
+[2026-08-19 09:43:59] Updated row 730: ECO=DSM26186 Submitted=12 Aug 2026 Released=13 Aug 2026
+[2026-08-19 09:44:00] Updated row 731: ECO=DSM26189 Submitted=12 Aug 2026 Released=13 Aug 2026
+[2026-08-19 09:44:00] Updated row 732: ECO=DSM26189 Submitted=12 Aug 2026 Released=13 Aug 2026
+[2026-08-19 09:44:00] Updated row 733: ECO=DSM26189 Submitted=12 Aug 2026 Released=13 Aug 2026
+[2026-08-19 09:44:02] Updated row 734: ECO=DSM26193 Submitted=11 Aug 2026 Released=13 Aug 2026
+[2026-08-19 09:44:03] Updated row 735: ECO=DSM26192 Submitted=11 Aug 2026 Released=12 Aug 2026
+[2026-08-19 09:44:03] Updated row 736: ECO=DSM26192 Submitted=11 Aug 2026 Released=12 Aug 2026
+[2026-08-19 09:44:03] Updated row 737: ECO=DSM26192 Submitted=11 Aug 2026 Released=12 Aug 2026
+[2026-08-19 09:44:04] Updated row 738: ECO=CA91013HB Submitted=12 Aug 2026 Released=13 Aug 2026
+[2026-08-19 09:44:06] Updated row 739: ECO=DSM26197 Submitted=12 Aug 2026 Released=13 Aug 2026
+[2026-08-19 09:44:07] Updated row 740: ECO=DSM26200 Submitted=12 Aug 2026 Released=13 Aug 2026
+[2026-08-19 09:44:09] Updated row 741: ECO=DSM26199 Submitted=13 Aug 2026 Released=15 Aug 2026
+[2026-08-19 09:44:10] Updated row 742: ECO=CA91011HB Submitted=12 Aug 2026 Released=13 Aug 2026
+[2026-08-19 09:44:12] Updated row 743: ECO=CA91014HB Submitted=12 Aug 2026 Released=13 Aug 2026
+[2026-08-19 09:44:12] Updated row 744: ECO=CA91014HB Submitted=12 Aug 2026 Released=13 Aug 2026
+[2026-08-19 09:44:12] Updated row 745: ECO=CA91014HB Submitted=12 Aug 2026 Released=13 Aug 2026
+[2026-08-19 09:44:12] Updated row 746: ECO=CA91014HB Submitted=12 Aug 2026 Released=13 Aug 2026
+[2026-08-19 09:44:13] Updated row 747: ECO=CA91019HB Submitted=12 Aug 2026 Released=13 Aug 2026
+[2026-08-19 09:44:13] Updated row 748: ECO=CA91019HB Submitted=12 Aug 2026 Released=13 Aug 2026
+[2026-08-19 09:44:13] Updated row 749: ECO=CA91019HB Submitted=12 Aug 2026 Released=13 Aug 2026
+[2026-08-19 09:44:13] Updated row 750: ECO=CA91019HB Submitted=12 Aug 2026 Released=13 Aug 2026
+[2026-08-19 09:44:14] Updated row 751: ECO=CA91017HB Submitted=12 Aug 2026 Released=13 Aug 2026
+[2026-08-19 09:44:16] Updated row 752: ECO=CA91025HB Submitted=12 Aug 2026 Released=13 Aug 2026
+[2026-08-19 09:44:17] Updated row 753: ECO=CA91028HB Submitted=12 Aug 2026 Released=13 Aug 2026
+[2026-08-19 09:44:18] Updated row 754: ECO=CA91012HB Submitted=12 Aug 2026 Released=13 Aug 2026
+[2026-08-19 09:44:18] Updated row 755: ECO=CA91012HB Submitted=12 Aug 2026 Released=13 Aug 2026
+[2026-08-19 09:44:18] Updated row 756: ECO=CA91012HB Submitted=12 Aug 2026 Released=13 Aug 2026
+[2026-08-19 09:44:18] Updated row 757: ECO=CA91012HB Submitted=12 Aug 2026 Released=13 Aug 2026
+[2026-08-19 09:44:20] Updated row 758: ECO=CA91007HB Submitted=12 Aug 2026 Released=13 Aug 2026
+[2026-08-19 09:44:21] Updated row 759: ECO=CA91002HB Submitted=12 Aug 2026 Released=13 Aug 2026
+[2026-08-19 09:44:23] Updated row 760: ECO=CA91009HB Submitted=12 Aug 2026 Released=13 Aug 2026
+[2026-08-19 09:44:24] Updated row 761: ECO=CA91001HB Submitted=12 Aug 2026 Released=13 Aug 2026
+[2026-08-19 09:44:24] Updated row 762: ECO=CA91001HB Submitted=12 Aug 2026 Released=13 Aug 2026
+[2026-08-19 09:44:24] Updated row 763: ECO=CA91001HB Submitted=12 Aug 2026 Released=13 Aug 2026
+[2026-08-19 09:44:24] Updated row 764: ECO=CA91001HB Submitted=12 Aug 2026 Released=13 Aug 2026
+[2026-08-19 09:44:26] Updated row 765: ECO=CA91008HB Submitted=12 Aug 2026 Released=17 Aug 2026
+[2026-08-19 09:44:26] Updated row 766: ECO=CA91008HB Submitted=12 Aug 2026 Released=17 Aug 2026
+[2026-08-19 09:44:27] Updated row 767: ECO=CA91004HB Submitted=12 Aug 2026 Released=15 Aug 2026
+[2026-08-19 09:44:28] Updated row 768: ECO=CA91092HB Submitted=15 Aug 2026 Released=15 Aug 2026
+[2026-08-19 09:44:30] Updated row 769: ECO=CA91089HB Submitted=14 Aug 2026 Released=15 Aug 2026
+[2026-08-19 09:44:31] Updated row 770: ECO=CA91103HB Submitted=15 Aug 2026 Released=15 Aug 2026
+[2026-08-19 09:44:33] Updated row 771: ECO=DSM26213 Submitted=15 Aug 2026 Released=15 Aug 2026
+[2026-08-19 09:44:33] Updated row 772: ECO=DSM26213 Submitted=15 Aug 2026 Released=15 Aug 2026
+[2026-08-19 09:44:33] Updated row 773: ECO=DSM26213 Submitted=15 Aug 2026 Released=15 Aug 2026
+[2026-08-19 09:44:34] Updated row 774: ECO=CA91091HB Submitted=15 Aug 2026 Released=15 Aug 2026
+[2026-08-19 09:44:34] Updated row 775: ECO=CA91091HB Submitted=15 Aug 2026 Released=15 Aug 2026
+[2026-08-19 09:44:35] Updated row 776: ECO=CA91094HB Submitted=15 Aug 2026 Released=17 Aug 2026
+[2026-08-19 09:44:37] Updated row 777: ECO=CA91095HB Submitted=14 Aug 2026 Released=15 Aug 2026
+[2026-08-19 09:44:38] Updated row 778: ECO=CA91086HB Submitted=14 Aug 2026 Released=15 Aug 2026
+[2026-08-19 09:44:38] Updated row 779: ECO=CA91086HB Submitted=14 Aug 2026 Released=15 Aug 2026
+[2026-08-19 09:44:38] Updated row 780: ECO=CA91086HB Submitted=14 Aug 2026 Released=15 Aug 2026
+[2026-08-19 09:44:40] Updated row 781: ECO=CA91087HB Submitted=14 Aug 2026 Released=15 Aug 2026
+[2026-08-19 09:44:41] Updated row 782: ECO=CA91088HB Submitted=14 Aug 2026 Released=15 Aug 2026
+[2026-08-19 09:44:42] Updated row 783: ECO=CA91111HB Submitted=15 Aug 2026 Released=15 Aug 2026
+[2026-08-19 09:44:44] Updated row 784: ECO=CA91097HB Submitted=14 Aug 2026 Released=15 Aug 2026
+[2026-08-19 09:44:45] Updated row 785: ECO=CA91093HB Submitted=14 Aug 2026 Released=15 Aug 2026
+[2026-08-19 09:44:47] Updated row 786: ECO=CA91117HB Submitted=15 Aug 2026 Released=18 Aug 2026
+[2026-08-19 09:44:48] Updated row 788: ECO=CA91118HB Submitted=15 Aug 2026 Released=18 Aug 2026
+[2026-08-19 09:44:49] Updated row 789: ECO=CA91117HB Submitted=15 Aug 2026 Released=18 Aug 2026
+[2026-08-19 09:44:49] Updated row 790: ECO=CA91117HB Submitted=15 Aug 2026 Released=18 Aug 2026
+[2026-08-19 09:44:49] Updated row 791: ECO=CA91117HB Submitted=15 Aug 2026 Released=18 Aug 2026
+[2026-08-19 09:44:49] Updated row 792: ECO=CA91118HB Submitted=15 Aug 2026 Released=18 Aug 2026
+[2026-08-19 09:44:49] Updated row 793: ECO=CA91118HB Submitted=15 Aug 2026 Released=18 Aug 2026
+[2026-08-19 09:44:49] Updated row 794: ECO=CA91118HB Submitted=15 Aug 2026 Released=18 Aug 2026
+[2026-08-19 09:44:52] Updated row 795: ECO=CA91163HB Submitted=18 Aug 2026 Released=None
+[2026-08-19 09:44:52] Updated row 796: ECO=CA91163HB Submitted=18 Aug 2026 Released=None
+[2026-08-19 09:44:52] Updated row 797: ECO=CA91163HB Submitted=18 Aug 2026 Released=None
+[2026-08-19 09:44:52] Updated row 798: ECO=CA91163HB Submitted=18 Aug 2026 Released=None
+[2026-08-19 09:44:55] Updated row 799: ECO=CA91167HB Submitted=19 Aug 2026 Released=None
+[2026-08-19 09:44:55] Updated row 800: ECO=CA91167HB Submitted=19 Aug 2026 Released=None
+[2026-08-19 09:44:55] Updated row 801: ECO=CA91167HB Submitted=19 Aug 2026 Released=None
+[2026-08-19 09:44:55] Updated row 802: ECO=CA91167HB Submitted=19 Aug 2026 Released=None
+[2026-08-19 09:44:59] Row 803: ECO lookup failed for CA91156HB; treating as not submitted yet. Could not find Submitted/Released workflow dates for CA91156HB.
+Tried classes=['Change', 'ECO', 'Change Orders'] tables=['History', 'Cover Page', 'Workflow', 'Workflow Status']
+No matching workflow rows found.
+[2026-08-19 09:44:59] Updated row 803: ECO=CA91156HB Submitted=None Released=None
+[2026-08-19 09:44:59] Updated row 804: ECO=CA91156HB Submitted=None Released=None
+[2026-08-19 09:44:59] Updated row 805: ECO=CA91156HB Submitted=None Released=None
+[2026-08-19 09:44:59] Updated row 806: ECO=CA91156HB Submitted=None Released=None
+[2026-08-19 09:45:03] Row 807: ECO lookup failed for CA91143HB; treating as not submitted yet. Could not find Submitted/Released workflow dates for CA91143HB.
+Tried classes=['Change', 'ECO', 'Change Orders'] tables=['History', 'Cover Page', 'Workflow', 'Workflow Status']
+No matching workflow rows found.
+[2026-08-19 09:45:03] Updated row 807: ECO=CA91143HB Submitted=None Released=None
+[2026-08-19 09:45:03] Updated row 808: ECO=CA91143HB Submitted=None Released=None
+[2026-08-19 09:45:03] Updated row 809: ECO=CA91143HB Submitted=None Released=None
+[2026-08-19 09:45:03] Updated row 810: ECO=CA91143HB Submitted=None Released=None
+[2026-08-19 09:45:04] Updated row 811: ECO=CA91149HB Submitted=18 Aug 2026 Released=19 Aug 2026
+[2026-08-19 09:45:04] Updated row 812: ECO=CA91149HB Submitted=18 Aug 2026 Released=19 Aug 2026
+[2026-08-19 09:45:04] Updated row 813: ECO=CA91149HB Submitted=18 Aug 2026 Released=19 Aug 2026
+[2026-08-19 09:45:04] Updated row 814: ECO=CA91149HB Submitted=18 Aug 2026 Released=19 Aug 2026
+[2026-08-19 09:45:06] Updated row 815: ECO=DSM26223 Submitted=18 Aug 2026 Released=19 Aug 2026
+[2026-08-19 09:45:06] Updated row 816: ECO=DSM26223 Submitted=18 Aug 2026 Released=19 Aug 2026
+[2026-08-19 09:45:06] Updated row 817: ECO=DSM26223 Submitted=18 Aug 2026 Released=19 Aug 2026
+[2026-08-19 09:45:07] Updated row 818: ECO=DSM26222 Submitted=18 Aug 2026 Released=19 Aug 2026
+[2026-08-19 09:45:07] Updated row 819: ECO=DSM26222 Submitted=18 Aug 2026 Released=19 Aug 2026
+[2026-08-19 09:45:07] Updated row 820: ECO=DSM26222 Submitted=18 Aug 2026 Released=19 Aug 2026
+[2026-08-19 09:45:08] Updated row 821: ECO=DSM26221 Submitted=18 Aug 2026 Released=19 Aug 2026
+[2026-08-19 09:45:08] Updated row 822: ECO=DSM26221 Submitted=18 Aug 2026 Released=19 Aug 2026
+[2026-08-19 09:45:08] Updated row 823: ECO=DSM26221 Submitted=18 Aug 2026 Released=19 Aug 2026
+[2026-08-19 09:45:12] Updated row 824: ECO=DSM26230 Submitted=18 Aug 2026 Released=None
+[2026-08-19 09:45:12] Updated row 825: ECO=DSM26230 Submitted=18 Aug 2026 Released=None
+[2026-08-19 09:45:12] Updated row 826: ECO=DSM26230 Submitted=18 Aug 2026 Released=None
+[2026-08-19 09:45:16] Updated row 827: ECO=DSM26234 Submitted=18 Aug 2026 Released=None
+[2026-08-19 09:45:16] Updated row 828: ECO=DSM26234 Submitted=18 Aug 2026 Released=None
+[2026-08-19 09:45:16] Updated row 829: ECO=DSM26234 Submitted=18 Aug 2026 Released=None
+[2026-08-19 09:45:19] Updated row 830: ECO=DSM26231 Submitted=18 Aug 2026 Released=None
+[2026-08-19 09:45:19] Updated row 831: ECO=DSM26231 Submitted=18 Aug 2026 Released=None
+[2026-08-19 09:45:19] Updated row 832: ECO=DSM26231 Submitted=18 Aug 2026 Released=None
+[2026-08-19 09:45:23] Updated row 833: ECO=DSM26233 Submitted=19 Aug 2026 Released=None
+[2026-08-19 09:45:23] Updated row 834: ECO=DSM26233 Submitted=19 Aug 2026 Released=None
+[2026-08-19 09:45:23] Updated row 835: ECO=DSM26233 Submitted=19 Aug 2026 Released=None
+[2026-08-19 09:45:23] Updated row 836: ECO=DSM26233 Submitted=19 Aug 2026 Released=None
+[2026-08-19 09:45:27] Updated row 837: ECO=DSM26226 Submitted=18 Aug 2026 Released=None
+[2026-08-19 09:45:31] Updated row 838: ECO=DSM26225 Submitted=18 Aug 2026 Released=None
+[2026-08-19 09:45:31] Updated row 839: ECO=DSM26225 Submitted=18 Aug 2026 Released=None
+[2026-08-19 09:45:31] Updated row 840: ECO=DSM26225 Submitted=18 Aug 2026 Released=None
+[2026-08-19 09:45:32] Updated row 841: ECO=DSM26229 Submitted=18 Aug 2026 Released=19 Aug 2026
+[2026-08-19 09:45:32] Updated row 842: ECO=DSM26229 Submitted=18 Aug 2026 Released=19 Aug 2026
+[2026-08-19 09:45:36] Row 843: ECO lookup failed for DSM26228; treating as not submitted yet. Could not find Submitted/Released workflow dates for DSM26228.
+Tried classes=['Change', 'ECO', 'Change Orders'] tables=['History', 'Cover Page', 'Workflow', 'Workflow Status']
+No matching workflow rows found.
+[2026-08-19 09:45:36] Updated row 843: ECO=DSM26228 Submitted=None Released=None
+[2026-08-19 09:45:36] Updated row 844: ECO=DSM26228 Submitted=None Released=None
+[2026-08-19 09:45:36] Updated row 845: ECO=DSM26228 Submitted=None Released=None
+[2026-08-19 09:45:39] Updated row 846: ECO=DSM26227 Submitted=18 Aug 2026 Released=None
+[2026-08-19 09:45:39] Updated row 847: ECO=DSM26227 Submitted=18 Aug 2026 Released=None
+[2026-08-19 09:45:39] Updated row 848: ECO=DSM26227 Submitted=18 Aug 2026 Released=None
+[2026-08-19 09:45:41] Updated row 850: ECO=CA91150HB Submitted=18 Aug 2026 Released=19 Aug 2026
+[2026-08-19 09:45:44] Row 851: ECO lookup failed for CA91182HB; treating as not submitted yet. Could not find Submitted/Released workflow dates for CA91182HB.
+Tried classes=['Change', 'ECO', 'Change Orders'] tables=['History', 'Cover Page', 'Workflow', 'Workflow Status']
+No matching workflow rows found.
+[2026-08-19 09:45:44] Updated row 851: ECO=CA91182HB Submitted=None Released=None
+[2026-08-19 09:45:44] Updated row 852: ECO=CA91182HB Submitted=None Released=None
+[2026-08-19 09:45:44] Updated row 853: ECO=CA91182HB Submitted=None Released=None
+[2026-08-19 09:45:48] Row 854: ECO lookup failed for CA91187HB; treating as not submitted yet. Could not find Submitted/Released workflow dates for CA91187HB.
+Tried classes=['Change', 'ECO', 'Change Orders'] tables=['History', 'Cover Page', 'Workflow', 'Workflow Status']
+No matching workflow rows found.
+[2026-08-19 09:45:48] Updated row 854: ECO=CA91187HB Submitted=None Released=None
+[2026-08-19 09:45:51] Row 861: ECO lookup failed for CA91193HB; treating as not submitted yet. Could not find Submitted/Released workflow dates for CA91193HB.
+Tried classes=['Change', 'ECO', 'Change Orders'] tables=['History', 'Cover Page', 'Workflow', 'Workflow Status']
+No matching workflow rows found.
+[2026-08-19 09:45:51] Updated row 861: ECO=CA91193HB Submitted=None Released=None
+[2026-08-19 09:45:51] Updated row 862: ECO=CA91193HB Submitted=None Released=None
+[2026-08-19 09:45:54] Row 863: ECO lookup failed for CA91194HB; treating as not submitted yet. Could not find Submitted/Released workflow dates for CA91194HB.
+Tried classes=['Change', 'ECO', 'Change Orders'] tables=['History', 'Cover Page', 'Workflow', 'Workflow Status']
+No matching workflow rows found.
+[2026-08-19 09:45:54] Updated row 863: ECO=CA91194HB Submitted=None Released=None
+[2026-08-19 09:45:54] Updated row 864: ECO=CA91194HB Submitted=None Released=None
+[2026-08-19 09:45:54] Workbook looks free. Waiting 30 seconds for OneDrive to settle...
+[2026-08-19 09:46:24] Saving workbook to C:\Users\kmageshkumar\OneDrive - Ichor Systems\AMAT SGP ECO Tracker.xlsx...
+[2026-08-19 09:46:24] Workbook protection and editable-range metadata preserved.
+[2026-08-19 09:46:24] Workbook save complete.
+[2026-08-19 09:46:26] Workbook updated: C:\Users\kmageshkumar\OneDrive - Ichor Systems\AMAT SGP ECO Tracker.xlsx; rows updated=331; rows skipped (already released)=487; rows skipped (blank/not applicable)=45; not-applicable rows with deltas cleared=31
+[2026-08-19 09:46:26] Workbook looks free. Waiting 30 seconds for OneDrive to settle...
+[2026-08-19 09:47:01] Row 2: CRF lookup failed for 1392045; treating as not submitted yet. Could not find Submitted/Released workflow dates for 1392045.
+Tried classes=['Change', 'ECO', 'Change Orders'] tables=['History', 'Cover Page', 'Workflow', 'Workflow Status']
+No matching workflow rows found.
+[2026-08-19 09:47:01] Updated row 2: CRF=1392045 Submitted=None Released=None
+[2026-08-19 09:47:05] Row 3: CRF lookup failed for 1392046; treating as not submitted yet. Could not find Submitted/Released workflow dates for 1392046.
+Tried classes=['Change', 'ECO', 'Change Orders'] tables=['History', 'Cover Page', 'Workflow', 'Workflow Status']
+No matching workflow rows found.
+[2026-08-19 09:47:05] Updated row 3: CRF=1392046 Submitted=None Released=None
+[2026-08-19 09:47:08] Row 4: CRF lookup failed for 1392048; treating as not submitted yet. Could not find Submitted/Released workflow dates for 1392048.
+Tried classes=['Change', 'ECO', 'Change Orders'] tables=['History', 'Cover Page', 'Workflow', 'Workflow Status']
+No matching workflow rows found.
+[2026-08-19 09:47:08] Updated row 4: CRF=1392048 Submitted=None Released=None
+[2026-08-19 09:47:12] Row 5: CRF lookup failed for 1382229; treating as not submitted yet. Could not find Submitted/Released workflow dates for 1382229.
+Tried classes=['Change', 'ECO', 'Change Orders'] tables=['History', 'Cover Page', 'Workflow', 'Workflow Status']
+No matching workflow rows found.
+[2026-08-19 09:47:12] Updated row 5: CRF=1382229 Submitted=None Released=None
+[2026-08-19 09:47:15] Row 6: CRF lookup failed for 1387625; treating as not submitted yet. Could not find Submitted/Released workflow dates for 1387625.
+Tried classes=['Change', 'ECO', 'Change Orders'] tables=['History', 'Cover Page', 'Workflow', 'Workflow Status']
+No matching workflow rows found.
+[2026-08-19 09:47:15] Updated row 6: CRF=1387625 Submitted=None Released=None
+[2026-08-19 09:47:18] Row 7: CRF lookup failed for 1394327; treating as not submitted yet. Could not find Submitted/Released workflow dates for 1394327.
+Tried classes=['Change', 'ECO', 'Change Orders'] tables=['History', 'Cover Page', 'Workflow', 'Workflow Status']
+No matching workflow rows found.
+[2026-08-19 09:47:18] Updated row 7: CRF=1394327 Submitted=None Released=None
+[2026-08-19 09:47:21] Row 8: CRF lookup failed for 1393125; treating as not submitted yet. Could not find Submitted/Released workflow dates for 1393125.
+Tried classes=['Change', 'ECO', 'Change Orders'] tables=['History', 'Cover Page', 'Workflow', 'Workflow Status']
+No matching workflow rows found.
+[2026-08-19 09:47:21] Updated row 8: CRF=1393125 Submitted=None Released=None
+[2026-08-19 09:47:25] Row 9: CRF lookup failed for 1397033; treating as not submitted yet. Could not find Submitted/Released workflow dates for 1397033.
+Tried classes=['Change', 'ECO', 'Change Orders'] tables=['History', 'Cover Page', 'Workflow', 'Workflow Status']
+No matching workflow rows found.
+[2026-08-19 09:47:25] Updated row 9: CRF=1397033 Submitted=None Released=None
+[2026-08-19 09:47:28] Row 10: CRF lookup failed for 1397034; treating as not submitted yet. Could not find Submitted/Released workflow dates for 1397034.
+Tried classes=['Change', 'ECO', 'Change Orders'] tables=['History', 'Cover Page', 'Workflow', 'Workflow Status']
+No matching workflow rows found.
+[2026-08-19 09:47:28] Updated row 10: CRF=1397034 Submitted=None Released=None
+[2026-08-19 09:47:28] Workbook looks free. Waiting 30 seconds for OneDrive to settle...
+[2026-08-19 09:47:58] Saving workbook to C:\Users\kmageshkumar\OneDrive - Ichor Systems\AMAT SGP CRF Tracker.xlsx...
+[2026-08-19 09:47:58] Workbook protection and editable-range metadata preserved.
+[2026-08-19 09:47:58] Workbook save complete.
+[2026-08-19 09:47:58] CRF workbook updated: C:\Users\kmageshkumar\OneDrive - Ichor Systems\AMAT SGP CRF Tracker.xlsx; rows updated=9; rows skipped (already released)=0; rows skipped (blank/not applicable)=0
+[2026-08-20 06:00:02] Workbook looks free. Waiting 30 seconds for OneDrive to settle...
+[2026-08-20 06:00:37] Updated row 443: ECO=CA90605HB Submitted=18 Aug 2026 Released=20 Aug 2026
+[2026-08-20 06:00:37] Updated row 444: ECO=CA90605HB Submitted=18 Aug 2026 Released=20 Aug 2026
+[2026-08-20 06:00:40] Updated row 787: ECO=CA91116HB Submitted=19 Aug 2026 Released=None
+[2026-08-20 06:00:42] Updated row 795: ECO=CA91163HB Submitted=18 Aug 2026 Released=20 Aug 2026
+[2026-08-20 06:00:42] Updated row 796: ECO=CA91163HB Submitted=18 Aug 2026 Released=20 Aug 2026
+[2026-08-20 06:00:42] Updated row 797: ECO=CA91163HB Submitted=18 Aug 2026 Released=20 Aug 2026
+[2026-08-20 06:00:42] Updated row 798: ECO=CA91163HB Submitted=18 Aug 2026 Released=20 Aug 2026
+[2026-08-20 06:00:45] Updated row 799: ECO=CA91167HB Submitted=19 Aug 2026 Released=None
+[2026-08-20 06:00:45] Updated row 800: ECO=CA91167HB Submitted=19 Aug 2026 Released=None
+[2026-08-20 06:00:45] Updated row 801: ECO=CA91167HB Submitted=19 Aug 2026 Released=None
+[2026-08-20 06:00:45] Updated row 802: ECO=CA91167HB Submitted=19 Aug 2026 Released=None
+[2026-08-20 06:00:49] Updated row 803: ECO=CA91156HB Submitted=19 Aug 2026 Released=None
+[2026-08-20 06:00:49] Updated row 804: ECO=CA91156HB Submitted=19 Aug 2026 Released=None
+[2026-08-20 06:00:49] Updated row 805: ECO=CA91156HB Submitted=19 Aug 2026 Released=None
+[2026-08-20 06:00:49] Updated row 806: ECO=CA91156HB Submitted=19 Aug 2026 Released=None
+[2026-08-20 06:00:52] Updated row 807: ECO=CA91143HB Submitted=19 Aug 2026 Released=None
+[2026-08-20 06:00:52] Updated row 808: ECO=CA91143HB Submitted=19 Aug 2026 Released=None
+[2026-08-20 06:00:52] Updated row 809: ECO=CA91143HB Submitted=19 Aug 2026 Released=None
+[2026-08-20 06:00:52] Updated row 810: ECO=CA91143HB Submitted=19 Aug 2026 Released=None
+[2026-08-20 06:00:53] Updated row 824: ECO=DSM26230 Submitted=18 Aug 2026 Released=20 Aug 2026
+[2026-08-20 06:00:53] Updated row 825: ECO=DSM26230 Submitted=18 Aug 2026 Released=20 Aug 2026
+[2026-08-20 06:00:53] Updated row 826: ECO=DSM26230 Submitted=18 Aug 2026 Released=20 Aug 2026
+[2026-08-20 06:00:55] Updated row 827: ECO=DSM26234 Submitted=18 Aug 2026 Released=20 Aug 2026
+[2026-08-20 06:00:55] Updated row 828: ECO=DSM26234 Submitted=18 Aug 2026 Released=20 Aug 2026
+[2026-08-20 06:00:55] Updated row 829: ECO=DSM26234 Submitted=18 Aug 2026 Released=20 Aug 2026
+[2026-08-20 06:00:56] Updated row 830: ECO=DSM26231 Submitted=18 Aug 2026 Released=20 Aug 2026
+[2026-08-20 06:00:56] Updated row 831: ECO=DSM26231 Submitted=18 Aug 2026 Released=20 Aug 2026
+[2026-08-20 06:00:56] Updated row 832: ECO=DSM26231 Submitted=18 Aug 2026 Released=20 Aug 2026
+[2026-08-20 06:00:58] Updated row 833: ECO=DSM26233 Submitted=19 Aug 2026 Released=20 Aug 2026
+[2026-08-20 06:00:58] Updated row 834: ECO=DSM26233 Submitted=19 Aug 2026 Released=20 Aug 2026
+[2026-08-20 06:00:58] Updated row 835: ECO=DSM26233 Submitted=19 Aug 2026 Released=20 Aug 2026
+[2026-08-20 06:00:58] Updated row 836: ECO=DSM26233 Submitted=19 Aug 2026 Released=20 Aug 2026
+[2026-08-20 06:00:59] Updated row 837: ECO=DSM26226 Submitted=18 Aug 2026 Released=20 Aug 2026
+[2026-08-20 06:01:01] Updated row 838: ECO=DSM26225 Submitted=18 Aug 2026 Released=20 Aug 2026
+[2026-08-20 06:01:01] Updated row 839: ECO=DSM26225 Submitted=18 Aug 2026 Released=20 Aug 2026
+[2026-08-20 06:01:01] Updated row 840: ECO=DSM26225 Submitted=18 Aug 2026 Released=20 Aug 2026
+[2026-08-20 06:01:04] Row 843: ECO lookup failed for DSM26228; treating as not submitted yet. Could not find Submitted/Released workflow dates for DSM26228.
+Tried classes=['Change', 'ECO', 'Change Orders'] tables=['History', 'Cover Page', 'Workflow', 'Workflow Status']
+No matching workflow rows found.
+[2026-08-20 06:01:04] Updated row 843: ECO=DSM26228 Submitted=None Released=None
+[2026-08-20 06:01:04] Updated row 844: ECO=DSM26228 Submitted=None Released=None
+[2026-08-20 06:01:04] Updated row 845: ECO=DSM26228 Submitted=None Released=None
+[2026-08-20 06:01:08] Updated row 846: ECO=DSM26227 Submitted=18 Aug 2026 Released=None
+[2026-08-20 06:01:08] Updated row 847: ECO=DSM26227 Submitted=18 Aug 2026 Released=None
+[2026-08-20 06:01:08] Updated row 848: ECO=DSM26227 Submitted=18 Aug 2026 Released=None
+[2026-08-20 06:01:12] Row 851: ECO lookup failed for CA91182HB; treating as not submitted yet. Could not find Submitted/Released workflow dates for CA91182HB.
+Tried classes=['Change', 'ECO', 'Change Orders'] tables=['History', 'Cover Page', 'Workflow', 'Workflow Status']
+No matching workflow rows found.
+[2026-08-20 06:01:12] Updated row 851: ECO=CA91182HB Submitted=None Released=None
+[2026-08-20 06:01:12] Updated row 852: ECO=CA91182HB Submitted=None Released=None
+[2026-08-20 06:01:12] Updated row 853: ECO=CA91182HB Submitted=None Released=None
+[2026-08-20 06:01:15] Row 854: ECO lookup failed for CA91187HB; treating as not submitted yet. Could not find Submitted/Released workflow dates for CA91187HB.
+Tried classes=['Change', 'ECO', 'Change Orders'] tables=['History', 'Cover Page', 'Workflow', 'Workflow Status']
+No matching workflow rows found.
+[2026-08-20 06:01:15] Updated row 854: ECO=CA91187HB Submitted=None Released=None
+[2026-08-20 06:01:19] Updated row 855: ECO=CA91192HB Submitted=20 Aug 2026 Released=None
+[2026-08-20 06:01:19] Updated row 856: ECO=CA91192HB Submitted=20 Aug 2026 Released=None
+[2026-08-20 06:01:19] Updated row 857: ECO=CA91192HB Submitted=20 Aug 2026 Released=None
+[2026-08-20 06:01:22] Row 858: ECO lookup failed for CA91197HB; treating as not submitted yet. Could not find Submitted/Released workflow dates for CA91197HB.
+Tried classes=['Change', 'ECO', 'Change Orders'] tables=['History', 'Cover Page', 'Workflow', 'Workflow Status']
+No matching workflow rows found.
+[2026-08-20 06:01:22] Updated row 858: ECO=CA91197HB Submitted=None Released=None
+[2026-08-20 06:01:22] Updated row 859: ECO=CA91197HB Submitted=None Released=None
+[2026-08-20 06:01:22] Updated row 860: ECO=CA91197HB Submitted=None Released=None
+[2026-08-20 06:01:25] Updated row 861: ECO=CA91193HB Submitted=19 Aug 2026 Released=None
+[2026-08-20 06:01:25] Updated row 862: ECO=CA91193HB Submitted=19 Aug 2026 Released=None
+[2026-08-20 06:01:29] Row 863: ECO lookup failed for CA91194HB; treating as not submitted yet. Could not find Submitted/Released workflow dates for CA91194HB.
+Tried classes=['Change', 'ECO', 'Change Orders'] tables=['History', 'Cover Page', 'Workflow', 'Workflow Status']
+No matching workflow rows found.
+[2026-08-20 06:01:29] Updated row 863: ECO=CA91194HB Submitted=None Released=None
+[2026-08-20 06:01:29] Updated row 864: ECO=CA91194HB Submitted=None Released=None
+[2026-08-20 06:01:29] Workbook looks free. Waiting 30 seconds for OneDrive to settle...
+[2026-08-20 06:01:59] Saving workbook to C:\Users\kmageshkumar\OneDrive - Ichor Systems\AMAT SGP ECO Tracker.xlsx...
+[2026-08-20 06:01:59] Workbook protection and editable-range metadata preserved.
+[2026-08-20 06:01:59] Workbook save complete.
+[2026-08-20 06:02:00] Workbook updated: C:\Users\kmageshkumar\OneDrive - Ichor Systems\AMAT SGP ECO Tracker.xlsx; rows updated=56; rows skipped (already released)=768; rows skipped (blank/not applicable)=39; not-applicable rows with deltas cleared=32
+[2026-08-20 06:02:00] Workbook looks free. Waiting 30 seconds for OneDrive to settle...
+[2026-08-20 06:02:34] Row 2: CRF lookup failed for 1392045; treating as not submitted yet. Could not find Submitted/Released workflow dates for 1392045.
+Tried classes=['Change', 'ECO', 'Change Orders'] tables=['History', 'Cover Page', 'Workflow', 'Workflow Status']
+No matching workflow rows found.
+[2026-08-20 06:02:34] Updated row 2: CRF=1392045 Submitted=None Released=None
+[2026-08-20 06:02:38] Row 3: CRF lookup failed for 1392046; treating as not submitted yet. Could not find Submitted/Released workflow dates for 1392046.
+Tried classes=['Change', 'ECO', 'Change Orders'] tables=['History', 'Cover Page', 'Workflow', 'Workflow Status']
+No matching workflow rows found.
+[2026-08-20 06:02:38] Updated row 3: CRF=1392046 Submitted=None Released=None
+[2026-08-20 06:02:41] Row 4: CRF lookup failed for 1392048; treating as not submitted yet. Could not find Submitted/Released workflow dates for 1392048.
+Tried classes=['Change', 'ECO', 'Change Orders'] tables=['History', 'Cover Page', 'Workflow', 'Workflow Status']
+No matching workflow rows found.
+[2026-08-20 06:02:41] Updated row 4: CRF=1392048 Submitted=None Released=None
+[2026-08-20 06:02:44] Row 5: CRF lookup failed for 1382229; treating as not submitted yet. Could not find Submitted/Released workflow dates for 1382229.
+Tried classes=['Change', 'ECO', 'Change Orders'] tables=['History', 'Cover Page', 'Workflow', 'Workflow Status']
+No matching workflow rows found.
+[2026-08-20 06:02:44] Updated row 5: CRF=1382229 Submitted=None Released=None
+[2026-08-20 06:02:47] Row 6: CRF lookup failed for 1387625; treating as not submitted yet. Could not find Submitted/Released workflow dates for 1387625.
+Tried classes=['Change', 'ECO', 'Change Orders'] tables=['History', 'Cover Page', 'Workflow', 'Workflow Status']
+No matching workflow rows found.
+[2026-08-20 06:02:47] Updated row 6: CRF=1387625 Submitted=None Released=None
+[2026-08-20 06:02:50] Row 7: CRF lookup failed for 1394327; treating as not submitted yet. Could not find Submitted/Released workflow dates for 1394327.
+Tried classes=['Change', 'ECO', 'Change Orders'] tables=['History', 'Cover Page', 'Workflow', 'Workflow Status']
+No matching workflow rows found.
+[2026-08-20 06:02:50] Updated row 7: CRF=1394327 Submitted=None Released=None
+[2026-08-20 06:02:53] Row 8: CRF lookup failed for 1393125; treating as not submitted yet. Could not find Submitted/Released workflow dates for 1393125.
+Tried classes=['Change', 'ECO', 'Change Orders'] tables=['History', 'Cover Page', 'Workflow', 'Workflow Status']
+No matching workflow rows found.
+[2026-08-20 06:02:53] Updated row 8: CRF=1393125 Submitted=None Released=None
+[2026-08-20 06:02:57] Row 9: CRF lookup failed for 1397033; treating as not submitted yet. Could not find Submitted/Released workflow dates for 1397033.
+Tried classes=['Change', 'ECO', 'Change Orders'] tables=['History', 'Cover Page', 'Workflow', 'Workflow Status']
+No matching workflow rows found.
+[2026-08-20 06:02:57] Updated row 9: CRF=1397033 Submitted=None Released=None
+[2026-08-20 06:03:00] Row 10: CRF lookup failed for 1397034; treating as not submitted yet. Could not find Submitted/Released workflow dates for 1397034.
+Tried classes=['Change', 'ECO', 'Change Orders'] tables=['History', 'Cover Page', 'Workflow', 'Workflow Status']
+No matching workflow rows found.
+[2026-08-20 06:03:00] Updated row 10: CRF=1397034 Submitted=None Released=None
+[2026-08-20 06:03:00] Workbook looks free. Waiting 30 seconds for OneDrive to settle...
+[2026-08-20 06:03:30] Saving workbook to C:\Users\kmageshkumar\OneDrive - Ichor Systems\AMAT SGP CRF Tracker.xlsx...
+[2026-08-20 06:03:30] Workbook protection and editable-range metadata preserved.
+[2026-08-20 06:03:30] Workbook save complete.
+[2026-08-20 06:03:30] CRF workbook updated: C:\Users\kmageshkumar\OneDrive - Ichor Systems\AMAT SGP CRF Tracker.xlsx; rows updated=9; rows skipped (already released)=0; rows skipped (blank/not applicable)=0
+[2026-08-21 06:00:02] Workbook looks free. Waiting 30 seconds for OneDrive to settle...
+[2026-08-21 06:00:37] Row 655: ECO lookup failed for DSM26178; treating as not submitted yet. Could not find Submitted/Released workflow dates for DSM26178.
+Tried classes=['Change', 'ECO', 'Change Orders'] tables=['History', 'Cover Page', 'Workflow', 'Workflow Status']
+No matching workflow rows found.
+[2026-08-21 06:00:37] Updated row 655: ECO=DSM26178 Submitted=None Released=None
+[2026-08-21 06:00:38] Updated row 683: ECO=DSM26183 Submitted=08 Aug 2026 Released=11 Aug 2026
+[2026-08-21 06:00:38] Updated row 684: ECO=DSM26183 Submitted=08 Aug 2026 Released=11 Aug 2026
+[2026-08-21 06:00:38] Updated row 685: ECO=DSM26183 Submitted=08 Aug 2026 Released=11 Aug 2026
+[2026-08-21 06:00:40] Updated row 699: ECO=CA90973HB Submitted=14 Aug 2026 Released=17 Aug 2026
+[2026-08-21 06:00:40] Updated row 700: ECO=CA90973HB Submitted=14 Aug 2026 Released=17 Aug 2026
+[2026-08-21 06:00:41] Updated row 787: ECO=CA91116HB Submitted=19 Aug 2026 Released=21 Aug 2026
+[2026-08-21 06:00:44] Updated row 799: ECO=CA91167HB Submitted=19 Aug 2026 Released=None
+[2026-08-21 06:00:44] Updated row 800: ECO=CA91167HB Submitted=19 Aug 2026 Released=None
+[2026-08-21 06:00:44] Updated row 801: ECO=CA91167HB Submitted=19 Aug 2026 Released=None
+[2026-08-21 06:00:44] Updated row 802: ECO=CA91167HB Submitted=19 Aug 2026 Released=None
+[2026-08-21 06:00:45] Updated row 803: ECO=CA91156HB Submitted=19 Aug 2026 Released=21 Aug 2026
+[2026-08-21 06:00:45] Updated row 804: ECO=CA91156HB Submitted=19 Aug 2026 Released=21 Aug 2026
+[2026-08-21 06:00:45] Updated row 805: ECO=CA91156HB Submitted=19 Aug 2026 Released=21 Aug 2026
+[2026-08-21 06:00:45] Updated row 806: ECO=CA91156HB Submitted=19 Aug 2026 Released=21 Aug 2026
+[2026-08-21 06:00:49] Updated row 807: ECO=CA91143HB Submitted=19 Aug 2026 Released=None
+[2026-08-21 06:00:49] Updated row 808: ECO=CA91143HB Submitted=19 Aug 2026 Released=None
+[2026-08-21 06:00:49] Updated row 809: ECO=CA91143HB Submitted=19 Aug 2026 Released=None
+[2026-08-21 06:00:49] Updated row 810: ECO=CA91143HB Submitted=19 Aug 2026 Released=None
+[2026-08-21 06:00:51] Row 843: ECO lookup failed for DSM26228; treating as not submitted yet. Could not find Submitted/Released workflow dates for DSM26228.
+Tried classes=['Change', 'ECO', 'Change Orders'] tables=['History', 'Cover Page', 'Workflow', 'Workflow Status']
+No matching workflow rows found.
+[2026-08-21 06:00:51] Updated row 843: ECO=DSM26228 Submitted=None Released=None
+[2026-08-21 06:00:51] Updated row 844: ECO=DSM26228 Submitted=None Released=None
+[2026-08-21 06:00:51] Updated row 845: ECO=DSM26228 Submitted=None Released=None
+[2026-08-21 06:00:55] Updated row 846: ECO=DSM26227 Submitted=18 Aug 2026 Released=None
+[2026-08-21 06:00:55] Updated row 847: ECO=DSM26227 Submitted=18 Aug 2026 Released=None
+[2026-08-21 06:00:55] Updated row 848: ECO=DSM26227 Submitted=18 Aug 2026 Released=None
+[2026-08-21 06:00:58] Row 849: ECO lookup failed for CA91153HB; treating as not submitted yet. Could not find Submitted/Released workflow dates for CA91153HB.
+Tried classes=['Change', 'ECO', 'Change Orders'] tables=['History', 'Cover Page', 'Workflow', 'Workflow Status']
+No matching workflow rows found.
+[2026-08-21 06:00:58] Updated row 849: ECO=CA91153HB Submitted=None Released=None
+[2026-08-21 06:01:01] Updated row 851: ECO=CA91182HB Submitted=20 Aug 2026 Released=None
+[2026-08-21 06:01:01] Updated row 852: ECO=CA91182HB Submitted=20 Aug 2026 Released=None
+[2026-08-21 06:01:01] Updated row 853: ECO=CA91182HB Submitted=20 Aug 2026 Released=None
+[2026-08-21 06:01:04] Updated row 854: ECO=CA91187HB Submitted=20 Aug 2026 Released=None
+[2026-08-21 06:01:05] Updated row 855: ECO=CA91192HB Submitted=20 Aug 2026 Released=21 Aug 2026
+[2026-08-21 06:01:05] Updated row 856: ECO=CA91192HB Submitted=20 Aug 2026 Released=21 Aug 2026
+[2026-08-21 06:01:05] Updated row 857: ECO=CA91192HB Submitted=20 Aug 2026 Released=21 Aug 2026
+[2026-08-21 06:01:09] Row 858: ECO lookup failed for CA91197HB; treating as not submitted yet. Could not find Submitted/Released workflow dates for CA91197HB.
+Tried classes=['Change', 'ECO', 'Change Orders'] tables=['History', 'Cover Page', 'Workflow', 'Workflow Status']
+No matching workflow rows found.
+[2026-08-21 06:01:09] Updated row 858: ECO=CA91197HB Submitted=None Released=None
+[2026-08-21 06:01:09] Updated row 859: ECO=CA91197HB Submitted=None Released=None
+[2026-08-21 06:01:09] Updated row 860: ECO=CA91197HB Submitted=None Released=None
+[2026-08-21 06:01:10] Updated row 861: ECO=CA91193HB Submitted=19 Aug 2026 Released=21 Aug 2026
+[2026-08-21 06:01:10] Updated row 862: ECO=CA91193HB Submitted=19 Aug 2026 Released=21 Aug 2026
+[2026-08-21 06:01:13] Updated row 863: ECO=CA91194HB Submitted=21 Aug 2026 Released=None
+[2026-08-21 06:01:13] Updated row 864: ECO=CA91194HB Submitted=21 Aug 2026 Released=None
+[2026-08-21 06:01:13] Workbook looks free. Waiting 30 seconds for OneDrive to settle...
+[2026-08-21 06:01:43] Saving workbook to C:\Users\kmageshkumar\OneDrive - Ichor Systems\AMAT SGP ECO Tracker.xlsx...
+[2026-08-21 06:01:44] Workbook protection and editable-range metadata preserved.
+[2026-08-21 06:01:44] Workbook save complete.
+[2026-08-21 06:01:45] Workbook updated: C:\Users\kmageshkumar\OneDrive - Ichor Systems\AMAT SGP ECO Tracker.xlsx; rows updated=40; rows skipped (already released)=791; rows skipped (blank/not applicable)=32; not-applicable rows with deltas cleared=32
+[2026-08-21 06:01:45] Workbook looks free. Waiting 30 seconds for OneDrive to settle...
+[2026-08-21 06:02:20] Row 2: CRF lookup failed for 1392045; treating as not submitted yet. Could not find Submitted/Released workflow dates for 1392045.
+Tried classes=['Change', 'ECO', 'Change Orders'] tables=['History', 'Cover Page', 'Workflow', 'Workflow Status']
+No matching workflow rows found.
+[2026-08-21 06:02:20] Updated row 2: CRF=1392045 Submitted=None Released=None
+[2026-08-21 06:02:22] Row 3: CRF lookup failed for 1392046; treating as not submitted yet. Could not find Submitted/Released workflow dates for 1392046.
+Tried classes=['Change', 'ECO', 'Change Orders'] tables=['History', 'Cover Page', 'Workflow', 'Workflow Status']
+No matching workflow rows found.
+[2026-08-21 06:02:22] Updated row 3: CRF=1392046 Submitted=None Released=None
+[2026-08-21 06:02:25] Row 4: CRF lookup failed for 1392048; treating as not submitted yet. Could not find Submitted/Released workflow dates for 1392048.
+Tried classes=['Change', 'ECO', 'Change Orders'] tables=['History', 'Cover Page', 'Workflow', 'Workflow Status']
+No matching workflow rows found.
+[2026-08-21 06:02:25] Updated row 4: CRF=1392048 Submitted=None Released=None
+[2026-08-21 06:02:28] Row 5: CRF lookup failed for 1382229; treating as not submitted yet. Could not find Submitted/Released workflow dates for 1382229.
+Tried classes=['Change', 'ECO', 'Change Orders'] tables=['History', 'Cover Page', 'Workflow', 'Workflow Status']
+No matching workflow rows found.
+[2026-08-21 06:02:28] Updated row 5: CRF=1382229 Submitted=None Released=None
+[2026-08-21 06:02:30] Row 6: CRF lookup failed for 1387625; treating as not submitted yet. Could not find Submitted/Released workflow dates for 1387625.
+Tried classes=['Change', 'ECO', 'Change Orders'] tables=['History', 'Cover Page', 'Workflow', 'Workflow Status']
+No matching workflow rows found.
+[2026-08-21 06:02:30] Updated row 6: CRF=1387625 Submitted=None Released=None
+[2026-08-21 06:02:33] Row 7: CRF lookup failed for 1394327; treating as not submitted yet. Could not find Submitted/Released workflow dates for 1394327.
+Tried classes=['Change', 'ECO', 'Change Orders'] tables=['History', 'Cover Page', 'Workflow', 'Workflow Status']
+No matching workflow rows found.
+[2026-08-21 06:02:33] Updated row 7: CRF=1394327 Submitted=None Released=None
+[2026-08-21 06:02:36] Row 8: CRF lookup failed for 1393125; treating as not submitted yet. Could not find Submitted/Released workflow dates for 1393125.
+Tried classes=['Change', 'ECO', 'Change Orders'] tables=['History', 'Cover Page', 'Workflow', 'Workflow Status']
+No matching workflow rows found.
+[2026-08-21 06:02:36] Updated row 8: CRF=1393125 Submitted=None Released=None
+[2026-08-21 06:02:38] Row 9: CRF lookup failed for 1397033; treating as not submitted yet. Could not find Submitted/Released workflow dates for 1397033.
+Tried classes=['Change', 'ECO', 'Change Orders'] tables=['History', 'Cover Page', 'Workflow', 'Workflow Status']
+No matching workflow rows found.
+[2026-08-21 06:02:38] Updated row 9: CRF=1397033 Submitted=None Released=None
+[2026-08-21 06:02:41] Row 10: CRF lookup failed for 1397034; treating as not submitted yet. Could not find Submitted/Released workflow dates for 1397034.
+Tried classes=['Change', 'ECO', 'Change Orders'] tables=['History', 'Cover Page', 'Workflow', 'Workflow Status']
+No matching workflow rows found.
+[2026-08-21 06:02:41] Updated row 10: CRF=1397034 Submitted=None Released=None
+[2026-08-21 06:02:41] Workbook looks free. Waiting 30 seconds for OneDrive to settle...
+[2026-08-21 06:03:11] Saving workbook to C:\Users\kmageshkumar\OneDrive - Ichor Systems\AMAT SGP CRF Tracker.xlsx...
+[2026-08-21 06:03:11] Workbook protection and editable-range metadata preserved.
+[2026-08-21 06:03:11] Workbook save complete.
+[2026-08-21 06:03:11] CRF workbook updated: C:\Users\kmageshkumar\OneDrive - Ichor Systems\AMAT SGP CRF Tracker.xlsx; rows updated=9; rows skipped (already released)=0; rows skipped (blank/not applicable)=0
+[2026-08-22 06:00:03] Workbook looks free. Waiting 30 seconds for OneDrive to settle...
+[2026-08-22 06:00:36] Unhandled workbook update error.
+[2026-08-22 06:00:36] Traceback (most recent call last):
+  File "C:\Users\kmageshkumar\AppData\Local\Programs\Python\Python313\Lib\site-packages\urllib3\connection.py", line 204, in _new_conn
+    sock = connection.create_connection(
+        (self._dns_host, self.port),
+    ...<2 lines>...
+        socket_options=self.socket_options,
+    )
+  File "C:\Users\kmageshkumar\AppData\Local\Programs\Python\Python313\Lib\site-packages\urllib3\util\connection.py", line 85, in create_connection
+    raise err
+  File "C:\Users\kmageshkumar\AppData\Local\Programs\Python\Python313\Lib\site-packages\urllib3\util\connection.py", line 73, in create_connection
+    sock.connect(sa)
+    ~~~~~~~~~~~~^^^^
+ConnectionRefusedError: [WinError 10061] No connection could be made because the target machine actively refused it
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\Users\kmageshkumar\AppData\Local\Programs\Python\Python313\Lib\site-packages\urllib3\connectionpool.py", line 788, in urlopen
+    response = self._make_request(
+        conn,
+    ...<10 lines>...
+        **response_kw,
+    )
+  File "C:\Users\kmageshkumar\AppData\Local\Programs\Python\Python313\Lib\site-packages\urllib3\connectionpool.py", line 493, in _make_request
+    conn.request(
+    ~~~~~~~~~~~~^
+        method,
+        ^^^^^^^
+    ...<6 lines>...
+        enforce_content_length=enforce_content_length,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\kmageshkumar\AppData\Local\Programs\Python\Python313\Lib\site-packages\urllib3\connection.py", line 500, in request
+    self.endheaders()
+    ~~~~~~~~~~~~~~~^^
+  File "C:\Users\kmageshkumar\AppData\Local\Programs\Python\Python313\Lib\http\client.py", line 1333, in endheaders
+    self._send_output(message_body, encode_chunked=encode_chunked)
+    ~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\kmageshkumar\AppData\Local\Programs\Python\Python313\Lib\http\client.py", line 1093, in _send_output
+    self.send(msg)
+    ~~~~~~~~~^^^^^
+  File "C:\Users\kmageshkumar\AppData\Local\Programs\Python\Python313\Lib\http\client.py", line 1037, in send
+    self.connect()
+    ~~~~~~~~~~~~^^
+  File "C:\Users\kmageshkumar\AppData\Local\Programs\Python\Python313\Lib\site-packages\urllib3\connection.py", line 331, in connect
+    self.sock = self._new_conn()
+                ~~~~~~~~~~~~~~^^
+  File "C:\Users\kmageshkumar\AppData\Local\Programs\Python\Python313\Lib\site-packages\urllib3\connection.py", line 219, in _new_conn
+    raise NewConnectionError(
+        self, f"Failed to establish a new connection: {e}"
+    ) from e
+urllib3.exceptions.NewConnectionError: HTTPConnection(host='pagapps1.ichorsystems.com', port=7001): Failed to establish a new connection: [WinError 10061] No connection could be made because the target machine actively refused it
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "C:\Users\kmageshkumar\AppData\Local\Programs\Python\Python313\Lib\site-packages\requests\adapters.py", line 696, in send
+    resp = conn.urlopen(
+        method=request.method,
+    ...<9 lines>...
+        chunked=chunked,
+    )
+  File "C:\Users\kmageshkumar\AppData\Local\Programs\Python\Python313\Lib\site-packages\urllib3\connectionpool.py", line 842, in urlopen
+    retries = retries.increment(
+        method, url, error=new_e, _pool=self, _stacktrace=sys.exc_info()[2]
+    )
+  File "C:\Users\kmageshkumar\AppData\Local\Programs\Python\Python313\Lib\site-packages\urllib3\util\retry.py", line 543, in increment
+    raise MaxRetryError(_pool, url, reason) from reason  # type: ignore[arg-type]
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+urllib3.exceptions.MaxRetryError: HTTPConnectionPool(host='pagapps1.ichorsystems.com', port=7001): Max retries exceeded with url: /CoreService/services/Table?wsdl (Caused by NewConnectionError("HTTPConnection(host='pagapps1.ichorsystems.com', port=7001): Failed to establish a new connection: [WinError 10061] No connection could be made because the target machine actively refused it"))
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\kmageshkumar\OneDrive - Ichor Systems\Scripts\ECO & CRF Tracker\agile_eco_dates.py", line 1319, in update_workbook_dates
+    agile_client = create_agile_client_from_file()
+  File "C:\Users\kmageshkumar\OneDrive - Ichor Systems\Scripts\ECO & CRF Tracker\agile_eco_dates.py", line 735, in create_agile_client_from_file
+    return AgileEcoClient(agile_user, agile_pass)
+  File "C:\Users\kmageshkumar\OneDrive - Ichor Systems\Scripts\ECO & CRF Tracker\agile_eco_dates.py", line 229, in __init__
+    self.client = Client(AGILE_WSDL, transport=transport, settings=settings)
+                  ~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\kmageshkumar\AppData\Local\Programs\Python\Python313\Lib\site-packages\zeep\client.py", line 76, in __init__
+    self.wsdl = Document(wsdl, self.transport, settings=self.settings)
+                ~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\kmageshkumar\AppData\Local\Programs\Python\Python313\Lib\site-packages\zeep\wsdl\wsdl.py", line 84, in __init__
+    self.load(location)
+    ~~~~~~~~~^^^^^^^^^^
+  File "C:\Users\kmageshkumar\AppData\Local\Programs\Python\Python313\Lib\site-packages\zeep\wsdl\wsdl.py", line 87, in load
+    document = self._get_xml_document(location, _initial=True)
+  File "C:\Users\kmageshkumar\AppData\Local\Programs\Python\Python313\Lib\site-packages\zeep\wsdl\wsdl.py", line 152, in _get_xml_document
+    return load_external(
+        location,
+    ...<3 lines>...
+        _initial=_initial,
+    )
+  File "C:\Users\kmageshkumar\AppData\Local\Programs\Python\Python313\Lib\site-packages\zeep\loader.py", line 108, in load_external
+    content = transport.load(url)
+  File "C:\Users\kmageshkumar\AppData\Local\Programs\Python\Python313\Lib\site-packages\zeep\transports.py", line 132, in load
+    content = self._load_remote_data(url)
+  File "C:\Users\kmageshkumar\AppData\Local\Programs\Python\Python313\Lib\site-packages\zeep\transports.py", line 144, in _load_remote_data
+    response = self.session.get(url, timeout=self.load_timeout)
+  File "C:\Users\kmageshkumar\AppData\Local\Programs\Python\Python313\Lib\site-packages\requests\sessions.py", line 671, in get
+    return self.request("GET", url, params=params, **kwargs)
+           ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\kmageshkumar\AppData\Local\Programs\Python\Python313\Lib\site-packages\requests\sessions.py", line 651, in request
+    resp = self.send(prep, **send_kwargs)
+  File "C:\Users\kmageshkumar\AppData\Local\Programs\Python\Python313\Lib\site-packages\requests\sessions.py", line 784, in send
+    r = adapter.send(request, **kwargs)
+  File "C:\Users\kmageshkumar\AppData\Local\Programs\Python\Python313\Lib\site-packages\requests\adapters.py", line 729, in send
+    raise ConnectionError(e, request=request)
+requests.exceptions.ConnectionError: HTTPConnectionPool(host='pagapps1.ichorsystems.com', port=7001): Max retries exceeded with url: /CoreService/services/Table?wsdl (Caused by NewConnectionError("HTTPConnection(host='pagapps1.ichorsystems.com', port=7001): Failed to establish a new connection: [WinError 10061] No connection could be made because the target machine actively refused it"))
+[2026-08-23 06:00:02] Workbook looks free. Waiting 30 seconds for OneDrive to settle...
+[2026-08-23 06:00:37] Row 655: ECO lookup failed for DSM26178; treating as not submitted yet. Could not find Submitted/Released workflow dates for DSM26178.
+Tried classes=['Change', 'ECO', 'Change Orders'] tables=['History', 'Cover Page', 'Workflow', 'Workflow Status']
+No matching workflow rows found.
+[2026-08-23 06:00:37] Updated row 655: ECO=DSM26178 Submitted=None Released=None
+[2026-08-23 06:00:38] Updated row 799: ECO=CA91167HB Submitted=19 Aug 2026 Released=21 Aug 2026
+[2026-08-23 06:00:38] Updated row 800: ECO=CA91167HB Submitted=19 Aug 2026 Released=21 Aug 2026
+[2026-08-23 06:00:38] Updated row 801: ECO=CA91167HB Submitted=19 Aug 2026 Released=21 Aug 2026
+[2026-08-23 06:00:38] Updated row 802: ECO=CA91167HB Submitted=19 Aug 2026 Released=21 Aug 2026
+[2026-08-23 06:00:41] Updated row 807: ECO=CA91143HB Submitted=19 Aug 2026 Released=None
+[2026-08-23 06:00:41] Updated row 808: ECO=CA91143HB Submitted=19 Aug 2026 Released=None
+[2026-08-23 06:00:41] Updated row 809: ECO=CA91143HB Submitted=19 Aug 2026 Released=None
+[2026-08-23 06:00:41] Updated row 810: ECO=CA91143HB Submitted=19 Aug 2026 Released=None
+[2026-08-23 06:00:44] Updated row 843: ECO=DSM26228 Submitted=21 Aug 2026 Released=None
+[2026-08-23 06:00:44] Updated row 844: ECO=DSM26228 Submitted=21 Aug 2026 Released=None
+[2026-08-23 06:00:44] Updated row 845: ECO=DSM26228 Submitted=21 Aug 2026 Released=None
+[2026-08-23 06:00:45] Updated row 846: ECO=DSM26227 Submitted=18 Aug 2026 Released=21 Aug 2026
+[2026-08-23 06:00:45] Updated row 847: ECO=DSM26227 Submitted=18 Aug 2026 Released=21 Aug 2026
+[2026-08-23 06:00:45] Updated row 848: ECO=DSM26227 Submitted=18 Aug 2026 Released=21 Aug 2026
+[2026-08-23 06:00:47] Row 849: ECO lookup failed for CA91153HB; treating as not submitted yet. Could not find Submitted/Released workflow dates for CA91153HB.
+Tried classes=['Change', 'ECO', 'Change Orders'] tables=['History', 'Cover Page', 'Workflow', 'Workflow Status']
+No matching workflow rows found.
+[2026-08-23 06:00:47] Updated row 849: ECO=CA91153HB Submitted=None Released=None
+[2026-08-23 06:00:48] Updated row 851: ECO=CA91182HB Submitted=20 Aug 2026 Released=22 Aug 2026
+[2026-08-23 06:00:48] Updated row 852: ECO=CA91182HB Submitted=20 Aug 2026 Released=22 Aug 2026
+[2026-08-23 06:00:48] Updated row 853: ECO=CA91182HB Submitted=20 Aug 2026 Released=22 Aug 2026
+[2026-08-23 06:00:50] Updated row 854: ECO=CA91187HB Submitted=20 Aug 2026 Released=22 Aug 2026
+[2026-08-23 06:00:52] Updated row 858: ECO=CA91197HB Submitted=21 Aug 2026 Released=None
+[2026-08-23 06:00:52] Updated row 859: ECO=CA91197HB Submitted=21 Aug 2026 Released=None
+[2026-08-23 06:00:52] Updated row 860: ECO=CA91197HB Submitted=21 Aug 2026 Released=None
+[2026-08-23 06:00:53] Updated row 863: ECO=CA91194HB Submitted=21 Aug 2026 Released=22 Aug 2026
+[2026-08-23 06:00:53] Updated row 864: ECO=CA91194HB Submitted=21 Aug 2026 Released=22 Aug 2026
+[2026-08-23 06:00:53] Workbook looks free. Waiting 30 seconds for OneDrive to settle...
+[2026-08-23 06:01:23] Saving workbook to C:\Users\kmageshkumar\OneDrive - Ichor Systems\AMAT SGP ECO Tracker.xlsx...
+[2026-08-23 06:01:23] Workbook protection and editable-range metadata preserved.
+[2026-08-23 06:01:23] Workbook save complete.
+[2026-08-23 06:01:25] Workbook updated: C:\Users\kmageshkumar\OneDrive - Ichor Systems\AMAT SGP ECO Tracker.xlsx; rows updated=25; rows skipped (already released)=806; rows skipped (blank/not applicable)=44; not-applicable rows with deltas cleared=32
+[2026-08-23 06:01:25] Workbook looks free. Waiting 30 seconds for OneDrive to settle...
+[2026-08-23 06:01:59] Row 2: CRF lookup failed for 1392045; treating as not submitted yet. Could not find Submitted/Released workflow dates for 1392045.
+Tried classes=['Change', 'ECO', 'Change Orders'] tables=['History', 'Cover Page', 'Workflow', 'Workflow Status']
+No matching workflow rows found.
+[2026-08-23 06:01:59] Updated row 2: CRF=1392045 Submitted=None Released=None
+[2026-08-23 06:02:02] Row 3: CRF lookup failed for 1392046; treating as not submitted yet. Could not find Submitted/Released workflow dates for 1392046.
+Tried classes=['Change', 'ECO', 'Change Orders'] tables=['History', 'Cover Page', 'Workflow', 'Workflow Status']
+No matching workflow rows found.
+[2026-08-23 06:02:02] Updated row 3: CRF=1392046 Submitted=None Released=None
+[2026-08-23 06:02:04] Row 4: CRF lookup failed for 1392048; treating as not submitted yet. Could not find Submitted/Released workflow dates for 1392048.
+Tried classes=['Change', 'ECO', 'Change Orders'] tables=['History', 'Cover Page', 'Workflow', 'Workflow Status']
+No matching workflow rows found.
+[2026-08-23 06:02:04] Updated row 4: CRF=1392048 Submitted=None Released=None
+[2026-08-23 06:02:07] Row 5: CRF lookup failed for 1382229; treating as not submitted yet. Could not find Submitted/Released workflow dates for 1382229.
+Tried classes=['Change', 'ECO', 'Change Orders'] tables=['History', 'Cover Page', 'Workflow', 'Workflow Status']
+No matching workflow rows found.
+[2026-08-23 06:02:07] Updated row 5: CRF=1382229 Submitted=None Released=None
+[2026-08-23 06:02:09] Row 6: CRF lookup failed for 1387625; treating as not submitted yet. Could not find Submitted/Released workflow dates for 1387625.
+Tried classes=['Change', 'ECO', 'Change Orders'] tables=['History', 'Cover Page', 'Workflow', 'Workflow Status']
+No matching workflow rows found.
+[2026-08-23 06:02:09] Updated row 6: CRF=1387625 Submitted=None Released=None
+[2026-08-23 06:02:11] Row 7: CRF lookup failed for 1394327; treating as not submitted yet. Could not find Submitted/Released workflow dates for 1394327.
+Tried classes=['Change', 'ECO', 'Change Orders'] tables=['History', 'Cover Page', 'Workflow', 'Workflow Status']
+No matching workflow rows found.
+[2026-08-23 06:02:11] Updated row 7: CRF=1394327 Submitted=None Released=None
+[2026-08-23 06:02:14] Row 8: CRF lookup failed for 1393125; treating as not submitted yet. Could not find Submitted/Released workflow dates for 1393125.
+Tried classes=['Change', 'ECO', 'Change Orders'] tables=['History', 'Cover Page', 'Workflow', 'Workflow Status']
+No matching workflow rows found.
+[2026-08-23 06:02:14] Updated row 8: CRF=1393125 Submitted=None Released=None
+[2026-08-23 06:02:16] Row 9: CRF lookup failed for 1397033; treating as not submitted yet. Could not find Submitted/Released workflow dates for 1397033.
+Tried classes=['Change', 'ECO', 'Change Orders'] tables=['History', 'Cover Page', 'Workflow', 'Workflow Status']
+No matching workflow rows found.
+[2026-08-23 06:02:16] Updated row 9: CRF=1397033 Submitted=None Released=None
+[2026-08-23 06:02:19] Row 10: CRF lookup failed for 1397034; treating as not submitted yet. Could not find Submitted/Released workflow dates for 1397034.
+Tried classes=['Change', 'ECO', 'Change Orders'] tables=['History', 'Cover Page', 'Workflow', 'Workflow Status']
+No matching workflow rows found.
+[2026-08-23 06:02:19] Updated row 10: CRF=1397034 Submitted=None Released=None
+[2026-08-23 06:02:19] Workbook looks free. Waiting 30 seconds for OneDrive to settle...
+[2026-08-23 06:02:49] Saving workbook to C:\Users\kmageshkumar\OneDrive - Ichor Systems\AMAT SGP CRF Tracker.xlsx...
+[2026-08-23 06:02:49] Workbook protection and editable-range metadata preserved.
+[2026-08-23 06:02:49] Workbook save complete.
+[2026-08-23 06:02:49] CRF workbook updated: C:\Users\kmageshkumar\OneDrive - Ichor Systems\AMAT SGP CRF Tracker.xlsx; rows updated=9; rows skipped (already released)=0; rows skipped (blank/not applicable)=0
+[2026-08-24 06:00:02] Workbook looks free. Waiting 30 seconds for OneDrive to settle...
+[2026-08-24 06:00:37] Row 655: ECO lookup failed for DSM26178; treating as not submitted yet. Could not find Submitted/Released workflow dates for DSM26178.
+Tried classes=['Change', 'ECO', 'Change Orders'] tables=['History', 'Cover Page', 'Workflow', 'Workflow Status']
+No matching workflow rows found.
+[2026-08-24 06:00:37] Updated row 655: ECO=DSM26178 Submitted=None Released=None
+[2026-08-24 06:00:40] Updated row 807: ECO=CA91143HB Submitted=19 Aug 2026 Released=None
+[2026-08-24 06:00:40] Updated row 808: ECO=CA91143HB Submitted=19 Aug 2026 Released=None
+[2026-08-24 06:00:40] Updated row 809: ECO=CA91143HB Submitted=19 Aug 2026 Released=None
+[2026-08-24 06:00:40] Updated row 810: ECO=CA91143HB Submitted=19 Aug 2026 Released=None
+[2026-08-24 06:00:42] Updated row 843: ECO=DSM26228 Submitted=21 Aug 2026 Released=None
+[2026-08-24 06:00:42] Updated row 844: ECO=DSM26228 Submitted=21 Aug 2026 Released=None
+[2026-08-24 06:00:42] Updated row 845: ECO=DSM26228 Submitted=21 Aug 2026 Released=None
+[2026-08-24 06:00:45] Row 849: ECO lookup failed for CA91153HB; treating as not submitted yet. Could not find Submitted/Released workflow dates for CA91153HB.
+Tried classes=['Change', 'ECO', 'Change Orders'] tables=['History', 'Cover Page', 'Workflow', 'Workflow Status']
+No matching workflow rows found.
+[2026-08-24 06:00:45] Updated row 849: ECO=CA91153HB Submitted=None Released=None
+[2026-08-24 06:00:48] Updated row 858: ECO=CA91197HB Submitted=21 Aug 2026 Released=None
+[2026-08-24 06:00:48] Updated row 859: ECO=CA91197HB Submitted=21 Aug 2026 Released=None
+[2026-08-24 06:00:48] Updated row 860: ECO=CA91197HB Submitted=21 Aug 2026 Released=None
+[2026-08-24 06:00:48] Workbook looks free. Waiting 30 seconds for OneDrive to settle...
+[2026-08-24 06:01:18] Saving workbook to C:\Users\kmageshkumar\OneDrive - Ichor Systems\AMAT SGP ECO Tracker.xlsx...
+[2026-08-24 06:01:18] Workbook protection and editable-range metadata preserved.
+[2026-08-24 06:01:18] Workbook save complete.
+[2026-08-24 06:01:20] Workbook updated: C:\Users\kmageshkumar\OneDrive - Ichor Systems\AMAT SGP ECO Tracker.xlsx; rows updated=12; rows skipped (already released)=819; rows skipped (blank/not applicable)=84; not-applicable rows with deltas cleared=32
+[2026-08-24 06:01:20] Workbook looks free. Waiting 30 seconds for OneDrive to settle...
+[2026-08-24 06:01:54] Row 2: CRF lookup failed for 1392045; treating as not submitted yet. Could not find Submitted/Released workflow dates for 1392045.
+Tried classes=['Change', 'ECO', 'Change Orders'] tables=['History', 'Cover Page', 'Workflow', 'Workflow Status']
+No matching workflow rows found.
+[2026-08-24 06:01:54] Updated row 2: CRF=1392045 Submitted=None Released=None
+[2026-08-24 06:01:56] Row 3: CRF lookup failed for 1392046; treating as not submitted yet. Could not find Submitted/Released workflow dates for 1392046.
+Tried classes=['Change', 'ECO', 'Change Orders'] tables=['History', 'Cover Page', 'Workflow', 'Workflow Status']
+No matching workflow rows found.
+[2026-08-24 06:01:56] Updated row 3: CRF=1392046 Submitted=None Released=None
+[2026-08-24 06:01:59] Row 4: CRF lookup failed for 1392048; treating as not submitted yet. Could not find Submitted/Released workflow dates for 1392048.
+Tried classes=['Change', 'ECO', 'Change Orders'] tables=['History', 'Cover Page', 'Workflow', 'Workflow Status']
+No matching workflow rows found.
+[2026-08-24 06:01:59] Updated row 4: CRF=1392048 Submitted=None Released=None
+[2026-08-24 06:02:01] Row 5: CRF lookup failed for 1382229; treating as not submitted yet. Could not find Submitted/Released workflow dates for 1382229.
+Tried classes=['Change', 'ECO', 'Change Orders'] tables=['History', 'Cover Page', 'Workflow', 'Workflow Status']
+No matching workflow rows found.
+[2026-08-24 06:02:01] Updated row 5: CRF=1382229 Submitted=None Released=None
+[2026-08-24 06:02:04] Row 6: CRF lookup failed for 1387625; treating as not submitted yet. Could not find Submitted/Released workflow dates for 1387625.
+Tried classes=['Change', 'ECO', 'Change Orders'] tables=['History', 'Cover Page', 'Workflow', 'Workflow Status']
+No matching workflow rows found.
+[2026-08-24 06:02:04] Updated row 6: CRF=1387625 Submitted=None Released=None
+[2026-08-24 06:02:07] Row 7: CRF lookup failed for 1394327; treating as not submitted yet. Could not find Submitted/Released workflow dates for 1394327.
+Tried classes=['Change', 'ECO', 'Change Orders'] tables=['History', 'Cover Page', 'Workflow', 'Workflow Status']
+No matching workflow rows found.
+[2026-08-24 06:02:07] Updated row 7: CRF=1394327 Submitted=None Released=None
+[2026-08-24 06:02:09] Row 8: CRF lookup failed for 1393125; treating as not submitted yet. Could not find Submitted/Released workflow dates for 1393125.
+Tried classes=['Change', 'ECO', 'Change Orders'] tables=['History', 'Cover Page', 'Workflow', 'Workflow Status']
+No matching workflow rows found.
+[2026-08-24 06:02:09] Updated row 8: CRF=1393125 Submitted=None Released=None
+[2026-08-24 06:02:12] Row 9: CRF lookup failed for 1397033; treating as not submitted yet. Could not find Submitted/Released workflow dates for 1397033.
+Tried classes=['Change', 'ECO', 'Change Orders'] tables=['History', 'Cover Page', 'Workflow', 'Workflow Status']
+No matching workflow rows found.
+[2026-08-24 06:02:12] Updated row 9: CRF=1397033 Submitted=None Released=None
+[2026-08-24 06:02:14] Row 10: CRF lookup failed for 1397034; treating as not submitted yet. Could not find Submitted/Released workflow dates for 1397034.
+Tried classes=['Change', 'ECO', 'Change Orders'] tables=['History', 'Cover Page', 'Workflow', 'Workflow Status']
+No matching workflow rows found.
+[2026-08-24 06:02:14] Updated row 10: CRF=1397034 Submitted=None Released=None
+[2026-08-24 06:02:14] Workbook looks free. Waiting 30 seconds for OneDrive to settle...
+[2026-08-24 06:02:44] Saving workbook to C:\Users\kmageshkumar\OneDrive - Ichor Systems\AMAT SGP CRF Tracker.xlsx...
+[2026-08-24 06:02:44] Workbook protection and editable-range metadata preserved.
+[2026-08-24 06:02:44] Workbook save complete.
+[2026-08-24 06:02:44] CRF workbook updated: C:\Users\kmageshkumar\OneDrive - Ichor Systems\AMAT SGP CRF Tracker.xlsx; rows updated=9; rows skipped (already released)=0; rows skipped (blank/not applicable)=0
+[2026-08-25 06:00:03] Workbook looks free. Waiting 30 seconds for OneDrive to settle...
+[2026-08-25 06:00:37] Row 655: ECO lookup failed for DSM26178; treating as not submitted yet. Could not find Submitted/Released workflow dates for DSM26178.
+Tried classes=['Change', 'ECO', 'Change Orders'] tables=['History', 'Cover Page', 'Workflow', 'Workflow Status']
+No matching workflow rows found.
+[2026-08-25 06:00:37] Updated row 655: ECO=DSM26178 Submitted=None Released=None
+[2026-08-25 06:00:38] Updated row 807: ECO=CA91143HB Submitted=19 Aug 2026 Released=24 Aug 2026
+[2026-08-25 06:00:38] Updated row 808: ECO=CA91143HB Submitted=19 Aug 2026 Released=24 Aug 2026
+[2026-08-25 06:00:38] Updated row 809: ECO=CA91143HB Submitted=19 Aug 2026 Released=24 Aug 2026
+[2026-08-25 06:00:38] Updated row 810: ECO=CA91143HB Submitted=19 Aug 2026 Released=24 Aug 2026
+[2026-08-25 06:00:39] Updated row 843: ECO=DSM26228 Submitted=21 Aug 2026 Released=25 Aug 2026
+[2026-08-25 06:00:39] Updated row 844: ECO=DSM26228 Submitted=21 Aug 2026 Released=25 Aug 2026
+[2026-08-25 06:00:39] Updated row 845: ECO=DSM26228 Submitted=21 Aug 2026 Released=25 Aug 2026
+[2026-08-25 06:00:42] Row 849: ECO lookup failed for CA91153HB; treating as not submitted yet. Could not find Submitted/Released workflow dates for CA91153HB.
+Tried classes=['Change', 'ECO', 'Change Orders'] tables=['History', 'Cover Page', 'Workflow', 'Workflow Status']
+No matching workflow rows found.
+[2026-08-25 06:00:42] Updated row 849: ECO=CA91153HB Submitted=None Released=None
+[2026-08-25 06:00:44] Updated row 858: ECO=CA91197HB Submitted=21 Aug 2026 Released=None
+[2026-08-25 06:00:44] Updated row 859: ECO=CA91197HB Submitted=21 Aug 2026 Released=None
+[2026-08-25 06:00:44] Updated row 860: ECO=CA91197HB Submitted=21 Aug 2026 Released=None
+[2026-08-25 06:00:47] Updated row 865: ECO=CA91313HB Submitted=25 Aug 2026 Released=None
+[2026-08-25 06:00:47] Updated row 866: ECO=CA91313HB Submitted=25 Aug 2026 Released=None
+[2026-08-25 06:00:47] Updated row 867: ECO=CA91313HB Submitted=25 Aug 2026 Released=None
+[2026-08-25 06:00:47] Updated row 868: ECO=CA91313HB Submitted=25 Aug 2026 Released=None
+[2026-08-25 06:00:49] Updated row 869: ECO=CA91315HB Submitted=25 Aug 2026 Released=None
+[2026-08-25 06:00:49] Updated row 870: ECO=CA91315HB Submitted=25 Aug 2026 Released=None
+[2026-08-25 06:00:49] Updated row 871: ECO=CA91315HB Submitted=25 Aug 2026 Released=None
+[2026-08-25 06:00:49] Updated row 872: ECO=CA91315HB Submitted=25 Aug 2026 Released=None
+[2026-08-25 06:00:52] Row 873: ECO lookup failed for CA91314HB; treating as not submitted yet. Could not find Submitted/Released workflow dates for CA91314HB.
+Tried classes=['Change', 'ECO', 'Change Orders'] tables=['History', 'Cover Page', 'Workflow', 'Workflow Status']
+No matching workflow rows found.
+[2026-08-25 06:00:52] Updated row 873: ECO=CA91314HB Submitted=None Released=None
+[2026-08-25 06:00:52] Updated row 874: ECO=CA91314HB Submitted=None Released=None
+[2026-08-25 06:00:52] Updated row 875: ECO=CA91314HB Submitted=None Released=None
+[2026-08-25 06:00:52] Updated row 876: ECO=CA91314HB Submitted=None Released=None
+[2026-08-25 06:00:54] Updated row 877: ECO=DSM26247 Submitted=25 Aug 2026 Released=None
+[2026-08-25 06:00:54] Updated row 878: ECO=DSM26247 Submitted=25 Aug 2026 Released=None
+[2026-08-25 06:00:54] Updated row 879: ECO=DSM26247 Submitted=25 Aug 2026 Released=None
+[2026-08-25 06:00:57] Updated row 880: ECO=DSM26251 Submitted=25 Aug 2026 Released=None
+[2026-08-25 06:00:57] Updated row 881: ECO=DSM26251 Submitted=25 Aug 2026 Released=None
+[2026-08-25 06:00:57] Updated row 882: ECO=DSM26251 Submitted=25 Aug 2026 Released=None
+[2026-08-25 06:00:57] Updated row 883: ECO=DSM26251 Submitted=25 Aug 2026 Released=None
+[2026-08-25 06:01:00] Updated row 884: ECO=DSM26240 Submitted=24 Aug 2026 Released=None
+[2026-08-25 06:01:00] Updated row 885: ECO=DSM26240 Submitted=24 Aug 2026 Released=None
+[2026-08-25 06:01:00] Updated row 886: ECO=DSM26240 Submitted=24 Aug 2026 Released=None
+[2026-08-25 06:01:02] Updated row 887: ECO=DSM26242 Submitted=24 Aug 2026 Released=None
+[2026-08-25 06:01:02] Updated row 888: ECO=DSM26242 Submitted=24 Aug 2026 Released=None
+[2026-08-25 06:01:02] Updated row 889: ECO=DSM26242 Submitted=24 Aug 2026 Released=None
+[2026-08-25 06:01:05] Updated row 897: ECO=DSM26241 Submitted=25 Aug 2026 Released=None
+[2026-08-25 06:01:05] Updated row 898: ECO=DSM26241 Submitted=25 Aug 2026 Released=None
+[2026-08-25 06:01:05] Updated row 899: ECO=DSM26241 Submitted=25 Aug 2026 Released=None
+[2026-08-25 06:01:07] Updated row 900: ECO=DSM26243 Submitted=25 Aug 2026 Released=None
+[2026-08-25 06:01:10] Row 901: ECO lookup failed for DSM26244; treating as not submitted yet. Could not find Submitted/Released workflow dates for DSM26244.
+Tried classes=['Change', 'ECO', 'Change Orders'] tables=['History', 'Cover Page', 'Workflow', 'Workflow Status']
+No matching workflow rows found.
+[2026-08-25 06:01:10] Updated row 901: ECO=DSM26244 Submitted=None Released=None
+[2026-08-25 06:01:10] Updated row 902: ECO=DSM26244 Submitted=None Released=None
+[2026-08-25 06:01:10] Updated row 903: ECO=DSM26244 Submitted=None Released=None
+[2026-08-25 06:01:12] Updated row 904: ECO=DSM26246 Submitted=25 Aug 2026 Released=None
+[2026-08-25 06:01:12] Updated row 905: ECO=DSM26246 Submitted=25 Aug 2026 Released=None
+[2026-08-25 06:01:12] Updated row 906: ECO=DSM26246 Submitted=25 Aug 2026 Released=None
+[2026-08-25 06:01:15] Updated row 907: ECO=DSM26245 Submitted=25 Aug 2026 Released=None
+[2026-08-25 06:01:17] Updated row 911: ECO=CA91308HB Submitted=25 Aug 2026 Released=None
+[2026-08-25 06:01:17] Updated row 912: ECO=CA91308HB Submitted=25 Aug 2026 Released=None
+[2026-08-25 06:01:17] Updated row 913: ECO=CA91308HB Submitted=25 Aug 2026 Released=None
+[2026-08-25 06:01:17] Updated row 914: ECO=CA91308HB Submitted=25 Aug 2026 Released=None
+[2026-08-25 06:01:17] Workbook looks free. Waiting 30 seconds for OneDrive to settle...
+[2026-08-25 06:01:47] Saving workbook to C:\Users\kmageshkumar\OneDrive - Ichor Systems\AMAT SGP ECO Tracker.xlsx...
+[2026-08-25 06:01:47] Workbook protection and editable-range metadata preserved.
+[2026-08-25 06:01:47] Workbook save complete.
+[2026-08-25 06:01:49] Workbook updated: C:\Users\kmageshkumar\OneDrive - Ichor Systems\AMAT SGP ECO Tracker.xlsx; rows updated=52; rows skipped (already released)=819; rows skipped (blank/not applicable)=44; not-applicable rows with deltas cleared=32
+[2026-08-25 06:01:49] Workbook looks free. Waiting 30 seconds for OneDrive to settle...
+[2026-08-25 06:02:22] Row 2: CRF lookup failed for 1392045; treating as not submitted yet. Could not find Submitted/Released workflow dates for 1392045.
+Tried classes=['Change', 'ECO', 'Change Orders'] tables=['History', 'Cover Page', 'Workflow', 'Workflow Status']
+No matching workflow rows found.
+[2026-08-25 06:02:22] Updated row 2: CRF=1392045 Submitted=None Released=None
+[2026-08-25 06:02:25] Row 3: CRF lookup failed for 1392046; treating as not submitted yet. Could not find Submitted/Released workflow dates for 1392046.
+Tried classes=['Change', 'ECO', 'Change Orders'] tables=['History', 'Cover Page', 'Workflow', 'Workflow Status']
+No matching workflow rows found.
+[2026-08-25 06:02:25] Updated row 3: CRF=1392046 Submitted=None Released=None
+[2026-08-25 06:02:27] Row 4: CRF lookup failed for 1392048; treating as not submitted yet. Could not find Submitted/Released workflow dates for 1392048.
+Tried classes=['Change', 'ECO', 'Change Orders'] tables=['History', 'Cover Page', 'Workflow', 'Workflow Status']
+No matching workflow rows found.
+[2026-08-25 06:02:27] Updated row 4: CRF=1392048 Submitted=None Released=None
+[2026-08-25 06:02:30] Row 5: CRF lookup failed for 1382229; treating as not submitted yet. Could not find Submitted/Released workflow dates for 1382229.
+Tried classes=['Change', 'ECO', 'Change Orders'] tables=['History', 'Cover Page', 'Workflow', 'Workflow Status']
+No matching workflow rows found.
+[2026-08-25 06:02:30] Updated row 5: CRF=1382229 Submitted=None Released=None
+[2026-08-25 06:02:32] Row 6: CRF lookup failed for 1387625; treating as not submitted yet. Could not find Submitted/Released workflow dates for 1387625.
+Tried classes=['Change', 'ECO', 'Change Orders'] tables=['History', 'Cover Page', 'Workflow', 'Workflow Status']
+No matching workflow rows found.
+[2026-08-25 06:02:32] Updated row 6: CRF=1387625 Submitted=None Released=None
+[2026-08-25 06:02:35] Row 7: CRF lookup failed for 1394327; treating as not submitted yet. Could not find Submitted/Released workflow dates for 1394327.
+Tried classes=['Change', 'ECO', 'Change Orders'] tables=['History', 'Cover Page', 'Workflow', 'Workflow Status']
+No matching workflow rows found.
+[2026-08-25 06:02:35] Updated row 7: CRF=1394327 Submitted=None Released=None
+[2026-08-25 06:02:37] Row 8: CRF lookup failed for 1393125; treating as not submitted yet. Could not find Submitted/Released workflow dates for 1393125.
+Tried classes=['Change', 'ECO', 'Change Orders'] tables=['History', 'Cover Page', 'Workflow', 'Workflow Status']
+No matching workflow rows found.
+[2026-08-25 06:02:37] Updated row 8: CRF=1393125 Submitted=None Released=None
+[2026-08-25 06:02:40] Row 9: CRF lookup failed for 1397033; treating as not submitted yet. Could not find Submitted/Released workflow dates for 1397033.
+Tried classes=['Change', 'ECO', 'Change Orders'] tables=['History', 'Cover Page', 'Workflow', 'Workflow Status']
+No matching workflow rows found.
+[2026-08-25 06:02:40] Updated row 9: CRF=1397033 Submitted=None Released=None
+[2026-08-25 06:02:42] Row 10: CRF lookup failed for 1397034; treating as not submitted yet. Could not find Submitted/Released workflow dates for 1397034.
+Tried classes=['Change', 'ECO', 'Change Orders'] tables=['History', 'Cover Page', 'Workflow', 'Workflow Status']
+No matching workflow rows found.
+[2026-08-25 06:02:42] Updated row 10: CRF=1397034 Submitted=None Released=None
+[2026-08-25 06:02:42] Workbook looks free. Waiting 30 seconds for OneDrive to settle...
+[2026-08-25 06:03:12] Saving workbook to C:\Users\kmageshkumar\OneDrive - Ichor Systems\AMAT SGP CRF Tracker.xlsx...
+[2026-08-25 06:03:12] Workbook protection and editable-range metadata preserved.
+[2026-08-25 06:03:12] Workbook save complete.
+[2026-08-25 06:03:12] CRF workbook updated: C:\Users\kmageshkumar\OneDrive - Ichor Systems\AMAT SGP CRF Tracker.xlsx; rows updated=9; rows skipped (already released)=0; rows skipped (blank/not applicable)=0
+[2026-08-26 06:00:02] Workbook looks free. Waiting 30 seconds for OneDrive to settle...
+[2026-08-26 06:00:37] Updated row 655: ECO=DSM26254 Submitted=26 Aug 2026 Released=None
+[2026-08-26 06:00:39] Row 849: ECO lookup failed for CA91153HB; treating as not submitted yet. Could not find Submitted/Released workflow dates for CA91153HB.
+Tried classes=['Change', 'ECO', 'Change Orders'] tables=['History', 'Cover Page', 'Workflow', 'Workflow Status']
+No matching workflow rows found.
+[2026-08-26 06:00:39] Updated row 849: ECO=CA91153HB Submitted=None Released=None
+[2026-08-26 06:00:40] Updated row 858: ECO=CA91197HB Submitted=21 Aug 2026 Released=25 Aug 2026
+[2026-08-26 06:00:40] Updated row 859: ECO=CA91197HB Submitted=21 Aug 2026 Released=25 Aug 2026
+[2026-08-26 06:00:40] Updated row 860: ECO=CA91197HB Submitted=21 Aug 2026 Released=25 Aug 2026
+[2026-08-26 06:00:41] Updated row 865: ECO=CA91313HB Submitted=25 Aug 2026 Released=26 Aug 2026
+[2026-08-26 06:00:41] Updated row 866: ECO=CA91313HB Submitted=25 Aug 2026 Released=26 Aug 2026
+[2026-08-26 06:00:41] Updated row 867: ECO=CA91313HB Submitted=25 Aug 2026 Released=26 Aug 2026
+[2026-08-26 06:00:41] Updated row 868: ECO=CA91313HB Submitted=25 Aug 2026 Released=26 Aug 2026
+[2026-08-26 06:00:42] Updated row 869: ECO=CA91315HB Submitted=25 Aug 2026 Released=26 Aug 2026
+[2026-08-26 06:00:42] Updated row 870: ECO=CA91315HB Submitted=25 Aug 2026 Released=26 Aug 2026
+[2026-08-26 06:00:42] Updated row 871: ECO=CA91315HB Submitted=25 Aug 2026 Released=26 Aug 2026
+[2026-08-26 06:00:42] Updated row 872: ECO=CA91315HB Submitted=25 Aug 2026 Released=26 Aug 2026
+[2026-08-26 06:00:45] Updated row 873: ECO=CA91314HB Submitted=25 Aug 2026 Released=None
+[2026-08-26 06:00:45] Updated row 874: ECO=CA91314HB Submitted=25 Aug 2026 Released=None
+[2026-08-26 06:00:45] Updated row 875: ECO=CA91314HB Submitted=25 Aug 2026 Released=None
+[2026-08-26 06:00:45] Updated row 876: ECO=CA91314HB Submitted=25 Aug 2026 Released=None
+[2026-08-26 06:00:46] Updated row 877: ECO=DSM26247 Submitted=25 Aug 2026 Released=26 Aug 2026
+[2026-08-26 06:00:46] Updated row 878: ECO=DSM26247 Submitted=25 Aug 2026 Released=26 Aug 2026
+[2026-08-26 06:00:46] Updated row 879: ECO=DSM26247 Submitted=25 Aug 2026 Released=26 Aug 2026
+[2026-08-26 06:00:48] Updated row 880: ECO=DSM26251 Submitted=25 Aug 2026 Released=None
+[2026-08-26 06:00:48] Updated row 881: ECO=DSM26251 Submitted=25 Aug 2026 Released=None
+[2026-08-26 06:00:48] Updated row 882: ECO=DSM26251 Submitted=25 Aug 2026 Released=None
+[2026-08-26 06:00:48] Updated row 883: ECO=DSM26251 Submitted=25 Aug 2026 Released=None
+[2026-08-26 06:00:51] Updated row 884: ECO=DSM26240 Submitted=24 Aug 2026 Released=None
+[2026-08-26 06:00:51] Updated row 885: ECO=DSM26240 Submitted=24 Aug 2026 Released=None
+[2026-08-26 06:00:51] Updated row 886: ECO=DSM26240 Submitted=24 Aug 2026 Released=None
+[2026-08-26 06:00:53] Updated row 887: ECO=DSM26242 Submitted=24 Aug 2026 Released=None
+[2026-08-26 06:00:53] Updated row 888: ECO=DSM26242 Submitted=24 Aug 2026 Released=None
+[2026-08-26 06:00:53] Updated row 889: ECO=DSM26242 Submitted=24 Aug 2026 Released=None
+[2026-08-26 06:00:56] Updated row 897: ECO=DSM26241 Submitted=25 Aug 2026 Released=None
+[2026-08-26 06:00:56] Updated row 898: ECO=DSM26241 Submitted=25 Aug 2026 Released=None
+[2026-08-26 06:00:56] Updated row 899: ECO=DSM26241 Submitted=25 Aug 2026 Released=None
+[2026-08-26 06:00:59] Updated row 900: ECO=DSM26243 Submitted=25 Aug 2026 Released=None
+[2026-08-26 06:01:01] Updated row 901: ECO=DSM26244 Submitted=25 Aug 2026 Released=None
+[2026-08-26 06:01:01] Updated row 902: ECO=DSM26244 Submitted=25 Aug 2026 Released=None
+[2026-08-26 06:01:01] Updated row 903: ECO=DSM26244 Submitted=25 Aug 2026 Released=None
+[2026-08-26 06:01:04] Updated row 904: ECO=DSM26246 Submitted=25 Aug 2026 Released=None
+[2026-08-26 06:01:04] Updated row 905: ECO=DSM26246 Submitted=25 Aug 2026 Released=None
+[2026-08-26 06:01:04] Updated row 906: ECO=DSM26246 Submitted=25 Aug 2026 Released=None
+[2026-08-26 06:01:06] Updated row 907: ECO=DSM26245 Submitted=25 Aug 2026 Released=None
+[2026-08-26 06:01:09] Updated row 908: ECO=DSM26249 Submitted=26 Aug 2026 Released=None
+[2026-08-26 06:01:09] Updated row 909: ECO=DSM26249 Submitted=26 Aug 2026 Released=None
+[2026-08-26 06:01:10] Updated row 911: ECO=CA91308HB Submitted=25 Aug 2026 Released=26 Aug 2026
+[2026-08-26 06:01:10] Updated row 912: ECO=CA91308HB Submitted=25 Aug 2026 Released=26 Aug 2026
+[2026-08-26 06:01:10] Updated row 913: ECO=CA91308HB Submitted=25 Aug 2026 Released=26 Aug 2026
+[2026-08-26 06:01:10] Updated row 914: ECO=CA91308HB Submitted=25 Aug 2026 Released=26 Aug 2026
+[2026-08-26 06:01:12] Updated row 915: ECO=CA91329HB Submitted=26 Aug 2026 Released=None
+[2026-08-26 06:01:12] Updated row 916: ECO=CA91329HB Submitted=26 Aug 2026 Released=None
+[2026-08-26 06:01:12] Workbook looks free. Waiting 30 seconds for OneDrive to settle...
+[2026-08-26 06:01:42] Saving workbook to C:\Users\kmageshkumar\OneDrive - Ichor Systems\AMAT SGP ECO Tracker.xlsx...
+[2026-08-26 06:01:43] Workbook protection and editable-range metadata preserved.
+[2026-08-26 06:01:43] Workbook save complete.
+[2026-08-26 06:01:44] Workbook updated: C:\Users\kmageshkumar\OneDrive - Ichor Systems\AMAT SGP ECO Tracker.xlsx; rows updated=49; rows skipped (already released)=826; rows skipped (blank/not applicable)=40; not-applicable rows with deltas cleared=33
+[2026-08-26 06:01:44] Workbook looks free. Waiting 30 seconds for OneDrive to settle...
+[2026-08-26 06:02:18] Row 2: CRF lookup failed for 1392045; treating as not submitted yet. Could not find Submitted/Released workflow dates for 1392045.
+Tried classes=['Change', 'ECO', 'Change Orders'] tables=['History', 'Cover Page', 'Workflow', 'Workflow Status']
+No matching workflow rows found.
+[2026-08-26 06:02:18] Updated row 2: CRF=1392045 Submitted=None Released=None
+[2026-08-26 06:02:20] Row 3: CRF lookup failed for 1392046; treating as not submitted yet. Could not find Submitted/Released workflow dates for 1392046.
+Tried classes=['Change', 'ECO', 'Change Orders'] tables=['History', 'Cover Page', 'Workflow', 'Workflow Status']
+No matching workflow rows found.
+[2026-08-26 06:02:20] Updated row 3: CRF=1392046 Submitted=None Released=None
+[2026-08-26 06:02:23] Row 4: CRF lookup failed for 1392048; treating as not submitted yet. Could not find Submitted/Released workflow dates for 1392048.
+Tried classes=['Change', 'ECO', 'Change Orders'] tables=['History', 'Cover Page', 'Workflow', 'Workflow Status']
+No matching workflow rows found.
+[2026-08-26 06:02:23] Updated row 4: CRF=1392048 Submitted=None Released=None
+[2026-08-26 06:02:25] Row 5: CRF lookup failed for 1382229; treating as not submitted yet. Could not find Submitted/Released workflow dates for 1382229.
+Tried classes=['Change', 'ECO', 'Change Orders'] tables=['History', 'Cover Page', 'Workflow', 'Workflow Status']
+No matching workflow rows found.
+[2026-08-26 06:02:25] Updated row 5: CRF=1382229 Submitted=None Released=None
+[2026-08-26 06:02:27] Row 6: CRF lookup failed for 1387625; treating as not submitted yet. Could not find Submitted/Released workflow dates for 1387625.
+Tried classes=['Change', 'ECO', 'Change Orders'] tables=['History', 'Cover Page', 'Workflow', 'Workflow Status']
+No matching workflow rows found.
+[2026-08-26 06:02:27] Updated row 6: CRF=1387625 Submitted=None Released=None
+[2026-08-26 06:02:30] Row 7: CRF lookup failed for 1394327; treating as not submitted yet. Could not find Submitted/Released workflow dates for 1394327.
+Tried classes=['Change', 'ECO', 'Change Orders'] tables=['History', 'Cover Page', 'Workflow', 'Workflow Status']
+No matching workflow rows found.
+[2026-08-26 06:02:30] Updated row 7: CRF=1394327 Submitted=None Released=None
+[2026-08-26 06:02:32] Row 8: CRF lookup failed for 1393125; treating as not submitted yet. Could not find Submitted/Released workflow dates for 1393125.
+Tried classes=['Change', 'ECO', 'Change Orders'] tables=['History', 'Cover Page', 'Workflow', 'Workflow Status']
+No matching workflow rows found.
+[2026-08-26 06:02:32] Updated row 8: CRF=1393125 Submitted=None Released=None
+[2026-08-26 06:02:35] Row 9: CRF lookup failed for 1397033; treating as not submitted yet. Could not find Submitted/Released workflow dates for 1397033.
+Tried classes=['Change', 'ECO', 'Change Orders'] tables=['History', 'Cover Page', 'Workflow', 'Workflow Status']
+No matching workflow rows found.
+[2026-08-26 06:02:35] Updated row 9: CRF=1397033 Submitted=None Released=None
+[2026-08-26 06:02:37] Row 10: CRF lookup failed for 1397034; treating as not submitted yet. Could not find Submitted/Released workflow dates for 1397034.
+Tried classes=['Change', 'ECO', 'Change Orders'] tables=['History', 'Cover Page', 'Workflow', 'Workflow Status']
+No matching workflow rows found.
+[2026-08-26 06:02:37] Updated row 10: CRF=1397034 Submitted=None Released=None
+[2026-08-26 06:02:37] Workbook looks free. Waiting 30 seconds for OneDrive to settle...
+[2026-08-26 06:03:07] Saving workbook to C:\Users\kmageshkumar\OneDrive - Ichor Systems\AMAT SGP CRF Tracker.xlsx...
+[2026-08-26 06:03:07] Workbook protection and editable-range metadata preserved.
+[2026-08-26 06:03:07] Workbook save complete.
+[2026-08-26 06:03:07] CRF workbook updated: C:\Users\kmageshkumar\OneDrive - Ichor Systems\AMAT SGP CRF Tracker.xlsx; rows updated=9; rows skipped (already released)=0; rows skipped (blank/not applicable)=0
