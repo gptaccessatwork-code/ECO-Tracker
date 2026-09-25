@@ -114,6 +114,20 @@ This script updates the tracker workbook in place by:
 - applying overdue highlighting
 - sending reminder emails for overdue rows
 
+### SharePoint email-bridge mode
+
+To avoid unreliable OneDrive synchronization, the script can process JSON job
+attachments delivered through Outlook while Power Automate reads and writes the
+SharePoint workbooks with Excel Online. See
+[`POWER_AUTOMATE_AGILE_EMAIL_BRIDGE.md`](POWER_AUTOMATE_AGILE_EMAIL_BRIDGE.md)
+for the Office Scripts, flow configuration, Task Scheduler cutover, testing, and
+rollback instructions.
+
+Email-bridge mode starts Classic Outlook Send/Receive and waits up to five
+minutes for a job email by default, so Classic Outlook does not have to be
+opened manually before the scheduled run. An interactive, logged-on Windows
+session and a configured Classic Outlook profile are still required.
+
 For efficient repeat runs, rows that already contain a valid Released Date are
 left unchanged and are not looked up in Agile. Blank and not-applicable ECO
 values are also ignored; matching is case-insensitive and accepts punctuation

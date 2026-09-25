@@ -1,0 +1,39 @@
+{
+  "type": "object",
+  "required": [
+    "schemaVersion",
+    "eventType",
+    "jobId",
+    "trackerType",
+    "createdAt",
+    "items"
+  ],
+  "properties": {
+    "schemaVersion": { "type": "string", "enum": ["1.0"] },
+    "eventType": { "type": "string", "enum": ["agile.lookup.request"] },
+    "jobId": { "type": "string" },
+    "trackerType": { "type": "string", "enum": ["ECO", "CRF"] },
+    "createdAt": { "type": "string" },
+    "items": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "recordType",
+          "recordId",
+          "sourceRow",
+          "systemNumber",
+          "trackingNumber"
+        ],
+        "properties": {
+          "recordType": { "type": "string", "enum": ["ECO", "CRF"] },
+          "recordId": { "type": "string" },
+          "sourceRow": { "type": "integer" },
+          "systemNumber": { "type": "string" },
+          "trackingNumber": { "type": "string" },
+          "baseDate": { "type": ["string", "null"] }
+        }
+      }
+    }
+  }
+}

@@ -15,6 +15,8 @@ import argparse
 import json
 import os
 import sys
+import tempfile
+import time
 from dataclasses import dataclass
 from datetime import date, datetime, timedelta
 from html import escape
@@ -90,6 +92,12 @@ RELEASED_DATE_FIELD_CANDIDATES = [
 
 NOT_APPLICABLE_TRACKING_NUMBERS = frozenset({"na", "none", "notapplicable"})
 
+APP_DIR = (
+    Path(sys.executable).resolve().parent
+    if getattr(sys, "frozen", False)
+    else Path(__file__).resolve().parent
+)
+
 DEFAULT_WORKBOOK_FILE = os.getenv("TARGET_WORKBOOK_FILE")
 DEFAULT_WORKSHEET_NAME = os.getenv("TARGET_WORKSHEET")
 DEFAULT_CRF_WORKBOOK_FILE = os.getenv("CRF_TARGET_WORKBOOK_FILE")
@@ -115,11 +123,20 @@ DEFAULT_REMINDER_BCC = os.getenv("ECO_REMINDER_BCC", "")
 DEFAULT_CRF_REMINDER_TO = os.getenv("CRF_REMINDER_TO", "")
 DEFAULT_CRF_REMINDER_CC = os.getenv("CRF_REMINDER_CC", "")
 DEFAULT_CRF_REMINDER_BCC = os.getenv("CRF_REMINDER_BCC", "")
-REMINDER_STATE_FILE = Path(__file__).with_name(".eco_reminder_state.json")
-CRF_REMINDER_STATE_FILE = Path(__file__).with_name(".crf_reminder_state.json")
+REMINDER_STATE_FILE = APP_DIR / ".eco_reminder_state.json"
+CRF_REMINDER_STATE_FILE = APP_DIR / ".crf_reminder_state.json"
+EMAIL_BRIDGE_STATE_FILE = APP_DIR / ".agile_email_bridge_state.json"
+EMAIL_BRIDGE_REQUEST_EVENT = "agile.lookup.request"
+EMAIL_BRIDGE_RESULT_EVENT = "agile.lookup.result"
+EMAIL_BRIDGE_SUBJECT_PREFIX = "AGILE-JOB |"
+EMAIL_BRIDGE_RESULT_SUBJECT_PREFIX = "AGILE-RESULT |"
+EMAIL_BRIDGE_ATTACHMENT_PREFIX = "agile-job-"
+EMAIL_BRIDGE_MAX_MESSAGES = 250
+EMAIL_BRIDGE_DEFAULT_WAIT_SECONDS = 300
+EMAIL_BRIDGE_DEFAULT_POLL_SECONDS = 10
 LOCAL_WORKBOOK_RETRY_DELAY_MINUTES = 15
 LOCAL_WORKBOOK_SETTLE_SECONDS = 30
-SYNC_LOG_FILE = Path(__file__).with_name(".agile_eco_dates_sync.log")
+SYNC_LOG_FILE = APP_DIR / ".agile_eco_dates_sync.log"
 ALERT_FILL = PatternFill(fill_type="solid", start_color="FF5B5B", end_color="FF5B5B")
 ALERT_FONT = Font(color="000000", bold=True)
 CLEAR_FILL = PatternFill(fill_type=None)
@@ -141,8 +158,8 @@ DATE_PARSE_FORMATS = (
 )
 
 SCRIPT_ROOT = next(
-    (parent for parent in Path(__file__).resolve().parents if (parent / "script_credentials.py").exists()),
-    Path(__file__).resolve().parent,
+    (parent for parent in APP_DIR.parents if (parent / "script_credentials.py").exists()),
+    APP_DIR,
 )
 if str(SCRIPT_ROOT) not in sys.path:
     sys.path.insert(0, str(SCRIPT_ROOT))
@@ -456,6 +473,56 @@ def parse_args() -> argparse.Namespace:
         default=DEFAULT_CRF_REMINDER_BCC,
         help="Semicolon-separated CRF reminder BCC recipients.",
     )
+    parser.add_argument(
+        "--email-bridge",
+        action="store_true",
+        help="Process Agile lookup request emails, send result emails, and exit.",
+    )
+    parser.add_argument(
+        "--bridge-self-test",
+        action="store_true",
+        help="Validate the email bridge setup without reading, moving, or sending mail.",
+    )
+    parser.add_argument(
+        "--bridge-mailbox",
+        default=os.getenv("AGILE_BRIDGE_MAILBOX", ""),
+        help="Mailbox that receives AGILE-RESULT emails. Required with --email-bridge.",
+    )
+    parser.add_argument(
+        "--bridge-job-sender",
+        default=os.getenv("AGILE_BRIDGE_JOB_SENDER", ""),
+        help="Expected SMTP sender for AGILE-JOB emails. Defaults to --bridge-mailbox.",
+    )
+    parser.add_argument(
+        "--bridge-folder",
+        default=os.getenv("AGILE_BRIDGE_FOLDER", "Inbox"),
+        help="Outlook folder containing AGILE-JOB emails. Default: Inbox.",
+    )
+    parser.add_argument(
+        "--bridge-wait-seconds",
+        type=int,
+        default=int(
+            os.getenv(
+                "AGILE_BRIDGE_WAIT_SECONDS",
+                str(EMAIL_BRIDGE_DEFAULT_WAIT_SECONDS),
+            )
+        ),
+        help=(
+            "Maximum time to wait for Outlook to synchronize a job email. "
+            "Default: 300; use 0 for one scan."
+        ),
+    )
+    parser.add_argument(
+        "--bridge-poll-seconds",
+        type=int,
+        default=int(
+            os.getenv(
+                "AGILE_BRIDGE_POLL_SECONDS",
+                str(EMAIL_BRIDGE_DEFAULT_POLL_SECONDS),
+            )
+        ),
+        help="Seconds between Inbox scans while waiting. Default: 10.",
+    )
     return parser.parse_args()
 
 
@@ -692,10 +759,12 @@ def load_json_state(state_file: Path) -> Dict[str, bool]:
 
 
 def save_json_state(state_file: Path, state: Dict[str, bool]) -> None:
-    state_file.write_text(
+    temporary_file = state_file.with_suffix(state_file.suffix + ".tmp")
+    temporary_file.write_text(
         json.dumps(state, indent=2, sort_keys=True),
         encoding="utf-8",
     )
+    os.replace(temporary_file, state_file)
 
 
 def load_reminder_state() -> Dict[str, bool]:
@@ -727,7 +796,7 @@ def reminder_key(reminder: ReminderItem) -> str:
 
 
 def load_agile_credentials() -> tuple[str, str]:
-    return get_agile_credentials()
+    return get_agile_credentials(APP_DIR)
 
 
 def create_agile_client_from_file() -> AgileEcoClient:
@@ -737,6 +806,440 @@ def create_agile_client_from_file() -> AgileEcoClient:
 
 def dispatch_outlook_application():
     return win32com.client.Dispatch("Outlook.Application")
+
+
+def request_outlook_send_receive(namespace: Any) -> bool:
+    """Ask Classic Outlook to synchronize all configured send/receive groups."""
+    try:
+        namespace.SendAndReceive(False)
+        return True
+    except Exception as exc:
+        log_event(
+            f"Outlook Send/Receive could not be started; continuing to poll: {exc}",
+            SYNC_LOG_FILE,
+        )
+        return False
+
+
+def validate_bridge_request(payload: Any) -> Dict[str, Any]:
+    if not isinstance(payload, dict):
+        raise ValueError("Bridge request must be a JSON object.")
+    if payload.get("schemaVersion") != "1.0":
+        raise ValueError("Bridge request schemaVersion must be '1.0'.")
+    if payload.get("eventType") != EMAIL_BRIDGE_REQUEST_EVENT:
+        raise ValueError(
+            f"Bridge request eventType must be '{EMAIL_BRIDGE_REQUEST_EVENT}'."
+        )
+
+    job_id = str(payload.get("jobId") or "").strip()
+    if not job_id or len(job_id) > 200:
+        raise ValueError("Bridge request jobId is missing or too long.")
+
+    items = payload.get("items")
+    if not isinstance(items, list):
+        raise ValueError("Bridge request items must be an array.")
+    if len(items) > 5000:
+        raise ValueError("Bridge request contains more than 5000 items.")
+
+    normalized_items: List[Dict[str, Any]] = []
+    for index, item in enumerate(items):
+        if not isinstance(item, dict):
+            raise ValueError(f"Bridge request item {index} is not an object.")
+        record_type = str(item.get("recordType") or "").strip().upper()
+        if record_type not in {"ECO", "CRF"}:
+            raise ValueError(
+                f"Bridge request item {index} has invalid recordType '{record_type}'."
+            )
+        record_id = str(item.get("recordId") or "").strip()
+        if not record_id:
+            raise ValueError(f"Bridge request item {index} has no recordId.")
+
+        normalized_item = dict(item)
+        normalized_item["recordType"] = record_type
+        normalized_item["recordId"] = record_id
+        normalized_item["trackingNumber"] = str(
+            item.get("trackingNumber") or ""
+        ).strip()
+        normalized_items.append(normalized_item)
+
+    normalized_payload = dict(payload)
+    normalized_payload["jobId"] = job_id
+    normalized_payload["items"] = normalized_items
+    tracker_type = str(payload.get("trackerType") or "").strip().upper()
+    if not tracker_type and normalized_items:
+        tracker_type = normalized_items[0]["recordType"]
+    if tracker_type not in {"ECO", "CRF"}:
+        raise ValueError("Bridge request trackerType must be 'ECO' or 'CRF'.")
+    if any(item["recordType"] != tracker_type for item in normalized_items):
+        raise ValueError("Bridge request cannot mix ECO and CRF items.")
+    normalized_payload["trackerType"] = tracker_type
+    return normalized_payload
+
+
+def bridge_date_to_iso(value: Optional[str]) -> Optional[str]:
+    parsed = parse_sheet_date(value)
+    return parsed.isoformat() if parsed else None
+
+
+def build_bridge_result(
+    request_payload: Dict[str, Any],
+    class_identifiers: List[str],
+    table_identifiers: List[str],
+    crf_class_identifiers: List[str],
+    crf_table_identifiers: List[str],
+    client_factory=create_agile_client_from_file,
+) -> Dict[str, Any]:
+    request = validate_bridge_request(request_payload)
+    agile_client: Optional[AgileEcoClient] = None
+    lookup_cache: Dict[tuple[str, str], tuple[bool, Optional[EcoDates], str]] = {}
+    result_items: List[Dict[str, Any]] = []
+
+    for item in request["items"]:
+        record_type = item["recordType"]
+        tracking_number = item["trackingNumber"]
+        result_item: Dict[str, Any] = {
+            "recordType": record_type,
+            "recordId": item["recordId"],
+            "sourceRow": item.get("sourceRow"),
+            "systemNumber": str(item.get("systemNumber") or ""),
+            "trackingNumber": tracking_number,
+            "baseDate": item.get("baseDate"),
+            "lookupSucceeded": True,
+            "lookupStatus": "not-required",
+            "lookupError": "",
+            "submittedDate": None,
+            "releasedDate": None,
+        }
+
+        if is_not_applicable_tracking_number(tracking_number):
+            result_item["lookupStatus"] = "not-applicable"
+            result_items.append(result_item)
+            continue
+        if is_unusable_tracking_number(tracking_number):
+            result_item["lookupStatus"] = "blank"
+            result_items.append(result_item)
+            continue
+
+        cache_key = (record_type, tracking_number.upper())
+        if cache_key not in lookup_cache:
+            try:
+                if agile_client is None:
+                    agile_client = client_factory()
+                lookup_result = fetch_eco_dates(
+                    client=agile_client,
+                    eco_number=tracking_number,
+                    class_identifiers=(
+                        crf_class_identifiers
+                        if record_type == "CRF"
+                        else class_identifiers
+                    ),
+                    table_identifiers=(
+                        crf_table_identifiers
+                        if record_type == "CRF"
+                        else table_identifiers
+                    ),
+                    inspect=False,
+                )
+                lookup_cache[cache_key] = (True, lookup_result, "")
+            except Exception as exc:
+                lookup_cache[cache_key] = (False, None, str(exc)[:2000])
+
+        succeeded, lookup_result, error = lookup_cache[cache_key]
+        result_item["lookupSucceeded"] = succeeded
+        result_item["lookupStatus"] = "completed" if succeeded else "failed"
+        result_item["lookupError"] = error
+        if lookup_result:
+            result_item["submittedDate"] = bridge_date_to_iso(
+                lookup_result.submitted_date
+            )
+            result_item["releasedDate"] = bridge_date_to_iso(
+                lookup_result.released_date
+            )
+        result_items.append(result_item)
+
+    return {
+        "schemaVersion": "1.0",
+        "eventType": EMAIL_BRIDGE_RESULT_EVENT,
+        "jobId": request["jobId"],
+        "trackerType": request["trackerType"],
+        "processedAt": datetime.now(SINGAPORE_TZ).isoformat(),
+        "items": result_items,
+    }
+
+
+def get_outlook_sender_smtp_address(message: Any) -> str:
+    sender_type = str(getattr(message, "SenderEmailType", "") or "").upper()
+    if sender_type == "EX":
+        try:
+            exchange_user = message.Sender.GetExchangeUser()
+            if exchange_user and exchange_user.PrimarySmtpAddress:
+                return str(exchange_user.PrimarySmtpAddress).strip().lower()
+        except Exception:
+            pass
+        try:
+            return str(
+                message.PropertyAccessor.GetProperty(
+                    "http://schemas.microsoft.com/mapi/proptag/0x39FE001E"
+                )
+            ).strip().lower()
+        except Exception:
+            return ""
+    return str(getattr(message, "SenderEmailAddress", "") or "").strip().lower()
+
+
+def get_outlook_folder(namespace: Any, folder_path: str) -> Any:
+    folder = namespace.GetDefaultFolder(6)  # olFolderInbox
+    parts = [part.strip() for part in folder_path.replace("\\", "/").split("/") if part.strip()]
+    if parts and parts[0].lower() == "inbox":
+        parts = parts[1:]
+    for part in parts:
+        folder = folder.Folders.Item(part)
+    return folder
+
+
+def get_or_create_outlook_subfolder(parent_folder: Any, name: str) -> Any:
+    try:
+        return parent_folder.Folders.Item(name)
+    except Exception:
+        return parent_folder.Folders.Add(name)
+
+
+def load_bridge_request_attachment(message: Any) -> Dict[str, Any]:
+    matching_attachment = None
+    for index in range(1, message.Attachments.Count + 1):
+        attachment = message.Attachments.Item(index)
+        filename = Path(str(attachment.FileName)).name
+        if filename.lower().startswith(EMAIL_BRIDGE_ATTACHMENT_PREFIX) and filename.lower().endswith(".json"):
+            matching_attachment = attachment
+            break
+    if matching_attachment is None:
+        raise ValueError("AGILE-JOB email has no agile-job-*.json attachment.")
+
+    with tempfile.TemporaryDirectory(prefix="agile-email-bridge-") as temporary_dir:
+        attachment_path = Path(temporary_dir) / Path(
+            str(matching_attachment.FileName)
+        ).name
+        matching_attachment.SaveAsFile(str(attachment_path))
+        payload = json.loads(attachment_path.read_text(encoding="utf-8-sig"))
+    return validate_bridge_request(payload)
+
+
+def safe_job_filename(job_id: str) -> str:
+    safe_value = "".join(
+        character if character.isalnum() or character in "-_." else "_"
+        for character in job_id
+    )
+    return safe_value[:150] or "job"
+
+
+def send_bridge_result_email(
+    outlook: Any,
+    mailbox: str,
+    result_payload: Dict[str, Any],
+) -> None:
+    job_id = str(result_payload["jobId"])
+    with tempfile.TemporaryDirectory(prefix="agile-email-result-") as temporary_dir:
+        result_path = Path(temporary_dir) / (
+            f"agile-result-{safe_job_filename(job_id)}.json"
+        )
+        result_path.write_text(
+            json.dumps(result_payload, indent=2, ensure_ascii=False),
+            encoding="utf-8",
+        )
+        mail = outlook.CreateItem(0)
+        mail.To = mailbox
+        mail.Subject = f"{EMAIL_BRIDGE_RESULT_SUBJECT_PREFIX} {job_id}"
+        mail.Body = (
+            "Automated Agile lookup result. The attached JSON file is intended "
+            "for the Power Automate result-import flow."
+        )
+        mail.Attachments.Add(str(result_path))
+        mail.Send()
+
+
+def run_email_bridge(
+    mailbox: str,
+    expected_sender: str,
+    folder_path: str,
+    wait_seconds: int,
+    poll_seconds: int,
+    class_identifiers: List[str],
+    table_identifiers: List[str],
+    crf_class_identifiers: List[str],
+    crf_table_identifiers: List[str],
+) -> int:
+    mailbox = mailbox.strip()
+    if not mailbox:
+        raise ValueError("--bridge-mailbox or AGILE_BRIDGE_MAILBOX is required.")
+    if wait_seconds < 0:
+        raise ValueError("--bridge-wait-seconds cannot be negative.")
+    if poll_seconds < 1:
+        raise ValueError("--bridge-poll-seconds must be at least 1.")
+    expected_sender = (expected_sender or mailbox).strip().lower()
+
+    outlook = dispatch_outlook_application()
+    namespace = outlook.GetNamespace("MAPI")
+    source_folder = get_outlook_folder(namespace, folder_path)
+    processed_folder = get_or_create_outlook_subfolder(source_folder, "Processed")
+    state = load_json_state(EMAIL_BRIDGE_STATE_FILE)
+    processed_count = 0
+    failed_count = 0
+    handled_message = False
+    ignored_message_ids: set[str] = set()
+    wait_deadline = time.monotonic() + wait_seconds
+
+    request_outlook_send_receive(namespace)
+    if wait_seconds:
+        log_event(
+            f"Email bridge is waiting up to {wait_seconds} seconds for an "
+            "AGILE-JOB email; Classic Outlook may open while it synchronizes.",
+            SYNC_LOG_FILE,
+        )
+
+    while True:
+        items = source_folder.Items
+        items.Sort("[ReceivedTime]", True)
+        message_count = min(int(items.Count), EMAIL_BRIDGE_MAX_MESSAGES)
+        candidates = [items.Item(index) for index in range(1, message_count + 1)]
+        for message in candidates:
+            if int(getattr(message, "Class", 0) or 0) != 43:  # olMail
+                continue
+            subject = str(getattr(message, "Subject", "") or "").strip()
+            if not subject.upper().startswith(EMAIL_BRIDGE_SUBJECT_PREFIX):
+                continue
+
+            sender = get_outlook_sender_smtp_address(message)
+            if sender != expected_sender:
+                message_id = str(getattr(message, "EntryID", "") or subject)
+                if message_id not in ignored_message_ids:
+                    log_event(
+                        "Ignored bridge job with unexpected sender "
+                        f"'{sender or '(unknown)'}': {subject}",
+                        SYNC_LOG_FILE,
+                    )
+                    ignored_message_ids.add(message_id)
+                continue
+
+            handled_message = True
+            try:
+                request_payload = load_bridge_request_attachment(message)
+                job_id = request_payload["jobId"]
+                if state.get(job_id):
+                    message.Move(processed_folder)
+                    continue
+
+                result_payload = build_bridge_result(
+                    request_payload=request_payload,
+                    class_identifiers=class_identifiers,
+                    table_identifiers=table_identifiers,
+                    crf_class_identifiers=crf_class_identifiers,
+                    crf_table_identifiers=crf_table_identifiers,
+                )
+                send_bridge_result_email(outlook, mailbox, result_payload)
+                state[job_id] = True
+                save_json_state(EMAIL_BRIDGE_STATE_FILE, state)
+                message.UnRead = False
+                message.Move(processed_folder)
+                processed_count += 1
+                failed_lookups = sum(
+                    1
+                    for item in result_payload["items"]
+                    if not item["lookupSucceeded"]
+                )
+                log_event(
+                    f"Email bridge completed job {job_id}: "
+                    f"items={len(result_payload['items'])}; failed lookups={failed_lookups}",
+                    SYNC_LOG_FILE,
+                )
+            except Exception as exc:
+                failed_count += 1
+                log_exception(
+                    f"Email bridge failed to process message '{subject}'.",
+                    exc,
+                    SYNC_LOG_FILE,
+                )
+
+        if handled_message or time.monotonic() >= wait_deadline:
+            break
+        time.sleep(min(poll_seconds, max(0.0, wait_deadline - time.monotonic())))
+
+    if processed_count:
+        # MailItem.Send queues the result; prompt Outlook to empty the Outbox
+        # even when this process launched Classic Outlook itself.
+        request_outlook_send_receive(namespace)
+
+    log_event(
+        f"Email bridge finished: processed jobs={processed_count}; failed jobs={failed_count}",
+        SYNC_LOG_FILE,
+    )
+    return 1 if failed_count else 0
+
+
+def run_email_bridge_self_test(
+    mailbox: str,
+    expected_sender: str,
+    folder_path: str,
+) -> int:
+    checks: List[SelfTestResult] = []
+    mailbox = mailbox.strip()
+    checks.append(
+        SelfTestResult(
+            label="Bridge result mailbox",
+            ok=bool(mailbox),
+            detail=mailbox or "Set --bridge-mailbox or AGILE_BRIDGE_MAILBOX.",
+        )
+    )
+    checks.append(
+        SelfTestResult(
+            label="Bridge job sender",
+            ok=bool((expected_sender or mailbox).strip()),
+            detail=(expected_sender or mailbox).strip()
+            or "Set --bridge-job-sender or AGILE_BRIDGE_JOB_SENDER.",
+        )
+    )
+    try:
+        agile_user, agile_password = load_agile_credentials()
+        checks.append(
+            SelfTestResult(
+                label="Agile credentials",
+                ok=bool(agile_user and agile_password),
+                detail=(
+                    f"Credentials loaded from {credentials_file(APP_DIR)}."
+                    if agile_user and agile_password
+                    else "Agile username or password is empty."
+                ),
+            )
+        )
+    except Exception as exc:
+        checks.append(
+            SelfTestResult("Agile credentials", False, f"Could not load credentials: {exc}")
+        )
+
+    try:
+        outlook = dispatch_outlook_application()
+        namespace = outlook.GetNamespace("MAPI")
+        folder = get_outlook_folder(namespace, folder_path)
+        checks.append(
+            SelfTestResult(
+                label="Outlook bridge folder",
+                ok=True,
+                detail=f"Found Outlook folder '{folder.FolderPath}'.",
+            )
+        )
+    except Exception as exc:
+        checks.append(
+            SelfTestResult(
+                label="Outlook bridge folder",
+                ok=False,
+                detail=f"Could not open '{folder_path}': {exc}",
+            )
+        )
+
+    failed = False
+    for check in checks:
+        print(f"{'PASS' if check.ok else 'FAIL'}: {check.label} - {check.detail}")
+        failed = failed or not check.ok
+    return 1 if failed else 0
 
 
 def build_email_cell(value: str, style: str = EMAIL_CELL_STYLE) -> str:
@@ -1697,6 +2200,26 @@ def main() -> int:
     table_identifiers = args.table_identifiers or DEFAULT_TABLE_CANDIDATES
     crf_class_identifiers = args.crf_class_identifiers or class_identifiers
     crf_table_identifiers = args.crf_table_identifiers or table_identifiers
+
+    if args.bridge_self_test:
+        return run_email_bridge_self_test(
+            mailbox=args.bridge_mailbox,
+            expected_sender=args.bridge_job_sender,
+            folder_path=args.bridge_folder,
+        )
+
+    if args.email_bridge:
+        return run_email_bridge(
+            mailbox=args.bridge_mailbox,
+            expected_sender=args.bridge_job_sender,
+            folder_path=args.bridge_folder,
+            wait_seconds=args.bridge_wait_seconds,
+            poll_seconds=args.bridge_poll_seconds,
+            class_identifiers=class_identifiers,
+            table_identifiers=table_identifiers,
+            crf_class_identifiers=crf_class_identifiers,
+            crf_table_identifiers=crf_table_identifiers,
+        )
 
     if args.self_test or args.crf_self_test:
         exit_code = 0

@@ -1,0 +1,46 @@
+{
+  "type": "object",
+  "required": [
+    "schemaVersion",
+    "eventType",
+    "jobId",
+    "trackerType",
+    "processedAt",
+    "items"
+  ],
+  "properties": {
+    "schemaVersion": { "type": "string", "enum": ["1.0"] },
+    "eventType": { "type": "string", "enum": ["agile.lookup.result"] },
+    "jobId": { "type": "string" },
+    "trackerType": { "type": "string", "enum": ["ECO", "CRF"] },
+    "processedAt": { "type": "string" },
+    "items": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "recordType",
+          "recordId",
+          "systemNumber",
+          "trackingNumber",
+          "lookupSucceeded",
+          "lookupStatus",
+          "lookupError"
+        ],
+        "properties": {
+          "recordType": { "type": "string", "enum": ["ECO", "CRF"] },
+          "recordId": { "type": "string" },
+          "sourceRow": { "type": ["integer", "null"] },
+          "systemNumber": { "type": "string" },
+          "trackingNumber": { "type": "string" },
+          "baseDate": { "type": ["string", "null"] },
+          "lookupSucceeded": { "type": "boolean" },
+          "lookupStatus": { "type": "string" },
+          "lookupError": { "type": "string" },
+          "submittedDate": { "type": ["string", "null"] },
+          "releasedDate": { "type": ["string", "null"] }
+        }
+      }
+    }
+  }
+}

@@ -189,6 +189,141 @@ class AgileDateExtractionTests(unittest.TestCase):
         )
 
 
+class EmailBridgeTests(unittest.TestCase):
+    def test_outlook_send_receive_is_requested_without_showing_dialog(self) -> None:
+        class FakeNamespace:
+            def __init__(self) -> None:
+                self.calls: list[bool] = []
+
+            def SendAndReceive(self, show_progress: bool) -> None:
+                self.calls.append(show_progress)
+
+        namespace = FakeNamespace()
+
+        self.assertTrue(subject.request_outlook_send_receive(namespace))
+        self.assertEqual(namespace.calls, [False])
+
+    def test_bridge_rejects_invalid_wait_settings_before_starting_outlook(self) -> None:
+        with self.assertRaisesRegex(ValueError, "wait-seconds cannot be negative"):
+            subject.run_email_bridge(
+                mailbox="worker@example.com",
+                expected_sender="worker@example.com",
+                folder_path="Inbox",
+                wait_seconds=-1,
+                poll_seconds=10,
+                class_identifiers=["ECO"],
+                table_identifiers=["History"],
+                crf_class_identifiers=["CRF"],
+                crf_table_identifiers=["History"],
+            )
+
+    def test_bridge_request_validation_normalizes_fields(self) -> None:
+        request = subject.validate_bridge_request(
+            {
+                "schemaVersion": "1.0",
+                "eventType": "agile.lookup.request",
+                "jobId": " job-1 ",
+                "items": [
+                    {
+                        "recordType": "eco",
+                        "recordId": "row-2",
+                        "trackingNumber": " CA123 ",
+                    }
+                ],
+            }
+        )
+
+        self.assertEqual(request["jobId"], "job-1")
+        self.assertEqual(request["items"][0]["recordType"], "ECO")
+        self.assertEqual(request["items"][0]["trackingNumber"], "CA123")
+
+    def test_bridge_deduplicates_agile_lookups_and_preserves_rows(self) -> None:
+        fake_client = FakeAgileClient(
+            {
+                "History": [
+                    make_row(
+                        status="45597SUBMITTEDSubmitted",
+                        action="65CHANGE_STATUSChange Status",
+                        localclienttime="2026-07-27T13:02:02.000Z",
+                    )
+                ]
+            }
+        )
+        request = {
+            "schemaVersion": "1.0",
+            "eventType": "agile.lookup.request",
+            "jobId": "job-2",
+            "items": [
+                {
+                    "recordType": "ECO",
+                    "recordId": "row-2",
+                    "trackingNumber": "CA123",
+                    "systemNumber": "SYS-1",
+                },
+                {
+                    "recordType": "ECO",
+                    "recordId": "row-3",
+                    "trackingNumber": "ca123",
+                    "systemNumber": "SYS-2",
+                },
+                {
+                    "recordType": "ECO",
+                    "recordId": "row-4",
+                    "trackingNumber": "N/A",
+                    "systemNumber": "SYS-3",
+                },
+                {
+                    "recordType": "ECO",
+                    "recordId": "row-5",
+                    "trackingNumber": "",
+                },
+            ],
+        }
+
+        result = subject.build_bridge_result(
+            request,
+            class_identifiers=["ECO"],
+            table_identifiers=["History"],
+            crf_class_identifiers=["CRF"],
+            crf_table_identifiers=["History"],
+            client_factory=lambda: fake_client,
+        )
+
+        self.assertEqual(result["eventType"], "agile.lookup.result")
+        self.assertEqual(len(fake_client.calls), 1)
+        self.assertEqual(result["items"][0]["submittedDate"], "2026-07-28")
+        self.assertEqual(result["items"][1]["submittedDate"], "2026-07-28")
+        self.assertEqual(result["items"][2]["lookupStatus"], "not-applicable")
+        self.assertEqual(result["items"][3]["lookupStatus"], "blank")
+
+    def test_bridge_lookup_failure_does_not_claim_success(self) -> None:
+        request = {
+            "schemaVersion": "1.0",
+            "eventType": "agile.lookup.request",
+            "jobId": "job-3",
+            "items": [
+                {
+                    "recordType": "ECO",
+                    "recordId": "row-2",
+                    "trackingNumber": "MISSING",
+                }
+            ],
+        }
+
+        result = subject.build_bridge_result(
+            request,
+            class_identifiers=["ECO"],
+            table_identifiers=["History"],
+            crf_class_identifiers=["CRF"],
+            crf_table_identifiers=["History"],
+            client_factory=lambda: FakeAgileClient({}),
+        )
+
+        self.assertFalse(result["items"][0]["lookupSucceeded"])
+        self.assertEqual(result["items"][0]["lookupStatus"], "failed")
+        self.assertTrue(result["items"][0]["lookupError"])
+
+
 class ConditionalFormattingTests(unittest.TestCase):
     def test_empty_data_range_is_ignored(self) -> None:
         workbook = Workbook()
