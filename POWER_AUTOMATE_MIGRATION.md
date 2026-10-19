@@ -105,6 +105,45 @@ Add conditions for the approved sender list and required body keywords. Then run
 an Office Script against `AMAT SGP ECO Tracker.xlsx`, passing the HTML body and
 received timestamp as parameters.
 
+### Jasmine's alternative table format
+
+Both Spec Award scripts accept the existing format for all approved senders,
+including Jasmine. They additionally accept her new format when `senderEmail`
+is `siewyeejasmine_lim@amat.com`, the latest body contains `Spec award`, and one
+table contains `Slot#`, `Material`, `Slot#+Part#`, and `NBD` headers. This
+alternative does not require `Qtr` or the literal header `Part Number`.
+System numbers come from `Slot#+Part#`; rows are skipped if that value does not
+match the system built from `Slot#` and a `SEMSYS-` or `SEMNSO-` material.
+Existing duplicate handling and received-date logic are unchanged.
+
+To apply the change to the cloud flow:
+
+1. Replace the saved Office Script with the updated local version you use:
+   `spec_award_combined_office_script.ts` for detection/forwarding and optional
+   writes, or `spec_award_office_script.ts` for workbook intake only.
+2. Refresh the **Run script** action's parameters (reselect the script, or
+   recreate the action if needed). Map the new `senderEmail` parameter to
+   **From (Address)** from the email trigger, using the actual sender address,
+   rather than a display name or an address extracted from the body. Restore
+   the existing Body, Received Time, and combined-script write-mode mappings.
+   The parameter defaults to empty for backward compatibility: old-format
+   emails still work, but the alternative requires the sender mapping.
+3. Keep the existing approved-sender condition and subject filter. If there is
+   a body-keyword condition before **Run script**, change it to:
+   **existing keyword condition OR sender address equals Jasmine's address**.
+   Compare the trimmed, lowercase address. The script performs the stricter
+   latest-body and table validation for Jasmine; a reply without a new award
+   table will still fail detection.
+4. With the combined script, keep forwarding and mark-as-read actions behind
+   `result.detected = true`. Test with `writeToWorkbook = false` before
+   restoring the existing live setting. With the intake-only script, use a
+   disposable workbook copy for validation.
+
+Verify Jasmine's new table, Jasmine's old table, an old-format email from
+another approved sender, a different sender using the new table (rejected),
+and a reply containing only a quoted award table (rejected). Also verify
+duplicate rows and a mismatched `Slot#+Part#` value.
+
 Install `power_automate/spec_award_office_script.ts` from this folder through
 Excel for the web: **Automate > New Script > Create in Code Editor**. Name the
 saved script `ECO - Process Spec Award`.

@@ -27168,3 +27168,76 @@ AttributeError: Outlook.Application.CreateItem
 [2026-09-25 06:00:12] Email bridge is waiting up to 300 seconds for an AGILE-JOB email; Classic Outlook may open while it synchronizes.
 [2026-09-25 06:00:53] Email bridge completed job 20260925-054459-ECO: items=69; failed lookups=0
 [2026-09-25 06:00:53] Email bridge finished: processed jobs=1; failed jobs=0
+[2026-09-26 06:00:09] Email bridge is waiting up to 300 seconds for an AGILE-JOB email; Classic Outlook may open while it synchronizes.
+[2026-09-26 06:00:43] Email bridge completed job 20260926-054459-ECO: items=57; failed lookups=3
+[2026-09-26 06:00:44] Email bridge finished: processed jobs=1; failed jobs=0
+[2026-09-27 06:00:08] Email bridge is waiting up to 300 seconds for an AGILE-JOB email; Classic Outlook may open while it synchronizes.
+[2026-09-27 06:00:45] Email bridge completed job 20260927-054500-ECO: items=51; failed lookups=3
+[2026-09-27 06:00:45] Email bridge finished: processed jobs=1; failed jobs=0
+[2026-09-28 06:00:09] Email bridge is waiting up to 300 seconds for an AGILE-JOB email; Classic Outlook may open while it synchronizes.
+[2026-09-28 06:00:35] Email bridge completed job 20260928-054500-ECO: items=142; failed lookups=3
+[2026-09-28 06:00:35] Email bridge finished: processed jobs=1; failed jobs=0
+[2026-09-29 06:00:09] Email bridge is waiting up to 300 seconds for an AGILE-JOB email; Classic Outlook may open while it synchronizes.
+[2026-09-29 06:02:05] Email bridge completed job 20260929-054459-ECO: items=152; failed lookups=13
+[2026-09-29 06:02:05] Email bridge finished: processed jobs=1; failed jobs=0
+[2026-09-30 06:00:08] Email bridge is waiting up to 300 seconds for an AGILE-JOB email; Classic Outlook may open while it synchronizes.
+[2026-09-30 06:03:14] Email bridge completed job 20260930-054500-ECO: items=178; failed lookups=7
+[2026-09-30 06:03:14] Email bridge finished: processed jobs=1; failed jobs=0
+[2026-10-01 06:00:09] Email bridge is waiting up to 300 seconds for an AGILE-JOB email; Classic Outlook may open while it synchronizes.
+[2026-10-01 06:01:41] Email bridge completed job 20261001-054500-ECO: items=151; failed lookups=10
+[2026-10-01 06:01:41] Email bridge finished: processed jobs=1; failed jobs=0
+[2026-10-02 06:00:08] Email bridge is waiting up to 300 seconds for an AGILE-JOB email; Classic Outlook may open while it synchronizes.
+[2026-10-02 06:00:49] Email bridge completed job 20261002-054459-ECO: items=66; failed lookups=3
+[2026-10-02 06:00:49] Email bridge finished: processed jobs=1; failed jobs=0
+[2026-10-03 06:00:08] Email bridge is waiting up to 300 seconds for an AGILE-JOB email; Classic Outlook may open while it synchronizes.
+[2026-10-03 06:00:38] Email bridge completed job 20261003-054500-ECO: items=58; failed lookups=3
+[2026-10-03 06:00:38] Email bridge finished: processed jobs=1; failed jobs=0
+[2026-10-04 06:00:10] Email bridge is waiting up to 300 seconds for an AGILE-JOB email; Classic Outlook may open while it synchronizes.
+[2026-10-04 06:00:40] Email bridge completed job 20261004-054500-ECO: items=55; failed lookups=3
+[2026-10-04 06:00:40] Email bridge finished: processed jobs=1; failed jobs=0
+[2026-10-05 06:00:09] Email bridge is waiting up to 300 seconds for an AGILE-JOB email; Classic Outlook may open while it synchronizes.
+[2026-10-05 06:00:37] Email bridge completed job 20261005-054459-ECO: items=118; failed lookups=3
+[2026-10-05 06:00:37] Email bridge finished: processed jobs=1; failed jobs=0
+[2026-10-06 06:00:08] Email bridge is waiting up to 300 seconds for an AGILE-JOB email; Classic Outlook may open while it synchronizes.
+[2026-10-06 06:01:32] Email bridge completed job 20261006-054500-ECO: items=133; failed lookups=7
+[2026-10-06 06:01:32] Email bridge finished: processed jobs=1; failed jobs=0
+[2026-10-07 06:00:07] Email bridge is waiting up to 300 seconds for an AGILE-JOB email; Classic Outlook may open while it synchronizes.
+[2026-10-07 06:05:07] Email bridge finished: processed jobs=0; failed jobs=0
+[2026-10-07 08:16:56] Email bridge is waiting up to 300 seconds for an AGILE-JOB email; Classic Outlook may open while it synchronizes.
+[2026-10-07 08:17:53] Email bridge is waiting up to 300 seconds for an AGILE-JOB email; Classic Outlook may open while it synchronizes.
+[2026-10-08 06:00:11] Email bridge is waiting up to 300 seconds for an AGILE-JOB email; Classic Outlook may open while it synchronizes.
+[2026-10-08 06:01:41] Email bridge completed job 20261008-054459-ECO: items=132; failed lookups=2
+[2026-10-08 06:01:41] Email bridge finished: processed jobs=1; failed jobs=0
+[2026-10-09 06:00:15] Email bridge is waiting up to 300 seconds for an AGILE-JOB email; Classic Outlook may open while it synchronizes.
+[2026-10-09 06:00:51] Email bridge completed job 20261009-054500-ECO: items=71; failed lookups=1
+[2026-10-09 06:00:51] Email bridge finished: processed jobs=1; failed jobs=0
+[2026-10-10 06:00:12] Email bridge is waiting up to 300 seconds for an AGILE-JOB email; Classic Outlook may open while it synchronizes.
+[2026-10-10 06:00:44] Email bridge completed job 20261010-054500-ECO: items=47; failed lookups=1
+[2026-10-10 06:00:44] Email bridge finished: processed jobs=1; failed jobs=0
+[2026-10-11 06:00:15] Email bridge is waiting up to 300 seconds for an AGILE-JOB email; Classic Outlook may open while it synchronizes.
+[2026-10-11 06:00:52] Email bridge completed job 20261011-054500-ECO: items=47; failed lookups=1
+[2026-10-11 06:00:52] Email bridge finished: processed jobs=1; failed jobs=0
+[2026-10-12 06:00:11] Email bridge is waiting up to 300 seconds for an AGILE-JOB email; Classic Outlook may open while it synchronizes.
+[2026-10-12 06:00:43] Email bridge completed job 20261012-054500-ECO: items=89; failed lookups=1
+[2026-10-12 06:00:43] Email bridge finished: processed jobs=1; failed jobs=0
+[2026-10-13 06:00:14] Email bridge is waiting up to 300 seconds for an AGILE-JOB email; Classic Outlook may open while it synchronizes.
+[2026-10-13 06:01:21] Email bridge completed job 20261013-054500-ECO: items=91; failed lookups=6
+[2026-10-13 06:01:21] Email bridge finished: processed jobs=1; failed jobs=0
+[2026-10-14 06:00:10] Email bridge is waiting up to 300 seconds for an AGILE-JOB email; Classic Outlook may open while it synchronizes.
+[2026-10-14 06:01:09] Email bridge completed job 20261014-054501-ECO: items=90; failed lookups=0
+[2026-10-14 06:01:09] Email bridge finished: processed jobs=1; failed jobs=0
+[2026-10-15 06:00:10] Email bridge is waiting up to 300 seconds for an AGILE-JOB email; Classic Outlook may open while it synchronizes.
+[2026-10-15 06:01:54] Email bridge completed job 20261015-054500-ECO: items=134; failed lookups=0
+[2026-10-15 06:01:54] Email bridge finished: processed jobs=1; failed jobs=0
+[2026-10-16 06:00:10] Email bridge is waiting up to 300 seconds for an AGILE-JOB email; Classic Outlook may open while it synchronizes.
+[2026-10-16 06:02:07] Email bridge completed job 20261016-054500-ECO: items=142; failed lookups=15
+[2026-10-16 06:02:07] Email bridge finished: processed jobs=1; failed jobs=0
+[2026-10-17 06:00:13] Email bridge is waiting up to 300 seconds for an AGILE-JOB email; Classic Outlook may open while it synchronizes.
+[2026-10-17 06:01:35] Email bridge completed job 20261017-054500-ECO: items=88; failed lookups=16
+[2026-10-17 06:01:35] Email bridge finished: processed jobs=1; failed jobs=0
+[2026-10-18 06:00:13] Email bridge is waiting up to 300 seconds for an AGILE-JOB email; Classic Outlook may open while it synchronizes.
+[2026-10-18 06:01:25] Email bridge completed job 20261018-054500-ECO: items=83; failed lookups=16
+[2026-10-18 06:01:25] Email bridge finished: processed jobs=1; failed jobs=0
+[2026-10-19 06:00:10] Email bridge is waiting up to 300 seconds for an AGILE-JOB email; Classic Outlook may open while it synchronizes.
+[2026-10-19 06:01:18] Email bridge completed job 20261019-054500-ECO: items=146; failed lookups=16
+[2026-10-19 06:01:18] Email bridge finished: processed jobs=1; failed jobs=0

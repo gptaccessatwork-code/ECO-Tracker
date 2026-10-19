@@ -16,6 +16,7 @@ interface SpecAwardCombinedResult {
  * Power Automate inputs:
  * - emailHtml: Body from "When a new email arrives (V3)"
  * - receivedTime: Received Time from "When a new email arrives (V3)"
+ * - senderEmail: From (Address) from the trigger; needed for Jasmine's new format
  * - writeToWorkbook: false in TEST mode and true in LIVE mode
  *
  * The target table must contain "System Number" and "Spec Award Date".
@@ -25,7 +26,8 @@ function main(
   workbook: ExcelScript.Workbook,
   emailHtml: string,
   receivedTime: string,
-  writeToWorkbook: boolean
+  writeToWorkbook: boolean,
+  senderEmail: string = ""
 ): SpecAwardCombinedResult {
   const tableName = "Table1";
   const systemNumberColumn = "System Number";
@@ -45,9 +47,16 @@ function main(
     latestText.includes("qtr") &&
     (latestText.includes("need by date") || latestText.includes("nbd"));
 
-  if (!hasRequiredKeywords) {
+  // The legacy format remains valid for every approved sender, including Jasmine.
+  const alternativeSystemNumbers =
+    senderEmail.trim().toLowerCase() === "siewyeejasmine_lim@amat.com" &&
+    /\bspec\s+award\b/i.test(latestText)
+      ? extractAlternativeSystemNumbers(latestHtml)
+      : [];
+
+  if (!hasRequiredKeywords && alternativeSystemNumbers.length === 0) {
     const reason =
-      "Required keywords were not found in the latest email body. Expected Part Number, Qtr, and Need By Date or NBD.";
+      "No supported Spec Award format found in the latest body. Expected Part Number, Qtr, and Need By Date or NBD; or Jasmine's Spec award table with Slot#, Material, Slot#+Part#, NBD, and matching system numbers.";
     console.log(reason);
     return {
       detected: false,
@@ -61,7 +70,12 @@ function main(
     };
   }
 
-  const parsedSystemNumbers = extractSystemNumbers(latestHtml);
+  const legacySystemNumbers = hasRequiredKeywords
+    ? extractSystemNumbers(latestHtml)
+    : [];
+  const parsedSystemNumbers = legacySystemNumbers.length > 0
+    ? legacySystemNumbers
+    : alternativeSystemNumbers;
   if (parsedSystemNumbers.length === 0) {
     const reason =
       "No HTML table containing Slot/Slot Number and Part Number data rows was found.";
@@ -328,6 +342,47 @@ function findOutlookReplyHeaderIndex(html: string): number {
   }
 
   return -1;
+}
+
+// This format is enabled only by the sender and body checks in main.
+function extractAlternativeSystemNumbers(html: string): string[] {
+  const tables = html.match(/<table\b[\s\S]*?<\/table>/gi) ?? [];
+  for (const tableHtml of tables) {
+    const rows = tableHtml.match(/<tr\b[\s\S]*?<\/tr>/gi) ?? [];
+    if (rows.length < 2) {
+      continue;
+    }
+    const headers = extractCells(rows[0]).map((value) => normalizeHeader(value));
+    const slotIndex = headers.indexOf("slot#");
+    const materialIndex = headers.indexOf("material");
+    const systemIndex = headers.indexOf("slot#+part#");
+    const nbdIndex = headers.indexOf("nbd");
+    if ([slotIndex, materialIndex, systemIndex, nbdIndex].some((index) => index < 0)) {
+      continue;
+    }
+    const results: string[] = [];
+    for (let rowIndex = 1; rowIndex < rows.length; rowIndex += 1) {
+      const cells = extractCells(rows[rowIndex]);
+      if (Math.max(slotIndex, materialIndex, systemIndex, nbdIndex) >= cells.length) {
+        continue;
+      }
+      const slot = cleanCellText(cells[slotIndex]);
+      const material = cleanCellText(cells[materialIndex]);
+      const system = cleanCellText(cells[systemIndex]);
+      if (!slot || !/^(SEMSYS|SEMNSO)-/i.test(material)) {
+        continue;
+      }
+      if (normalizeKey(system) !== normalizeKey(buildSystemNumber(slot, material))) {
+        console.log(`Skipped inconsistent Slot#+Part# value: ${system}`);
+        continue;
+      }
+      results.push(system);
+    }
+    if (results.length > 0) {
+      return results;
+    }
+  }
+  return [];
 }
 
 function extractSystemNumbers(html: string): string[] {
