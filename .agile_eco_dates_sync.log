@@ -27241,3 +27241,6 @@ AttributeError: Outlook.Application.CreateItem
 [2026-10-19 06:00:10] Email bridge is waiting up to 300 seconds for an AGILE-JOB email; Classic Outlook may open while it synchronizes.
 [2026-10-19 06:01:18] Email bridge completed job 20261019-054500-ECO: items=146; failed lookups=16
 [2026-10-19 06:01:18] Email bridge finished: processed jobs=1; failed jobs=0
+[2026-10-20 06:00:11] Email bridge is waiting up to 300 seconds for an AGILE-JOB email; Classic Outlook may open while it synchronizes.
+[2026-10-20 06:02:00] Email bridge completed job 20261020-054500-ECO: items=146; failed lookups=9
+[2026-10-20 06:02:01] Email bridge finished: processed jobs=1; failed jobs=0

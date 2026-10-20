@@ -76,23 +76,21 @@ function main(
 
   if (!hasRequiredKeywords && alternativeSystemNumbers.length === 0) {
     console.log(
-      "No supported Spec Award format found in the latest body. Expected Part Number, Qtr, and Need By Date or NBD; or Jasmine's Spec award table with Slot#, Material, Slot#+Part#, NBD, and matching system numbers."
+      "No supported Spec Award format found in the latest body. Expected Part Number, Qtr, and Need By Date or NBD; or Jasmine's Spec award table with Slot#, Material, and NBD or CM NBD."
     );
     return {
       added: 0,
       skippedDuplicates: 0,
       systemNumbers: [],
       reason:
-        "No supported Spec Award format found in the latest body. Expected Part Number, Qtr, and Need By Date or NBD; or Jasmine's Spec award table with Slot#, Material, Slot#+Part#, NBD, and matching system numbers."
+        "No supported Spec Award format found in the latest body. Expected Part Number, Qtr, and Need By Date or NBD; or Jasmine's Spec award table with Slot#, Material, and NBD or CM NBD."
     };
   }
 
   const legacySystemNumbers = hasRequiredKeywords
     ? extractSystemNumbers(latestHtml)
     : [];
-  const parsedSystemNumbers = legacySystemNumbers.length > 0
-    ? legacySystemNumbers
-    : alternativeSystemNumbers;
+  const parsedSystemNumbers = legacySystemNumbers.concat(alternativeSystemNumbers);
   if (parsedSystemNumbers.length === 0) {
     console.log(
       "No HTML table containing Slot Number and Part Number data rows was found."
@@ -230,22 +228,27 @@ function getLatestBodyOnly(html: string): string {
   // They are not visible to the user and must not participate in detection.
   const visibleHtml = removeNonVisibleHtml(html);
 
+  // A thread can mix Outlook header styles. Choose the earliest boundary;
+  // a divRplyFwdMsg deep in history must not override an earlier reply header.
+  let historyIndex = visibleHtml.length;
   const replyMarker = /<div\b[^>]*\bid\s*=\s*["']?divrplyfwdmsg["']?[^>]*>/i;
   const replyMatch = replyMarker.exec(visibleHtml);
-  if (replyMatch && replyMatch.index > 0) {
-    return visibleHtml.slice(0, replyMatch.index);
+  if (replyMatch) {
+    historyIndex = Math.min(historyIndex, replyMatch.index);
   }
 
-  // Outlook/Word replies frequently have no divRplyFwdMsg. Instead, quoted
-  // history begins in a bordered div containing From/Sent/To/Subject labels.
   const outlookReplyIndex = findOutlookReplyHeaderIndex(visibleHtml);
-  if (outlookReplyIndex > 0) {
-    return visibleHtml.slice(0, outlookReplyIndex);
+  if (outlookReplyIndex >= 0) {
+    historyIndex = Math.min(historyIndex, outlookReplyIndex);
   }
 
   const horizontalRuleIndex = visibleHtml.search(/<hr\b/i);
   if (horizontalRuleIndex > 10000) {
-    return visibleHtml.slice(0, horizontalRuleIndex);
+    historyIndex = Math.min(historyIndex, horizontalRuleIndex);
+  }
+
+  if (historyIndex < visibleHtml.length) {
+    return visibleHtml.slice(0, historyIndex);
   }
 
   return visibleHtml;
@@ -292,6 +295,7 @@ function findOutlookReplyHeaderIndex(html: string): number {
 // This format is enabled only by the sender and body checks in main.
 function extractAlternativeSystemNumbers(html: string): string[] {
   const tables = html.match(/<table\b[\s\S]*?<\/table>/gi) ?? [];
+  const results: string[] = [];
   for (const tableHtml of tables) {
     const rows = tableHtml.match(/<tr\b[\s\S]*?<\/tr>/gi) ?? [];
     if (rows.length < 2) {
@@ -300,37 +304,32 @@ function extractAlternativeSystemNumbers(html: string): string[] {
     const headers = extractCells(rows[0]).map((value) => normalizeHeader(value));
     const slotIndex = headers.indexOf("slot#");
     const materialIndex = headers.indexOf("material");
-    const systemIndex = headers.indexOf("slot#+part#");
-    const nbdIndex = headers.indexOf("nbd");
-    if ([slotIndex, materialIndex, systemIndex, nbdIndex].some((index) => index < 0)) {
+    const nbdIndex = headers.indexOf("nbd") >= 0
+      ? headers.indexOf("nbd")
+      : headers.indexOf("cmnbd");
+    if ([slotIndex, materialIndex, nbdIndex].some((index) => index < 0)) {
       continue;
     }
-    const results: string[] = [];
     for (let rowIndex = 1; rowIndex < rows.length; rowIndex += 1) {
       const cells = extractCells(rows[rowIndex]);
-      if (Math.max(slotIndex, materialIndex, systemIndex, nbdIndex) >= cells.length) {
+      if (Math.max(slotIndex, materialIndex, nbdIndex) >= cells.length) {
         continue;
       }
-      const slot = cleanCellText(cells[slotIndex]);
-      const material = cleanCellText(cells[materialIndex]);
-      const system = cleanCellText(cells[systemIndex]);
-      if (!slot || !/^(SEMSYS|SEMNSO)-/i.test(material)) {
-        continue;
+      // Material is authoritative in both layouts. Slot#+Part# is optional.
+      const system = buildSystemNumber(
+        cleanCellText(cells[slotIndex]),
+        cleanCellText(cells[materialIndex])
+      );
+      if (system) {
+        results.push(system);
       }
-      if (normalizeKey(system) !== normalizeKey(buildSystemNumber(slot, material))) {
-        console.log(`Skipped inconsistent Slot#+Part# value: ${system}`);
-        continue;
-      }
-      results.push(system);
-    }
-    if (results.length > 0) {
-      return results;
     }
   }
-  return [];
+  return results;
 }
 
 function extractSystemNumbers(html: string): string[] {
+  const results: string[] = [];
   const tables = html.match(/<table\b[\s\S]*?<\/table>/gi) ?? [];
 
   for (const tableHtml of tables) {
@@ -348,7 +347,6 @@ function extractSystemNumbers(html: string): string[] {
       continue;
     }
 
-    const results: string[] = [];
     for (let rowIndex = 1; rowIndex < rows.length; rowIndex += 1) {
       const cells = extractCells(rows[rowIndex]);
       if (
@@ -366,12 +364,9 @@ function extractSystemNumbers(html: string): string[] {
       }
     }
 
-    if (results.length > 0) {
-      return results;
-    }
   }
 
-  return [];
+  return results;
 }
 
 function extractCells(rowHtml: string): string[] {

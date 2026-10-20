@@ -109,12 +109,24 @@ received timestamp as parameters.
 
 Both Spec Award scripts accept the existing format for all approved senders,
 including Jasmine. They additionally accept her new format when `senderEmail`
-is `siewyeejasmine_lim@amat.com`, the latest body contains `Spec award`, and one
-table contains `Slot#`, `Material`, `Slot#+Part#`, and `NBD` headers. This
+is `siewyeejasmine_lim@amat.com`, the latest body contains `Spec award`, and a
+table contains `Slot#`, `Material`, and `NBD` or `CM NBD` headers. This
 alternative does not require `Qtr` or the literal header `Part Number`.
-System numbers come from `Slot#+Part#`; rows are skipped if that value does not
-match the system built from `Slot#` and a `SEMSYS-` or `SEMNSO-` material.
+System numbers come from `Material`: replace the first `SEMSYS` or `SEMNSO`
+with the slot number; otherwise copy the material unchanged. `Slot#+Part#`
+is optional and does not override Material. For example, `0244-05708` is stored
+as `0244-05708`, even if it appears under several different slots.
+All matching tables contribute, including mixed legacy and Material layouts.
 Existing duplicate handling and received-date logic are unchanged.
+
+Mixed Outlook threads may contain a bordered From/Sent/To/Subject header before
+a later `divRplyFwdMsg` marker. Both scripts now stop at the earliest recognized
+history boundary, so an old-format award deeper in the thread cannot take
+precedence over the current award table. The raw 20 October email input was
+verified locally: 33 rows across both current tables yield 10 unique systems
+(six from the upper table and four unchanged `0244-` materials from the lower
+table). These are added to a simulated workbook containing the eight historical
+systems that the earlier version selected; 23 repeated entries are skipped.
 
 To apply the change to the cloud flow:
 
@@ -142,7 +154,8 @@ To apply the change to the cloud flow:
 Verify Jasmine's new table, Jasmine's old table, an old-format email from
 another approved sender, a different sender using the new table (rejected),
 and a reply containing only a quoted award table (rejected). Also verify
-duplicate rows and a mismatched `Slot#+Part#` value.
+duplicate rows across different slots, multiple tables, unchanged `0244-`
+materials, and Material taking precedence over a mismatched `Slot#+Part#` value.
 
 Install `power_automate/spec_award_office_script.ts` from this folder through
 Excel for the web: **Automate > New Script > Create in Code Editor**. Name the
